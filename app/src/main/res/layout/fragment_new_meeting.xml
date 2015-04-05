@@ -1,0 +1,68 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="ee.juhan.meetingorganizer.fragments.NewMeetingFragment"
+    android:padding="@dimen/fragment_margin">
+
+    <TextView
+        android:text="Title"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <EditText
+        style="@style/TextboxStyle"
+        android:id="@+id/title_textbox" />
+
+    <TextView
+        android:text="Date"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <TextView
+        android:text="@string/not_set"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_large"
+        android:id="@+id/date_button" />
+
+    <TextView
+        android:text="Start time"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <TextView
+        android:text="@string/not_set"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_large"
+        android:id="@+id/start_time_button" />
+
+    <TextView
+        android:text="End time"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <TextView
+        android:text="@string/not_set"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_large"
+        android:id="@+id/end_time_button" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        style="@style/ButtonStyle"
+        android:text="Continue"
+        android:id="@+id/continue_button" />
+
+</LinearLayout>

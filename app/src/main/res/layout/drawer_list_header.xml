@@ -1,0 +1,17 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Meetings overview"
+        android:textSize="14sp"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
+        android:textColor="@color/alice_blue"
+        android:divider="@color/alice_blue"
+        android:dividerHeight="1dp"
+        style="?android:attr/listSeparatorTextViewStyle"/>
+
+</RelativeLayout>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="black" type="color">#000000</item>
+    <item name="white" type="color">#FFFFFF</item>
+    <item name="san_marino" type="color">#446CB3</item>
+    <item name="jacksons_purple" type="color">#1F3A93</item>
+    <item name="chambray" type="color">#3A539B</item>
+    <item name="madison" type="color">#2C3E50</item>
+    <item name="malibu" type="color">#6BB9F0</item>
+    <item name="alice_blue" type="color">#E4F1FE</item>
+    <item name="royal_blue" type="color">#4183D7</item>
+    <item name="steel_blue" type="color">#4B77BE</item>
+    <item name="jordy_blue" type="color">#89C4F4</item>
+    <item name="picton_blue" type="color">#59ABE3</item>
+    <item name="chambray_dark" type="color">#ff222244</item>
+
+</resources>

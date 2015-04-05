@@ -4,5 +4,22 @@
     <string name="app_name">Meeting Organizer</string>
     <string name="action_settings">Settings</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="not_set"><u>Not set</u></string>
+
+    <string-array name="drawer_items">
+        <item>New meeting</item>
+        <item>Current meeting</item>
+        <item>Future meetings</item>
+        <item>Past meetings</item>
+    </string-array>
+    <string-array name="location_items">
+        <item>Specific location</item>
+        <item>Generated from predefined locations</item>
+        <item>Generated on given filters</item>
+    </string-array>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="title_activity_maps">Map</string>
 
 </resources>

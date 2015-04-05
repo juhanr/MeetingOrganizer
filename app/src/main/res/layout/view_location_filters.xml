@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/location_filters">
+
+    <CheckBox
+        android:text="Cafe"
+        android:id="@+id/checkBox"
+        style="@style/CheckboxStyle" />
+
+    <CheckBox
+        android:text="Restaurant"
+        android:id="@+id/checkBox2"
+        style="@style/CheckboxStyle" />
+
+    <CheckBox
+        android:text="Park"
+        android:id="@+id/checkBox3"
+        style="@style/CheckboxStyle" />
+
+</LinearLayout>

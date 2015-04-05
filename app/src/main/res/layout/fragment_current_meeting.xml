@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/fragment_margin">
+
+    <TextView
+        style="@style/TextStyle"
+        android:id="@+id/meeting_title" />
+
+    <TextView
+        style="@style/TextStyle"
+        android:id="@+id/meeting_date" />
+
+    <TextView
+        style="@style/TextStyle"
+        android:id="@+id/meeting_time" />
+
+    <TextView
+        style="@style/TextStyle"
+        android:id="@+id/meeting_message" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:id="@+id/location_frame"
+        android:layout_marginTop="@dimen/view_margin_medium" />
+
+    <Button
+        style="@style/ButtonStyle"
+        android:text="Show participants"
+        android:id="@+id/continue_button" />
+
+</LinearLayout>
