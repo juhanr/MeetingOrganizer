@@ -12,12 +12,17 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Arrays;
+import java.util.List;
+
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
+import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
 
 import static android.R.layout.simple_spinner_item;
 
@@ -25,8 +30,14 @@ public class ChooseLocationFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private MainActivity activity;
+    private static CheckBoxAdapter adapter;
     private LinearLayout chooseLocationLayout;
     public static LatLng location;
+    private List<String> filtersList = Arrays.asList("Cafe", "Restaurant", "Park");
+    private int locationType;
+    private final int SPECIFIC_LOCATION = 1;
+    private final int GENERATED_FROM_LOCATIONS = 2;
+    private final int GENERATED_FROM_FILTERS = 3;
 
     public ChooseLocationFragment() {
 
@@ -62,27 +73,34 @@ public class ChooseLocationFragment extends Fragment {
 
     public void setLocationSpinner() {
         Spinner spinner = (Spinner) chooseLocationLayout.findViewById(R.id.location_spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(activity,
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(activity,
                 R.array.location_items, simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(spinnerAdapter);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                 Object item = parent.getItemAtPosition(pos);
                 switch (pos) {
                     case 0:
+                        locationType = SPECIFIC_LOCATION;
                         removeLocationChild();
-                        getFragmentManager().beginTransaction().replace(R.id.location_frame, new CustomMapFragment()).commit();
+                        CustomMapFragment customMapFragment = new CustomMapFragment();
+                        getFragmentManager().beginTransaction().replace(R.id.location_frame, customMapFragment).commit();
                         FrameLayout layout = (FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
                         layout.setBackgroundResource(R.drawable.view_border);
                         break;
                     case 1:
+                        locationType = GENERATED_FROM_LOCATIONS;
                         removeLocationChild();
                         break;
                     case 2:
+                        locationType = GENERATED_FROM_FILTERS;
                         removeLocationChild();
-                        addLocationChild(R.layout.view_location_filters);
+                        ListView listView = new ListView(activity);
+                        adapter = new CheckBoxAdapter(getActivity(), filtersList);
+                        listView.setAdapter(adapter);
+                        addLocationChild(listView);
                         break;
                     default:
                         break;
@@ -94,9 +112,9 @@ public class ChooseLocationFragment extends Fragment {
         });
     }
 
-    public void addLocationChild(int childId) {
+    public void addLocationChild(View child) {
         FrameLayout layout = (FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
-        View child = activity.getLayoutInflater().inflate(childId, null);
+//        View child = activity.getLayoutInflater().inflate(childId, null);
         layout.addView(child);
     }
 

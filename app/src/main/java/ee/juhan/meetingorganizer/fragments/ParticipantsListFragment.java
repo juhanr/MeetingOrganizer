@@ -15,24 +15,23 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.adapters.MeetingsAdapter;
-import ee.juhan.meetingorganizer.models.Meeting;
+import ee.juhan.meetingorganizer.adapters.ParticipantsAdapter;
+import ee.juhan.meetingorganizer.models.Participant;
 
-public class MeetingsListFragment extends Fragment {
+public class ParticipantsListFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
-    private LinearLayout meetingsListLayout;
-    private MeetingsAdapter adapter;
-    private final List<Meeting> meetingsList;
+    private LinearLayout participantsListLayout;
+    private ParticipantsAdapter adapter;
+    private final List<Participant> participantsList;
 
-    public MeetingsListFragment() {
-        this.meetingsList = null;
+    public ParticipantsListFragment() {
+        this.participantsList = null;
     }
 
     @SuppressLint("ValidFragment")
-    public MeetingsListFragment(List<Meeting> meetingsList) {
-        this.meetingsList = meetingsList;
+    public ParticipantsListFragment(List<Participant> participantsList) {
+        this.participantsList = participantsList;
     }
 
     @Override
@@ -43,30 +42,29 @@ public class MeetingsListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if (meetingsList == null || meetingsList.size() == 0) {
-            meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
-            TextView infoText = (TextView) meetingsListLayout.findViewById(R.id.info_text);
-            infoText.setText("No meetings found.");
+        if (participantsList == null || participantsList.size() == 0) {
+            participantsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
+            TextView infoText = (TextView) participantsListLayout.findViewById(R.id.info_text);
+            infoText.setText("No participants found.");
         } else {
-            meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.layout_listview, container, false);
+            participantsListLayout = (LinearLayout) inflater.inflate(R.layout.layout_listview, container, false);
             refreshListView();
         }
-        return meetingsListLayout;
+        return participantsListLayout;
     }
 
     public void refreshListView() {
-        ListView listview = (ListView) meetingsListLayout.findViewById(R.id.listView);
+        ListView listview = (ListView) participantsListLayout.findViewById(R.id.listView);
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
-                Meeting meeting = (Meeting) adapter.getItem(position);
-                ((MainActivity) getActivity()).changeFragment(new MeetingInfoFragment(meeting));
+                Participant participant = (Participant) adapter.getItem(position);
             }
         });
 
-        adapter = new MeetingsAdapter(getActivity(), meetingsList);
+        adapter = new ParticipantsAdapter(getActivity(), participantsList);
         listview.setAdapter(adapter);
     }
 

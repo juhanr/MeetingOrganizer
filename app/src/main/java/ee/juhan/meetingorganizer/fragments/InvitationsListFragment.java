@@ -20,19 +20,19 @@ import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.MeetingsAdapter;
 import ee.juhan.meetingorganizer.models.Meeting;
 
-public class MeetingsListFragment extends Fragment {
+public class InvitationsListFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
-    private LinearLayout meetingsListLayout;
+    private LinearLayout invitationsListLayout;
     private MeetingsAdapter adapter;
-    private final List<Meeting> meetingsList;
+    private final List<Meeting> invitationsList;
 
-    public MeetingsListFragment() {
-        this.meetingsList = null;
+    public InvitationsListFragment() {
+        this.invitationsList = null;
     }
 
     @SuppressLint("ValidFragment")
-    public MeetingsListFragment(List<Meeting> meetingsList) {
-        this.meetingsList = meetingsList;
+    public InvitationsListFragment(List<Meeting> invitationsList) {
+        this.invitationsList = invitationsList;
     }
 
     @Override
@@ -43,19 +43,19 @@ public class MeetingsListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if (meetingsList == null || meetingsList.size() == 0) {
-            meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
-            TextView infoText = (TextView) meetingsListLayout.findViewById(R.id.info_text);
-            infoText.setText("No meetings found.");
+        if (invitationsList == null || invitationsList.size() == 0) {
+            invitationsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
+            TextView infoText = (TextView) invitationsListLayout.findViewById(R.id.info_text);
+            infoText.setText("No invitations found.");
         } else {
-            meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.layout_listview, container, false);
+            invitationsListLayout = (LinearLayout) inflater.inflate(R.layout.layout_listview, container, false);
             refreshListView();
         }
-        return meetingsListLayout;
+        return invitationsListLayout;
     }
 
     public void refreshListView() {
-        ListView listview = (ListView) meetingsListLayout.findViewById(R.id.listView);
+        ListView listview = (ListView) invitationsListLayout.findViewById(R.id.listView);
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -66,7 +66,7 @@ public class MeetingsListFragment extends Fragment {
             }
         });
 
-        adapter = new MeetingsAdapter(getActivity(), meetingsList);
+        adapter = new MeetingsAdapter(getActivity(), invitationsList);
         listview.setAdapter(adapter);
     }
 

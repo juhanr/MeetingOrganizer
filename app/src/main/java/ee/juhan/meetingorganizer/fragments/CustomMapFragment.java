@@ -22,6 +22,7 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     private LatLng defaultCameraLatLng = new LatLng(59.437046, 24.753742);
     private float defaultCameraZoom = 10;
     private Marker locationMarker;
+    private LatLng location;
 
     public CustomMapFragment() {
 
@@ -44,26 +45,40 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     private void initializeMap() {
         map = this.getMap();
         if (map != null) {
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    defaultCameraLatLng, defaultCameraZoom));
             map.setMyLocationEnabled(true);
             map.setOnMyLocationButtonClickListener(this);
             map.setOnCameraChangeListener(this);
-            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                @Override
-                public void onMapClick(LatLng latLng) {
-                    ChooseLocationFragment.location = latLng;
-                    if (locationMarker != null)
-                        locationMarker.remove();
-                    locationMarker = map.addMarker(new MarkerOptions()
-                            .position(latLng)
-                            .title("Meeting point")
-                            .snippet("Meeting point"));
-                }
-            });
+            if (location == null) {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        defaultCameraLatLng, defaultCameraZoom));
+                map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng latLng) {
+                        ChooseLocationFragment.location = latLng;
+                        if (locationMarker != null)
+                            locationMarker.remove();
+                        setLocationMarker(latLng);
+                    }
+                });
+            } else {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        location, defaultCameraZoom));
+                setLocationMarker(location);
+            }
         }
     }
 
+    private void setLocationMarker(LatLng latLng) {
+        locationMarker = map.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title("Meeting location")
+                .snippet("Meeting point"));
+        locationMarker.showInfoWindow();
+    }
+
+    public void setLocation(LatLng latLng) {
+        location = latLng;
+    }
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {

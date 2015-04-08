@@ -6,7 +6,7 @@
 
     <CheckBox
         android:text="Contact"
-        android:id="@+id/contact_name"
-        style="@style/CheckboxStyle"/>
+        android:id="@+id/checkbox"
+        style="@style/CheckboxStyle" />
 
 </LinearLayout>

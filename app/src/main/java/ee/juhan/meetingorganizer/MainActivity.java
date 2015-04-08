@@ -24,9 +24,11 @@ import java.util.List;
 
 import ee.juhan.meetingorganizer.fragments.ChooseContactsFragment;
 import ee.juhan.meetingorganizer.fragments.ChooseLocationFragment;
+import ee.juhan.meetingorganizer.fragments.InvitationsListFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingInfoFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
 import ee.juhan.meetingorganizer.fragments.NewMeetingFragment;
+import ee.juhan.meetingorganizer.fragments.ParticipantsListFragment;
 import ee.juhan.meetingorganizer.models.Date;
 import ee.juhan.meetingorganizer.models.Meeting;
 import ee.juhan.meetingorganizer.models.Participant;
@@ -35,7 +37,8 @@ import ee.juhan.meetingorganizer.models.Time;
 
 public class MainActivity extends Activity implements NewMeetingFragment.OnFragmentInteractionListener,
         MeetingInfoFragment.OnFragmentInteractionListener, MeetingsListFragment.OnFragmentInteractionListener,
-        ChooseContactsFragment.OnFragmentInteractionListener, ChooseLocationFragment.OnFragmentInteractionListener {
+        ChooseContactsFragment.OnFragmentInteractionListener, ChooseLocationFragment.OnFragmentInteractionListener,
+        ParticipantsListFragment.OnFragmentInteractionListener, InvitationsListFragment.OnFragmentInteractionListener {
     private ActionBar actionBar;
     private DrawerLayout drawerLayout;
     private ListView drawerListView;
@@ -48,13 +51,16 @@ public class MainActivity extends Activity implements NewMeetingFragment.OnFragm
     public static List<Meeting> exampleMeetings = Arrays.asList(
             new Meeting("Example meeting 1", new Date(10, 03, 2015), new Time(18, 00), new Time(19, 00),
                     "This is the first example meeting.", new Participant[]
-                    {new Participant("John Smith", 37253974840L)}, 0, 0),
+                    {new Participant("John Smith", 37253974840L), new Participant("Bob Lake"),
+                            new Participant("Lucy Allen")}, 59, 24),
             new Meeting("Example meeting 2", new Date(30, 05, 2015), new Time(11, 00), new Time(12, 00),
                     "This is the second example meeting.", new Participant[]
-                    {new Participant("Jane Smith", 37253974840L)}, 0, 0),
+                    {new Participant("John Smith", 37253974840L), new Participant("Jane Fitzgerald"),
+                            new Participant("Jonathan Grassfield")}, 59, 24),
             new Meeting("Example meeting 3", new Date(01, 04, 2015), new Time(9, 30), new Time(12, 00),
                     "This is the third example meeting.", new Participant[]
-                    {new Participant("Bob Smith", 37253974840L)}, 0, 0));
+                    {new Participant("John Smith", 37253974840L), new Participant("Robert Green"),
+                            new Participant("Rachel Sky")}, 59, 24));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +137,9 @@ public class MainActivity extends Activity implements NewMeetingFragment.OnFragm
                     break;
                 case 4:
                     changeFragment(new MeetingsListFragment(meetingsList));
+                    break;
+                case 5:
+                    changeFragment(new InvitationsListFragment());
                     break;
                 default:
                     changeFragment(new NewMeetingFragment());

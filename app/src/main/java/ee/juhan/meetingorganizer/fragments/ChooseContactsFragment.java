@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,13 +24,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.adapters.ContactAdapter;
+import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
 
 public class ChooseContactsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private static HashMap<String, ArrayList<String>> contactsMap = new HashMap<String, ArrayList<String>>();
-    private static ContactAdapter adapter;
+    private static CheckBoxAdapter adapter;
     private static ArrayList<String> contactNames;
     private LinearLayout chooseContactsLayout;
 
@@ -45,22 +46,29 @@ public class ChooseContactsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_choose_contacts, container, false);
         createContactsMap();
-        contactNames = new ArrayList<String>(contactsMap.keySet());
+        if (contactsMap.size() == 0) {
+            chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
+            TextView infoText = (TextView) chooseContactsLayout
+                    .findViewById(R.id.info_text);
+            infoText.setText("No contacts found.");
+        } else {
+            chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_choose_contacts, container, false);
+            contactNames = new ArrayList<String>(contactsMap.keySet());
 
-        refreshListView();
-        setButtonListeners();
+            refreshListView();
+            setButtonListeners();
 
-        ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listview);
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listview);
+            listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-            @Override
-            public void onItemClick(AdapterView<?> parent, final View view,
-                                    int position, long id) {
-                // do something
-            }
-        });
+                @Override
+                public void onItemClick(AdapterView<?> parent, final View view,
+                                        int position, long id) {
+                    // do something
+                }
+            });
+        }
         return chooseContactsLayout;
     }
 
@@ -71,7 +79,7 @@ public class ChooseContactsFragment extends Fragment {
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                HashSet<String> checkedContacts = adapter.getCheckedContacts();
+                HashSet<String> checkedContacts = adapter.getCheckedItems();
                 Log.d("DEBUG", checkedContacts.toString());
             }
         });
@@ -145,8 +153,7 @@ public class ChooseContactsFragment extends Fragment {
     public void refreshListView() {
         Collections.sort(contactNames);
         ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listview);
-        adapter = new ContactAdapter(getActivity(),
-                contactNames);
+        adapter = new CheckBoxAdapter(getActivity(), contactNames);
         listview.setAdapter(adapter);
     }
 

@@ -1,5 +1,7 @@
 package ee.juhan.meetingorganizer.models;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public class Meeting {
     private String title;
     private Date date;
@@ -84,5 +86,9 @@ public class Meeting {
 
     public void setLocationLongitude(double locationLongitude) {
         this.locationLongitude = locationLongitude;
+    }
+
+    public LatLng getLocation() {
+        return new LatLng(locationLatitude, locationLongitude);
     }
 }

@@ -31,6 +31,6 @@
     <Button
         style="@style/ButtonStyle"
         android:text="Show participants"
-        android:id="@+id/continue_button" />
+        android:id="@+id/show_participants" />
 
 </LinearLayout>

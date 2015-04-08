@@ -11,6 +11,7 @@
         <item>Current meeting</item>
         <item>Future meetings</item>
         <item>Past meetings</item>
+        <item>Invitations</item>
     </string-array>
     <string-array name="location_items">
         <item>Specific location</item>

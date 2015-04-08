@@ -8,10 +8,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
+import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.models.Meeting;
 
@@ -38,30 +42,48 @@ public class MeetingInfoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        currentMeetingLayout = (LinearLayout) inflater.inflate(R.layout.fragment_current_meeting, container, false);
-        populateLayout(meeting);
+        if (meeting == null) {
+            currentMeetingLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
+            TextView infoText = (TextView) currentMeetingLayout.findViewById(R.id.info_text);
+            infoText.setText("No ongoing meeting found.");
+        } else {
+            currentMeetingLayout = (LinearLayout) inflater.inflate(R.layout.fragment_meeting_info, container, false);
+            populateLayout(meeting);
+            setButtonListeners();
+        }
         return currentMeetingLayout;
     }
 
     private void populateLayout(Meeting meeting) {
-        if (meeting != null) {
-            TextView title = (TextView) currentMeetingLayout.findViewById(R.id.meeting_title);
-            TextView date = (TextView) currentMeetingLayout.findViewById(R.id.meeting_date);
-            TextView time = (TextView) currentMeetingLayout.findViewById(R.id.meeting_time);
-            TextView message = (TextView) currentMeetingLayout.findViewById(R.id.meeting_message);
+        TextView title = (TextView) currentMeetingLayout.findViewById(R.id.meeting_title);
+        TextView date = (TextView) currentMeetingLayout.findViewById(R.id.meeting_date);
+        TextView time = (TextView) currentMeetingLayout.findViewById(R.id.meeting_time);
+        TextView message = (TextView) currentMeetingLayout.findViewById(R.id.meeting_message);
 
-            title.setText("Title: " + meeting.getTitle());
-            date.setText("Date: " + meeting.getDate());
-            time.setText("Time: " + meeting.getStartTime() + " - " + meeting.getEndTime());
-            message.setText("Message: " + meeting.getMessage());
+        title.setText("Title: " + meeting.getTitle());
+        date.setText("Date: " + meeting.getDate());
+        time.setText("Time: " + meeting.getStartTime() + " - " + meeting.getEndTime());
+        message.setText("Message: " + meeting.getMessage());
 
-            getFragmentManager().beginTransaction().replace(R.id.location_frame, new CustomMapFragment()).commit();
-            FrameLayout layout = (FrameLayout) currentMeetingLayout.findViewById(R.id.location_frame);
-            layout.setBackgroundResource(R.drawable.view_border);
-        } else {
-            TextView title = (TextView) currentMeetingLayout.findViewById(R.id.meeting_title);
-            title.setText("No meetings found.");
-        }
+        CustomMapFragment customMapFragment = new CustomMapFragment();
+        customMapFragment.setLocation(meeting.getLocation());
+        getFragmentManager().beginTransaction().replace(R.id.location_frame, customMapFragment).commit();
+        FrameLayout layout = (FrameLayout) currentMeetingLayout.findViewById(R.id.location_frame);
+        layout.setBackgroundResource(R.drawable.view_border);
+    }
+
+    private void setButtonListeners() {
+        Button showParticipants = (Button) currentMeetingLayout
+                .findViewById(R.id.show_participants);
+
+        showParticipants.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity) getActivity()).changeFragment(new ParticipantsListFragment(
+                        Arrays.asList(meeting.getParticipants())), "Participants");
+            }
+        });
+
     }
 
     public void onButtonPressed(Uri uri) {

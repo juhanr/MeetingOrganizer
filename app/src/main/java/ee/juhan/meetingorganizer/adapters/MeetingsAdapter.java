@@ -18,14 +18,14 @@ import ee.juhan.meetingorganizer.models.Meeting;
 public class MeetingsAdapter extends ArrayAdapter<Meeting> {
     private HashMap<Meeting, Integer> mIdMap = new HashMap<>();
     private Context context;
-    private List<Meeting> meetings;
+    private List<Meeting> meetingsList;
 
-    public MeetingsAdapter(Context context, List<Meeting> meetings) {
-        super(context, R.layout.list_item_meetings, meetings);
+    public MeetingsAdapter(Context context, List<Meeting> meetingsList) {
+        super(context, R.layout.list_item_meetings, meetingsList);
         this.context = context;
-        this.meetings = meetings;
-        for (int i = 0; i < meetings.size(); ++i) {
-            mIdMap.put(meetings.get(i), i);
+        this.meetingsList = meetingsList;
+        for (int i = 0; i < meetingsList.size(); ++i) {
+            mIdMap.put(meetingsList.get(i), i);
         }
     }
 
@@ -39,7 +39,7 @@ public class MeetingsAdapter extends ArrayAdapter<Meeting> {
         LinearLayout listItemView = (LinearLayout) inflater.inflate(
                 R.layout.list_item_meetings, parent, false);
 
-        Meeting meeting = meetings.get(position);
+        Meeting meeting = meetingsList.get(position);
 
         TextView meetingTitleView = (TextView) listItemView
                 .findViewById(R.id.meeting_title);

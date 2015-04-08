@@ -80,9 +80,14 @@ public class NewMeetingFragment extends Fragment {
         continueButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                saveData();
                 activity.changeFragment(new ChooseLocationFragment(), "Choose location");
             }
         });
+
+    }
+
+    private void saveData() {
 
     }
 

@@ -16,15 +16,14 @@ import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
 
-public class ContactAdapter extends ArrayAdapter<String> {
+public class CheckBoxAdapter extends ArrayAdapter<String> {
 
     private HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
-    private HashSet<String> checkedContacts = new HashSet<>();
+    private HashSet<String> checkedItems = new HashSet<>();
     private final Context context;
 
-    public ContactAdapter(Context context,
-                          List<String> objects) {
-        super(context, R.layout.list_item_choose_contacts, objects);
+    public CheckBoxAdapter(Context context, List<String> objects) {
+        super(context, R.layout.list_item_checkbox, objects);
         this.context = context;
         for (int i = 0; i < objects.size(); ++i) {
             mIdMap.put(objects.get(i), i);
@@ -39,22 +38,20 @@ public class ContactAdapter extends ArrayAdapter<String> {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         LinearLayout listItemView = (LinearLayout) inflater.inflate(
-                R.layout.list_item_choose_contacts, parent, false);
+                R.layout.list_item_checkbox, parent, false);
 
-        CheckBox contactNameView = (CheckBox) listItemView
-                .findViewById(R.id.contact_name);
-        contactNameView.setText(getItem(position));
-        contactNameView.setOnCheckedChangeListener(
+        CheckBox checkBox = (CheckBox) listItemView
+                .findViewById(R.id.checkbox);
+        checkBox.setText(getItem(position));
+        checkBox.setOnCheckedChangeListener(
                 new CompoundButton.OnCheckedChangeListener() {
 
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        CheckBox contactNameView = (CheckBox) buttonView
-                                .findViewById(R.id.contact_name);
                         String contactName = (String) ((CheckBox) buttonView).getText();
                         if (isChecked)
-                            checkedContacts.add(contactName);
-                        else checkedContacts.remove(contactName);
+                            checkedItems.add(contactName);
+                        else checkedItems.remove(contactName);
                     }
                 }
         );
@@ -73,8 +70,8 @@ public class ContactAdapter extends ArrayAdapter<String> {
         return true;
     }
 
-    public HashSet<String> getCheckedContacts() {
-        return checkedContacts;
+    public HashSet<String> getCheckedItems() {
+        return checkedItems;
     }
 
 }
