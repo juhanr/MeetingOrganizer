@@ -1,9 +1,7 @@
 package ee.juhan.meetingorganizer.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Fragment;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +13,15 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.ParticipantsAdapter;
 import ee.juhan.meetingorganizer.models.Participant;
 
 public class ParticipantsListFragment extends Fragment {
-    private OnFragmentInteractionListener mListener;
+
+    private MainActivity activity;
+    private final String title = "Participants";
     private LinearLayout participantsListLayout;
     private ParticipantsAdapter adapter;
     private final List<Participant> participantsList;
@@ -37,11 +38,13 @@ public class ParticipantsListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activity = (MainActivity) getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        activity.setTitle(title);
         if (participantsList == null || participantsList.size() == 0) {
             participantsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) participantsListLayout.findViewById(R.id.info_text);
@@ -66,33 +69,6 @@ public class ParticipantsListFragment extends Fragment {
 
         adapter = new ParticipantsAdapter(getActivity(), participantsList);
         listview.setAdapter(adapter);
-    }
-
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(Uri uri);
     }
 
 }

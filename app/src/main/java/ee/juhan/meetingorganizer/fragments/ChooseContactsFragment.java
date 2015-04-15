@@ -1,6 +1,5 @@
 package ee.juhan.meetingorganizer.fragments;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -23,12 +22,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
 
 public class ChooseContactsFragment extends Fragment {
 
-    private OnFragmentInteractionListener mListener;
+    private MainActivity activity;
+    private final String title = "Invite contacts";
     private static HashMap<String, ArrayList<String>> contactsMap = new HashMap<String, ArrayList<String>>();
     private static CheckBoxAdapter adapter;
     private static ArrayList<String> contactNames;
@@ -41,11 +42,13 @@ public class ChooseContactsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activity = (MainActivity) getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        activity.setTitle(title);
         createContactsMap();
         if (contactsMap.size() == 0) {
             chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
@@ -155,33 +158,6 @@ public class ChooseContactsFragment extends Fragment {
         ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listview);
         adapter = new CheckBoxAdapter(getActivity(), contactNames);
         listview.setAdapter(adapter);
-    }
-
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(Uri uri);
     }
 
 }

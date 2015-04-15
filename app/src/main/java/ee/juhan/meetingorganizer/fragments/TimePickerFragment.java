@@ -13,6 +13,7 @@ import ee.juhan.meetingorganizer.models.Time;
 @SuppressLint("ValidFragment")
 public class TimePickerFragment extends DialogFragment
         implements TimePickerDialog.OnTimeSetListener {
+
     private int viewId;
     private static int hour = 12;
     private static int minute = 0;

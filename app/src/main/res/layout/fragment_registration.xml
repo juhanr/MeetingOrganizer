@@ -1,0 +1,82 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="ee.juhan.meetingorganizer.fragments.RegistrationFragment"
+    style="@style/FragmentLayoutStyle">
+
+    <TextView
+        android:text="E-mail"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <EditText
+        style="@style/TextboxStyle"
+        android:id="@+id/email_textbox"
+        android:maxLength="40"
+        android:hint="example@mail.com" />
+
+    <TextView
+        android:text="Password"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <EditText
+        style="@style/TextboxStyle"
+        android:id="@+id/password_textbox"
+        android:inputType="textPassword" />
+
+    <TextView
+        android:text="Confirm password"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <EditText
+        style="@style/TextboxStyle"
+        android:id="@+id/password_confirmation_textbox"
+        android:inputType="textPassword" />
+
+    <TextView
+        android:text="Phone number"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="90dp"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/fragment_margin"
+        android:paddingRight="@dimen/fragment_margin">
+
+        <EditText
+            style="@style/TextboxStyle"
+            android:id="@+id/area_number_textbox"
+            android:inputType="phone"
+            android:hint="+XXX"
+            android:digits="0123456789+"
+            android:layout_width="65dp"
+            android:layout_height="wrap_content"
+            android:maxLength="4" />
+
+        <EditText
+            style="@style/TextboxStyle"
+            android:id="@+id/phone_number_textbox"
+            android:inputType="phone"
+            android:digits="0123456789 "
+            android:hint="XXXXXXXXX"
+            android:layout_marginLeft="@dimen/view_margin_small" />
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        style="@style/ButtonStyle"
+        android:text="Create account"
+        android:id="@+id/register_button" />
+
+</LinearLayout>

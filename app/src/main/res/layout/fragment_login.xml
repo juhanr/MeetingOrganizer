@@ -1,0 +1,44 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="ee.juhan.meetingorganizer.fragments.LoginFragment"
+    style="@style/FragmentLayoutStyle">
+
+    <TextView
+        android:text="E-mail"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <EditText
+        style="@style/TextboxStyle"
+        android:id="@+id/email_textbox"
+        android:maxLength="40" />
+
+    <TextView
+        android:text="Password"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/view_margin_small" />
+
+    <EditText
+        style="@style/TextboxStyle"
+        android:id="@+id/password_textbox"
+        android:inputType="textPassword" />
+
+    <TextView
+        android:text="@string/create_account"
+        style="@style/TextStyle"
+        android:layout_gravity="center"
+        android:id="@+id/create_account_textbutton" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        style="@style/ButtonStyle"
+        android:text="Log in"
+        android:id="@+id/login_button" />
+
+</LinearLayout>

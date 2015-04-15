@@ -17,6 +17,7 @@ import ee.juhan.meetingorganizer.MainActivity;
 
 public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnCameraChangeListener {
+
     MainActivity activity;
     private GoogleMap map;
     private LatLng defaultCameraLatLng = new LatLng(59.437046, 24.753742);
@@ -31,13 +32,13 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activity = (MainActivity) getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
-        activity = (MainActivity) getActivity();
         initializeMap();
         return v;
     }

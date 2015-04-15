@@ -16,6 +16,7 @@ import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.models.Participant;
 
 public class ParticipantsAdapter extends ArrayAdapter<Participant> {
+
     private HashMap<Participant, Integer> mIdMap = new HashMap<>();
     private Context context;
     private List<Participant> participantsList;

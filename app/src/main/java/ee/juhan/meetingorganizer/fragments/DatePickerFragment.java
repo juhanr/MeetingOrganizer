@@ -12,6 +12,7 @@ import ee.juhan.meetingorganizer.models.Date;
 
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener {
+
     private static int year;
     private static int month;
     private static int day;

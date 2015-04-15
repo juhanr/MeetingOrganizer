@@ -1,8 +1,6 @@
 package ee.juhan.meetingorganizer.fragments;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,8 +26,8 @@ import static android.R.layout.simple_spinner_item;
 
 public class ChooseLocationFragment extends Fragment {
 
-    private OnFragmentInteractionListener mListener;
     private MainActivity activity;
+    private final String title = "Choose location";
     private static CheckBoxAdapter adapter;
     private LinearLayout chooseLocationLayout;
     public static LatLng location;
@@ -52,6 +50,7 @@ public class ChooseLocationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        activity.setTitle(title);
         chooseLocationLayout = (LinearLayout) inflater.inflate(R.layout.fragment_choose_location, container, false);
         setLocationSpinner();
         setButtonListeners();
@@ -65,7 +64,7 @@ public class ChooseLocationFragment extends Fragment {
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.changeFragment(new ChooseContactsFragment(), "Invite contacts");
+                activity.changeFragment(new ChooseContactsFragment());
             }
         });
 
@@ -122,33 +121,6 @@ public class ChooseLocationFragment extends Fragment {
         FrameLayout layout = (FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
         layout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         layout.removeAllViews();
-    }
-
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(Uri uri);
     }
 
 }
