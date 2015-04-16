@@ -62,7 +62,7 @@ public class ChooseContactsFragment extends Fragment {
             refreshListView();
             setButtonListeners();
 
-            ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listview);
+            ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listView);
             listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
@@ -155,7 +155,7 @@ public class ChooseContactsFragment extends Fragment {
 
     public void refreshListView() {
         Collections.sort(contactNames);
-        ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listview);
+        ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listView);
         adapter = new CheckBoxAdapter(getActivity(), contactNames);
         listview.setAdapter(adapter);
     }

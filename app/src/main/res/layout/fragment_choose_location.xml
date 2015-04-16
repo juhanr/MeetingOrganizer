@@ -1,22 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="ee.juhan.meetingorganizer.fragments.ChooseLocationFragment"
-    style="@style/FragmentLayoutStyle">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    style="@style/FragmentLayout">
 
     <Spinner
         android:id="@+id/location_spinner"
-        style="@style/SpinnerStyle" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Spinner" />
 
     <FrameLayout
+        android:id="@+id/location_frame"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:id="@+id/location_frame"
         android:layout_marginTop="@dimen/view_margin_medium" />
 
     <Button
-        style="@style/ButtonStyle"
+        android:id="@+id/continue_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Continue"
-        android:id="@+id/continue_button" />
+        style="@style/Button" />
 
 </LinearLayout>

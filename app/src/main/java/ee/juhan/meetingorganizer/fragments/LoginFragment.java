@@ -60,7 +60,7 @@ public class LoginFragment extends Fragment {
                 String password = passwordTextBox.getText().toString();
 
                 if (!PatternMatcherUtil.isValidEmail(email)) {
-                    activity.showToastMessage("Email is in an incorrect format!");
+                    activity.showToastMessage("Invalid email address!");
                 } else if (password.length() < 5) {
                     activity.showToastMessage("Password must be at least 5 characters long!");
                 } else {

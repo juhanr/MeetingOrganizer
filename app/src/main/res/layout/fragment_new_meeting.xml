@@ -1,65 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="ee.juhan.meetingorganizer.fragments.NewMeetingFragment"
-    style="@style/FragmentLayoutStyle">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    style="@style/FragmentLayout">
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/view_margin_small"
         android:text="Title"
-        style="@style/TextStyle"
-        android:layout_gravity="center"
-        android:layout_marginBottom="@dimen/view_margin_small" />
+        style="@style/Text" />
 
     <EditText
-        style="@style/TextboxStyle"
-        android:id="@+id/title_textbox" />
+        android:id="@+id/title_textbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TextBox" />
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/view_margin_small"
         android:text="Date"
-        style="@style/TextStyle"
-        android:layout_gravity="center"
-        android:layout_marginBottom="@dimen/view_margin_small" />
+        style="@style/Text" />
 
     <TextView
-        android:text="@string/not_set"
-        style="@style/TextStyle"
-        android:layout_gravity="center"
+        android:id="@+id/date_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/view_margin_large"
-        android:id="@+id/date_button" />
+        android:text="@string/not_set"
+        style="@style/Text" />
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/view_margin_small"
         android:text="Start time"
-        style="@style/TextStyle"
-        android:layout_gravity="center"
-        android:layout_marginBottom="@dimen/view_margin_small" />
+        style="@style/Text" />
 
     <TextView
-        android:text="@string/not_set"
-        style="@style/TextStyle"
-        android:layout_gravity="center"
+        android:id="@+id/start_time_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/view_margin_large"
-        android:id="@+id/start_time_button" />
+        android:text="@string/not_set"
+        style="@style/Text" />
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/view_margin_small"
         android:text="End time"
-        style="@style/TextStyle"
-        android:layout_gravity="center"
-        android:layout_marginBottom="@dimen/view_margin_small" />
+        style="@style/Text" />
 
     <TextView
-        android:text="@string/not_set"
-        style="@style/TextStyle"
-        android:layout_gravity="center"
+        android:id="@+id/end_time_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/view_margin_large"
-        android:id="@+id/end_time_button" />
+        android:text="@string/not_set"
+        style="@style/Text" />
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+    <include layout="@layout/view_empty_space" />
 
     <Button
-        style="@style/ButtonStyle"
+        android:id="@+id/continue_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Continue"
-        android:id="@+id/continue_button" />
+        style="@style/Button" />
 
 </LinearLayout>
