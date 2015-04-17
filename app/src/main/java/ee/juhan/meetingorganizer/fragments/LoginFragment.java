@@ -72,24 +72,25 @@ public class LoginFragment extends Fragment {
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.changeFragment(new RegistrationFragment());
+                activity.selectDrawerItem(2);
             }
         });
 
     }
 
-    private void sendLoginRequest(String email, String password) {
+    private void sendLoginRequest(final String email, String password) {
         LoginLoader loginLoader = new LoginLoader(new AccountDTO(email, password)) {
             @Override
             public void handleResponse(final ServerResponse response) {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        activity.dismissLoadingFragment();
                         if (response != null) {
                             ServerResult result = response.getResult();
                             if (result == ServerResult.SUCCESS) {
                                 activity.showToastMessage("Log in successful!");
-                                activity.logIn(response.getSid(), response.getUserId());
+                                activity.logIn(email, response.getSid(), response.getUserId());
                             } else if (result == ServerResult.WRONG_PASSWORD) {
                                 activity.showToastMessage("Wrong password!");
                             } else if (result == ServerResult.NO_ACCOUNT_FOUND) {
@@ -104,6 +105,7 @@ public class LoginFragment extends Fragment {
                 });
             }
         };
+        activity.showLoadingFragment();
         loginLoader.retrieveResponse();
     }
 

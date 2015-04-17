@@ -7,13 +7,19 @@
     <string name="not_set"><u>Not set</u></string>
     <string name="create_account"><u>Create a new account</u></string>
 
-    <string-array name="drawer_items">
+    <string-array name="drawer_items_online">
         <item>New meeting</item>
         <item>Current meeting</item>
         <item>Future meetings</item>
         <item>Past meetings</item>
         <item>Invitations</item>
     </string-array>
+
+    <string-array name="drawer_items_offline">
+        <item>Log in</item>
+        <item>Registration</item>
+    </string-array>
+
     <string-array name="location_items">
         <item>Specific location</item>
         <item>Generated from predefined locations</item>

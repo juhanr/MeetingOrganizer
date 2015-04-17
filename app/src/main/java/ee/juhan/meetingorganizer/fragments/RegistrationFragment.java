@@ -83,7 +83,7 @@ public class RegistrationFragment extends Fragment {
 
     }
 
-    private void sendRegistrationRequest(String email, String password, String phoneNr) {
+    private void sendRegistrationRequest(final String email, String password, String phoneNr) {
         RegistrationLoader registrationLoader = new RegistrationLoader(
                 new AccountDTO(email, password, phoneNr)) {
             @Override
@@ -91,11 +91,12 @@ public class RegistrationFragment extends Fragment {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        activity.dismissLoadingFragment();
                         if (response != null) {
                             ServerResult result = response.getResult();
                             if (result == ServerResult.SUCCESS) {
                                 activity.showToastMessage("Registration successful!");
-                                activity.logIn(response.getSid(), response.getUserId());
+                                activity.logIn(email, response.getSid(), response.getUserId());
                             } else if (result == ServerResult.EMAIL_IN_USE) {
                                 activity.showToastMessage("Email is already in use");
                             } else {
@@ -108,6 +109,7 @@ public class RegistrationFragment extends Fragment {
                 });
             }
         };
+        activity.showLoadingFragment();
         registrationLoader.retrieveResponse();
     }
 
