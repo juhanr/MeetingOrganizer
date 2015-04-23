@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
@@ -19,9 +19,9 @@ import ee.juhan.meetingorganizer.util.PatternMatcherUtil;
 
 public class RegistrationFragment extends Fragment {
 
-    private MainActivity activity;
     private final String title = "Registration";
-    private LinearLayout registrationLayout;
+    private MainActivity activity;
+    private ViewGroup registrationLayout;
 
     public RegistrationFragment() {
     }
@@ -36,7 +36,8 @@ public class RegistrationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         activity.setTitle(title);
-        registrationLayout = (LinearLayout) inflater.inflate(R.layout.fragment_registration, container, false);
+        activity.setDrawerItem(activity.getDrawerItemPosition(title));
+        registrationLayout = (ViewGroup) inflater.inflate(R.layout.fragment_registration, container, false);
         setButtonListeners();
         return registrationLayout;
     }
@@ -48,44 +49,51 @@ public class RegistrationFragment extends Fragment {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText emailTextBox = (EditText) registrationLayout
-                        .findViewById(R.id.email_textbox);
-                EditText password1TextBox = (EditText) registrationLayout
-                        .findViewById(R.id.password_textbox);
-                EditText password2TextBox = (EditText) registrationLayout
-                        .findViewById(R.id.password_confirmation_textbox);
-                EditText areaNrTextBox = (EditText) registrationLayout
-                        .findViewById(R.id.area_number_textbox);
-                EditText phoneNrTextBox = (EditText) registrationLayout
-                        .findViewById(R.id.phone_number_textbox);
-
-                String email = emailTextBox.getText().toString();
-                String password1 = password1TextBox.getText().toString();
-                String password2 = password2TextBox.getText().toString();
-                String areaNr = areaNrTextBox.getText().toString();
-                String phoneNr = phoneNrTextBox.getText().toString();
-
-                if (!PatternMatcherUtil.isValidEmail(email)) {
-                    activity.showToastMessage("Invalid email address!");
-                } else if (password1.length() < 5) {
-                    activity.showToastMessage("Password must be at least 5 characters long!");
-                } else if (!password1.equals(password2)) {
-                    activity.showToastMessage("The passwords don't match!");
-                } else if (!PatternMatcherUtil.isValidAreaNumber(areaNr)) {
-                    activity.showToastMessage("Invalid area number!");
-                } else if (!PatternMatcherUtil.isValidPhoneNumber(phoneNr)) {
-                    activity.showToastMessage("Invalid phone number!");
-                } else {
-                    sendRegistrationRequest(email, password1, areaNr + phoneNr);
+                if (isValidData()) {
+                    sendRegistrationRequest(
+                            getViewText(R.id.name_textbox),
+                            getViewText(R.id.email_textbox),
+                            getViewText(R.id.password_textbox),
+                            "+" + getViewText(R.id.area_number_textbox) +
+                                    getViewText(R.id.phone_number_textbox));
                 }
             }
         });
 
     }
 
-    private void sendRegistrationRequest(final String email, String password, String phoneNr) {
+    private boolean isValidData() {
+        if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.email_textbox))) {
+            activity.showToastMessage("Invalid email address!");
+        } else if (getViewText(R.id.password_textbox).length() < 5) {
+            activity.showToastMessage("Password must be at least 5 characters long!");
+        } else if (!getViewText(R.id.password_textbox).equals(
+                getViewText(R.id.password_confirmation_textbox))) {
+            activity.showToastMessage("The passwords don't match!");
+        } else if (!PatternMatcherUtil.isValidName(getViewText(R.id.name_textbox))) {
+            activity.showToastMessage("Please enter your full name!");
+        } else if (!PatternMatcherUtil.isValidAreaNumber(getViewText(R.id.area_number_textbox))) {
+            activity.showToastMessage("Invalid area number!");
+        } else if (!PatternMatcherUtil.isValidPhoneNumber(getViewText(R.id.phone_number_textbox))) {
+            activity.showToastMessage("Invalid phone number!");
+        } else {
+            return true;
+        }
+        return false;
+    }
+
+    private String getViewText(int viewId) {
+        View view = registrationLayout.findViewById(viewId);
+        if (view instanceof EditText)
+            return ((EditText) view).getText().toString().trim();
+        else if (view instanceof TextView)
+            return ((TextView) view).getText().toString().trim();
+        else return null;
+    }
+
+    private void sendRegistrationRequest(String name, final String email, String password, String phoneNr) {
         RegistrationLoader registrationLoader = new RegistrationLoader(
-                new AccountDTO(email, password, phoneNr)) {
+                new AccountDTO(name, email, password, phoneNr)) {
             @Override
             public void handleResponse(final ServerResponse response) {
                 activity.runOnUiThread(new Runnable() {
@@ -98,7 +106,9 @@ public class RegistrationFragment extends Fragment {
                                 activity.showToastMessage("Registration successful!");
                                 activity.logIn(email, response.getSid(), response.getUserId());
                             } else if (result == ServerResult.EMAIL_IN_USE) {
-                                activity.showToastMessage("Email is already in use");
+                                activity.showToastMessage("The e-mail is already in use");
+                            } else if (result == ServerResult.PHONE_NUMBER_IN_USE) {
+                                activity.showToastMessage("The phone number is already in use");
                             } else {
                                 activity.showToastMessage("Server response fail.");
                             }

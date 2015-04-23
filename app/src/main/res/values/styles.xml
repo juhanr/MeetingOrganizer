@@ -37,7 +37,7 @@
     </style>
 
     <style name="Button" parent="Text">
-        <item name="android:layout_marginTop">@dimen/view_margin_medium</item>
+        <item name="android:layout_marginTop">@dimen/view_margin_large</item>
         <item name="android:background">@drawable/button</item>
     </style>
 

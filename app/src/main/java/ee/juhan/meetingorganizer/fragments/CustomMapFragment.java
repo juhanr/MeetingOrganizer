@@ -24,6 +24,7 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     private float defaultCameraZoom = 10;
     private Marker locationMarker;
     private LatLng location;
+    private boolean isClickableMap;
 
     public CustomMapFragment() {
 
@@ -49,18 +50,21 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
             map.setMyLocationEnabled(true);
             map.setOnMyLocationButtonClickListener(this);
             map.setOnCameraChangeListener(this);
-            if (location == null) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        defaultCameraLatLng, defaultCameraZoom));
+            if (isClickableMap) {
                 map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
                     public void onMapClick(LatLng latLng) {
-                        ChooseLocationFragment.location = latLng;
+                        NewMeetingFragment.newMeetingModel.setLocationLatitude(latLng.latitude);
+                        NewMeetingFragment.newMeetingModel.setLocationLongitude(latLng.longitude);
                         if (locationMarker != null)
                             locationMarker.remove();
                         setLocationMarker(latLng);
                     }
                 });
+            }
+            if (location == null) {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        defaultCameraLatLng, defaultCameraZoom));
             } else {
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         location, defaultCameraZoom));
@@ -79,6 +83,17 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
 
     public void setLocation(LatLng latLng) {
         location = latLng;
+    }
+
+    public void setIsClickableMap(boolean isClickableMap) {
+        this.isClickableMap = isClickableMap;
+    }
+
+    public void clearMap() {
+        if (map != null) {
+            map.clear();
+            location = null;
+        }
     }
 
     @Override

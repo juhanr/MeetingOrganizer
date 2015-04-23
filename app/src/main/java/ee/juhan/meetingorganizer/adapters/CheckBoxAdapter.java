@@ -18,9 +18,9 @@ import ee.juhan.meetingorganizer.R;
 
 public class CheckBoxAdapter extends ArrayAdapter<String> {
 
+    private final Context context;
     private HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
     private HashSet<String> checkedItems = new HashSet<>();
-    private final Context context;
 
     public CheckBoxAdapter(Context context, List<String> objects) {
         super(context, R.layout.list_item_checkbox, objects);

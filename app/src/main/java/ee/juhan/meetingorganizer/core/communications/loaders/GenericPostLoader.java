@@ -1,13 +1,12 @@
 package ee.juhan.meetingorganizer.core.communications.loaders;
 
-import com.google.gson.Gson;
-
-import java.io.DataOutputStream;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
 import ee.juhan.meetingorganizer.core.communications.Connection;
+import ee.juhan.meetingorganizer.core.communications.GsonParser;
 import ee.juhan.meetingorganizer.core.communications.PostConnection;
 
 /**
@@ -81,8 +80,12 @@ public abstract class GenericPostLoader<T> extends GenericLoader<T> {
 
             @Override
             public void handleResponseBody(String response) {
-                T object = getObjectFromJSON(response);
-                handleResponse(object);
+                if (response == null) {
+                    handleResponse(null);
+                } else {
+                    T object = getObjectFromJSON(response);
+                    handleResponse(object);
+                }
             }
 
             @Override
@@ -91,10 +94,10 @@ public abstract class GenericPostLoader<T> extends GenericLoader<T> {
             }
 
             @Override
-            public void writeToConnection(DataOutputStream writer)
+            public void writeToConnection(BufferedWriter writer)
                     throws IOException {
-                String json = new Gson().toJson(post);
-                writer.writeBytes(json);
+                String json = GsonParser.getInstance().toJson(post);
+                writer.write(json);
             }
         };
     }

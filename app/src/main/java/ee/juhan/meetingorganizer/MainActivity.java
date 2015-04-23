@@ -23,28 +23,21 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 
-import ee.juhan.meetingorganizer.fragments.InvitationsListFragment;
 import ee.juhan.meetingorganizer.fragments.LoadingFragment;
 import ee.juhan.meetingorganizer.fragments.LoginFragment;
-import ee.juhan.meetingorganizer.fragments.MeetingInfoFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
 import ee.juhan.meetingorganizer.fragments.NewMeetingFragment;
 import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
-import ee.juhan.meetingorganizer.models.Date;
-import ee.juhan.meetingorganizer.models.Meeting;
-import ee.juhan.meetingorganizer.models.Participant;
-import ee.juhan.meetingorganizer.models.Time;
 
 public class MainActivity extends Activity {
 
+    public HashMap<String, Integer> drawerItemsHashMap = new HashMap<String, Integer>();
     private ActionBar actionBar;
     private DrawerLayout drawerLayout;
     private ListView drawerListView;
     private ActionBarDrawerToggle drawerToggle;
-
     private CharSequence drawerTitle;
     private CharSequence title;
     private String[] drawerItems;
@@ -56,20 +49,6 @@ public class MainActivity extends Activity {
 
     private boolean isLoggedIn;
     private LoadingFragment loadingFragment;
-
-    public static List<Meeting> exampleMeetings = Arrays.asList(
-            new Meeting("Example meeting 1", new Date(10, 03, 2015), new Time(18, 00), new Time(19, 00),
-                    "This is the first example meeting.", new Participant[]
-                    {new Participant("John Smith", 37253974840L), new Participant("Bob Lake"),
-                            new Participant("Lucy Allen")}, 59, 24),
-            new Meeting("Example meeting 2", new Date(30, 03, 2015), new Time(11, 00), new Time(12, 00),
-                    "This is the second example meeting.", new Participant[]
-                    {new Participant("John Smith", 37253974840L), new Participant("Jane Fitzgerald"),
-                            new Participant("Jonathan Grassfield")}, 59, 24),
-            new Meeting("Example meeting 3", new Date(01, 04, 2015), new Time(9, 30), new Time(12, 00),
-                    "This is the third example meeting.", new Participant[]
-                    {new Participant("John Smith", 37253974840L), new Participant("Robert Green"),
-                            new Participant("Rachel Sky")}, 59, 24));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +68,23 @@ public class MainActivity extends Activity {
             setUpDrawer();
             setEmail(sharedPref.getString("email", ""));
         }
-        selectDrawerItem(1, false);
+    }
+
+    private void createDrawerItemsHashMap() {
+        drawerItemsHashMap.clear();
+        if (isLoggedIn)
+            drawerItems = getResources().getStringArray(R.array.drawer_items_online);
+        else
+            drawerItems = getResources().getStringArray(R.array.drawer_items_offline);
+        Integer position = 1;
+        for (String item : drawerItems) {
+            drawerItemsHashMap.put(item, position);
+            position++;
+        }
+    }
+
+    public Integer getDrawerItemPosition(String item) {
+        return drawerItemsHashMap.get(item);
     }
 
     public String getSID() {
@@ -106,7 +101,6 @@ public class MainActivity extends Activity {
         setEmail(email);
         isLoggedIn = true;
         setUpDrawer();
-        changeFragment(new NewMeetingFragment(), false);
     }
 
     private void logOut() {
@@ -115,7 +109,6 @@ public class MainActivity extends Activity {
         setEmail("Not logged in");
         isLoggedIn = false;
         setUpDrawer();
-        changeFragment(new LoginFragment(), false);
     }
 
     private void setEmail(String email) {
@@ -128,11 +121,7 @@ public class MainActivity extends Activity {
         title = drawerTitle = getTitle();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerListView = (ListView) findViewById(R.id.left_drawer);
-
-        if (isLoggedIn)
-            drawerItems = getResources().getStringArray(R.array.drawer_items_online);
-        else
-            drawerItems = getResources().getStringArray(R.array.drawer_items_offline);
+        createDrawerItemsHashMap();
 
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         drawerListView.setOnItemClickListener(new DrawerItemClickListener());
@@ -167,13 +156,9 @@ public class MainActivity extends Activity {
         drawerLayout.setDrawerListener(drawerToggle);
         drawerListView.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, drawerItems));
-    }
 
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectDrawerItem(position);
-        }
+        currentDrawerItemPosition = 0;
+        selectDrawerItem(1, false);
     }
 
     public void selectDrawerItem(int position) {
@@ -183,24 +168,27 @@ public class MainActivity extends Activity {
     public void selectDrawerItem(int position, boolean addToBackStack) {
         if (position != currentDrawerItemPosition && position != 0) {
             if (isLoggedIn) {
-                List<Meeting> meetingsList = MainActivity.exampleMeetings;
+                MeetingsListFragment meetingsListFragment = null;
+                if (position >= 2 && position <= 5) {
+                    meetingsListFragment = new MeetingsListFragment(
+                            drawerItems[position - 1], this);
+                    meetingsListFragment.loadMeetingsList();
+                }
                 switch (position) {
                     case 1:
                         changeFragment(new NewMeetingFragment(), addToBackStack);
                         break;
                     case 2:
-                        changeFragment(new MeetingInfoFragment(meetingsList.get(0)), addToBackStack);
+                        changeFragment(meetingsListFragment, addToBackStack);
                         break;
                     case 3:
-                        changeFragment(new MeetingsListFragment(meetingsList,
-                                drawerItems[position - 1]), addToBackStack);
+                        changeFragment(meetingsListFragment, addToBackStack);
                         break;
                     case 4:
-                        changeFragment(new MeetingsListFragment(meetingsList,
-                                drawerItems[position - 1]), addToBackStack);
+                        changeFragment(meetingsListFragment, addToBackStack);
                         break;
                     case 5:
-                        changeFragment(new InvitationsListFragment(), addToBackStack);
+                        changeFragment(meetingsListFragment, addToBackStack);
                         break;
                     default:
                         changeFragment(new NewMeetingFragment(), addToBackStack);
@@ -219,10 +207,15 @@ public class MainActivity extends Activity {
                         break;
                 }
             }
-            currentDrawerItemPosition = position;
             drawerLayout.closeDrawer(drawerListView);
+        } else {
+            setDrawerItem(currentDrawerItemPosition);
         }
-        drawerListView.setItemChecked(currentDrawerItemPosition, true);
+    }
+
+    public void setDrawerItem(int position) {
+        currentDrawerItemPosition = position;
+        drawerListView.setItemChecked(position, true);
     }
 
     @Override
@@ -320,6 +313,13 @@ public class MainActivity extends Activity {
     public void dismissLoadingFragment() {
         if (loadingFragment != null) {
             loadingFragment.dismiss();
+        }
+    }
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            selectDrawerItem(position);
         }
     }
 

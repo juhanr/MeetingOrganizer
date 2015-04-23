@@ -2,27 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:gravity="center_vertical"
-    android:paddingTop="@dimen/view_margin_medium"
-    android:paddingBottom="@dimen/view_margin_medium">
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/view_margin_medium"
+    android:paddingTop="@dimen/view_margin_medium">
 
     <TextView
         android:id="@+id/meeting_title"
+        style="@style/Text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Text" />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/meeting_date"
+        style="@style/Text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Text" />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/meeting_time"
+        style="@style/Text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Text" />
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

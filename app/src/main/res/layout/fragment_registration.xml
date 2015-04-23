@@ -1,91 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    style="@style/FragmentLayout">
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="E-mail"
-        style="@style/Text" />
+    <LinearLayout
+        style="@style/FragmentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/email_textbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:maxLength="40"
-        android:hint="example@mail.com"
-        style="@style/TextBox" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Password"
-        style="@style/Text" />
-
-    <EditText
-        android:id="@+id/password_textbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        style="@style/TextBox" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Confirm password"
-        style="@style/Text" />
-
-    <EditText
-        android:id="@+id/password_confirmation_textbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        style="@style/TextBox" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Phone number"
-        style="@style/Text" />
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/fragment_margin"
-        android:paddingRight="@dimen/fragment_margin">
-
-        <EditText
-            android:id="@+id/area_number_textbox"
-            android:layout_width="55dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="3dp"
-            android:inputType="phone"
-            android:digits="0123456789"
-            android:maxLength="3"
-            style="@style/TextBox" />
-
-        <EditText
-            android:id="@+id/phone_number_textbox"
+        <TextView
+            style="@style/Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/area_number_textbox"
-            android:layout_marginLeft="3dp"
-            android:layout_marginRight="3dp"
-            android:inputType="phone"
-            android:digits="0123456789"
-            style="@style/TextBox" />
-    </RelativeLayout>
+            android:text="E-mail" />
 
-    <include layout="@layout/view_empty_space" />
+        <EditText
+            android:id="@+id/email_textbox"
+            style="@style/TextBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="example@mail.com"
+            android:maxLength="40" />
 
-    <Button
-        android:id="@+id/register_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create account"
-        style="@style/Button" />
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password" />
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/password_textbox"
+            style="@style/TextBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword" />
+
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm password" />
+
+        <EditText
+            android:id="@+id/password_confirmation_textbox"
+            style="@style/TextBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword" />
+
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Full name" />
+
+        <EditText
+            android:id="@+id/name_textbox"
+            style="@style/TextBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phone number" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/fragment_margin"
+            android:paddingRight="@dimen/fragment_margin">
+
+            <EditText
+                android:id="@+id/area_number_textbox"
+                style="@style/TextBox"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
+                android:digits="0123456789"
+                android:inputType="phone"
+                android:maxLength="3" />
+
+            <EditText
+                android:id="@+id/phone_number_textbox"
+                style="@style/TextBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
+                android:layout_marginRight="3dp"
+                android:layout_toRightOf="@id/area_number_textbox"
+                android:digits="0123456789"
+                android:inputType="phone" />
+        </RelativeLayout>
+
+        <include layout="@layout/view_empty_space" />
+
+        <Button
+            android:id="@+id/register_button"
+            style="@style/Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create account" />
+
+    </LinearLayout>
+</ScrollView>

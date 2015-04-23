@@ -1,26 +1,35 @@
 package ee.juhan.meetingorganizer.fragments;
 
+import android.app.DatePickerDialog;
 import android.app.Fragment;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TimePicker;
+
+import java.util.Calendar;
+import java.util.Date;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.models.Date;
-import ee.juhan.meetingorganizer.models.Time;
+import ee.juhan.meetingorganizer.models.server.MeetingDTO;
+import ee.juhan.meetingorganizer.util.DateParserUtil;
 
 public class NewMeetingFragment extends Fragment {
 
-    private MainActivity activity;
+    public static MeetingDTO newMeetingModel = new MeetingDTO();
     private final String title = "New meeting";
-    private static LinearLayout newMeetingLayout;
+    private MainActivity activity;
+    private ViewGroup newMeetingLayout;
 
     public NewMeetingFragment() {
 
@@ -36,11 +45,12 @@ public class NewMeetingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         activity.setTitle(title);
-        newMeetingLayout = (LinearLayout) inflater.inflate(R.layout.fragment_new_meeting, container, false);
+        activity.setDrawerItem(activity.getDrawerItemPosition(title));
+        newMeetingLayout = (ViewGroup) inflater.inflate(R.layout.fragment_new_meeting, container, false);
         setButtonListeners();
+        setSavedData();
         return newMeetingLayout;
     }
-
 
     private void setButtonListeners() {
         TextView dateButton = (TextView) newMeetingLayout
@@ -55,24 +65,69 @@ public class NewMeetingFragment extends Fragment {
         dateButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatePickerFragment datePickerFragment = new DatePickerFragment();
-                datePickerFragment.show(getFragmentManager(), "datePicker");
+                DatePickerDialog.OnDateSetListener onDateSetListener =
+                        new DatePickerDialog.OnDateSetListener() {
+
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                                String date = dayOfMonth + "." + formatString(monthOfYear + 1) + "." + year;
+                                setDate(date);
+                            }
+                        };
+                Calendar c = Calendar.getInstance();
+                if (!getViewText(R.id.date_button).equals("Not set")) {
+                    c.setTime(DateParserUtil.parseDate(getViewText(R.id.date_button)));
+                }
+                DatePickerDialog dialog = new DatePickerDialog(activity,
+                        DatePickerDialog.THEME_HOLO_DARK, onDateSetListener,
+                        c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+                dialog.show();
             }
         });
 
         startTimeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                TimePickerFragment timePickerFragment = new TimePickerFragment(R.id.start_time_button);
-                timePickerFragment.show(getFragmentManager(), "timePicker");
+                TimePickerDialog.OnTimeSetListener onTimeSetListener =
+                        new TimePickerDialog.OnTimeSetListener() {
+
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                String time = formatString(hourOfDay) + ":" + formatString(minute);
+                                setStartTime(time);
+                            }
+                        };
+                Calendar c = Calendar.getInstance();
+                if (!getViewText(R.id.start_time_button).equals("Not set")) {
+                    c.setTime(DateParserUtil.parseTime(getViewText(R.id.start_time_button)));
+                }
+                TimePickerDialog dialog = new TimePickerDialog(activity,
+                        TimePickerDialog.THEME_HOLO_DARK, onTimeSetListener,
+                        c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true);
+                dialog.show();
             }
         });
 
         endTimeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                TimePickerFragment timePickerFragment = new TimePickerFragment(R.id.end_time_button);
-                timePickerFragment.show(getFragmentManager(), "timePicker");
+                TimePickerDialog.OnTimeSetListener onTimeSetListener =
+                        new TimePickerDialog.OnTimeSetListener() {
+
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                String time = formatString(hourOfDay) + ":" + formatString(minute);
+                                setEndTime(time);
+                            }
+                        };
+                Calendar c = Calendar.getInstance();
+                if (!getViewText(R.id.end_time_button).equals("Not set")) {
+                    c.setTime(DateParserUtil.parseTime(getViewText(R.id.end_time_button)));
+                }
+                TimePickerDialog dialog = new TimePickerDialog(activity,
+                        TimePickerDialog.THEME_HOLO_DARK, onTimeSetListener,
+                        c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true);
+                dialog.show();
             }
         });
 
@@ -80,29 +135,105 @@ public class NewMeetingFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 saveData();
-                activity.changeFragment(new ChooseLocationFragment());
+                if (isValidData()) {
+                    activity.changeFragment(new ChooseLocationFragment());
+                }
             }
         });
 
     }
 
+    private String formatString(int n) {
+        if (n < 10)
+            return "0" + n;
+        else
+            return "" + n;
+    }
+
+    private void setSavedData() {
+        if (newMeetingModel.getTitle() != null) {
+            setViewText(R.id.title_textbox, newMeetingModel.getTitle());
+            setViewText(R.id.description_textbox, newMeetingModel.getDescription());
+            setViewText(R.id.date_button, underlineString(
+                    DateParserUtil.formatDate(newMeetingModel.getStartDateTime())));
+            setViewText(R.id.start_time_button, underlineString(
+                    DateParserUtil.formatDate(newMeetingModel.getStartDateTime())));
+            setViewText(R.id.end_time_button, underlineString(
+                    DateParserUtil.formatDate(newMeetingModel.getEndDateTime())));
+        }
+    }
+
+    private boolean isValidData() {
+        if (getViewText(R.id.title_textbox).length() == 0) {
+            activity.showToastMessage("Please enter a title!");
+        } else if (getViewText(R.id.date_button).equals("Not set")) {
+            activity.showToastMessage("Please set a date!");
+        } else if (getViewText(R.id.start_time_button).equals("Not set")) {
+            activity.showToastMessage("Please set a start time!");
+        } else if (getViewText(R.id.end_time_button).equals("Not set")) {
+            activity.showToastMessage("Please set an end time!");
+        } else if (newMeetingModel.getStartDateTime().before(new Date())) {
+            activity.showToastMessage("The start time must be in the future!");
+        } else if (newMeetingModel.getStartDateTime().after(newMeetingModel.getEndDateTime())) {
+            activity.showToastMessage("The end time must be after start time!");
+        } else {
+            return true;
+        }
+        return false;
+    }
+
+    private String getViewText(int viewId) {
+        View view = newMeetingLayout.findViewById(viewId);
+        if (view instanceof EditText)
+            return ((EditText) view).getText().toString().trim();
+        else if (view instanceof TextView)
+            return ((TextView) view).getText().toString().trim();
+        else return null;
+    }
+
+    private void setViewText(int viewId, Spanned text) {
+        View view = newMeetingLayout.findViewById(viewId);
+        if (view instanceof EditText)
+            ((EditText) view).setText(text);
+        else if (view instanceof TextView)
+            ((TextView) view).setText(text);
+    }
+
+    private void setViewText(int viewId, String text) {
+        setViewText(viewId, Html.fromHtml(text));
+    }
+
     private void saveData() {
+        newMeetingModel.setTitle(getViewText(R.id.title_textbox));
+        newMeetingModel.setDescription(getViewText(R.id.description_textbox));
+        newMeetingModel.setStartDateTime(DateParserUtil.parseDateTime(
+                getViewText(R.id.date_button) + " " +
+                        getViewText(R.id.start_time_button)));
+        newMeetingModel.setEndDateTime(DateParserUtil.parseDateTime(
+                getViewText(R.id.date_button) + " " +
+                        getViewText(R.id.end_time_button)));
 
     }
 
-    public static void changeDate(Date date) {
+    private void setDate(String date) {
         TextView dateButton = (TextView) newMeetingLayout
                 .findViewById(R.id.date_button);
-        dateButton.setText(underlineString(date.toString()));
+        dateButton.setText(underlineString(date));
     }
 
-    public static void changeTime(Time time, int viewId) {
-        TextView dateButton = (TextView) newMeetingLayout
-                .findViewById(viewId);
-        dateButton.setText(underlineString(time.toString()));
+    private void setStartTime(String time) {
+        TextView startTimeButton = (TextView) newMeetingLayout
+                .findViewById(R.id.start_time_button);
+        startTimeButton.setText(underlineString(time));
     }
 
-    private static android.text.Spanned underlineString(String s) {
+    private void setEndTime(String time) {
+        TextView endTimeButton = (TextView) newMeetingLayout
+                .findViewById(R.id.end_time_button);
+        endTimeButton.setText(underlineString(time));
+    }
+
+    private Spanned underlineString(String s) {
         return Html.fromHtml("<u>" + s + "</u>");
     }
 

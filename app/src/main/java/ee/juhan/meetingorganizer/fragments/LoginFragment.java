@@ -21,8 +21,8 @@ import ee.juhan.meetingorganizer.util.PatternMatcherUtil;
 
 public class LoginFragment extends Fragment {
 
-    private MainActivity activity;
     private final String title = "Log in";
+    private MainActivity activity;
     private LinearLayout loginLayout;
 
     public LoginFragment() {
@@ -38,6 +38,7 @@ public class LoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         activity.setTitle(title);
+        activity.setDrawerItem(activity.getDrawerItemPosition(title));
         loginLayout = (LinearLayout) inflater.inflate(R.layout.fragment_login, container, false);
         setButtonListeners();
         return loginLayout;
@@ -52,19 +53,9 @@ public class LoginFragment extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText emailTextBox = (EditText) loginLayout
-                        .findViewById(R.id.email_textbox);
-                EditText passwordTextBox = (EditText) loginLayout
-                        .findViewById(R.id.password_textbox);
-                String email = emailTextBox.getText().toString();
-                String password = passwordTextBox.getText().toString();
-
-                if (!PatternMatcherUtil.isValidEmail(email)) {
-                    activity.showToastMessage("Invalid email address!");
-                } else if (password.length() < 5) {
-                    activity.showToastMessage("Password must be at least 5 characters long!");
-                } else {
-                    sendLoginRequest(email, password);
+                if (isValidData()) {
+                    sendLoginRequest(getViewText(R.id.email_textbox),
+                            getViewText(R.id.password_textbox));
                 }
             }
         });
@@ -76,6 +67,26 @@ public class LoginFragment extends Fragment {
             }
         });
 
+    }
+
+    private boolean isValidData() {
+        if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.email_textbox))) {
+            activity.showToastMessage("Invalid email address!");
+        } else if (getViewText(R.id.password_textbox).length() < 5) {
+            activity.showToastMessage("Password must be at least 5 characters long!");
+        } else {
+            return true;
+        }
+        return false;
+    }
+
+    private String getViewText(int viewId) {
+        View view = loginLayout.findViewById(viewId);
+        if (view instanceof EditText)
+            return ((EditText) view).getText().toString().trim();
+        else if (view instanceof TextView)
+            return ((TextView) view).getText().toString().trim();
+        else return null;
     }
 
     private void sendLoginRequest(final String email, String password) {

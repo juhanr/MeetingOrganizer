@@ -11,25 +11,29 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.Arrays;
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.models.Meeting;
+import ee.juhan.meetingorganizer.models.server.MeetingDTO;
+import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
+import ee.juhan.meetingorganizer.util.DateParserUtil;
 
 public class MeetingInfoFragment extends Fragment {
 
-    private MainActivity activity;
     private final String title = "Meeting info";
-    private LinearLayout currentMeetingLayout;
-    private Meeting meeting;
+    private MainActivity activity;
+    private LinearLayout meetingInfoLayout;
+    private MeetingDTO meeting;
 
     public MeetingInfoFragment() {
         meeting = null;
     }
 
     @SuppressLint("ValidFragment")
-    public MeetingInfoFragment(Meeting meeting) {
+    public MeetingInfoFragment(MeetingDTO meeting) {
         this.meeting = meeting;
     }
 
@@ -44,47 +48,52 @@ public class MeetingInfoFragment extends Fragment {
                              Bundle savedInstanceState) {
         activity.setTitle(title);
         if (meeting == null) {
-            currentMeetingLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
-            TextView infoText = (TextView) currentMeetingLayout.findViewById(R.id.info_text);
-            infoText.setText("No ongoing meeting found.");
+            meetingInfoLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
+            TextView infoText = (TextView) meetingInfoLayout.findViewById(R.id.info_text);
+            infoText.setText("No data found.");
         } else {
-            currentMeetingLayout = (LinearLayout) inflater.inflate(R.layout.fragment_meeting_info, container, false);
+            meetingInfoLayout = (LinearLayout) inflater.inflate(R.layout.fragment_meeting_info, container, false);
             populateLayout(meeting);
             setButtonListeners();
         }
-        return currentMeetingLayout;
+        return meetingInfoLayout;
     }
 
-    private void populateLayout(Meeting meeting) {
-        TextView title = (TextView) currentMeetingLayout.findViewById(R.id.meeting_title);
-        TextView date = (TextView) currentMeetingLayout.findViewById(R.id.meeting_date);
-        TextView time = (TextView) currentMeetingLayout.findViewById(R.id.meeting_time);
-        TextView message = (TextView) currentMeetingLayout.findViewById(R.id.meeting_message);
+    private void populateLayout(MeetingDTO meeting) {
+        TextView title = (TextView) meetingInfoLayout.findViewById(R.id.meeting_title);
+        TextView description = (TextView) meetingInfoLayout.findViewById(R.id.meeting_description);
+        TextView date = (TextView) meetingInfoLayout.findViewById(R.id.meeting_date);
+        TextView time = (TextView) meetingInfoLayout.findViewById(R.id.meeting_time);
 
         title.setText("Title: " + meeting.getTitle());
-        date.setText("Date: " + meeting.getDate());
-        time.setText("Time: " + meeting.getStartTime() + " - " + meeting.getEndTime());
-        message.setText("Message: " + meeting.getMessage());
+        if (!description.getText().equals(""))
+            description.setText("Description: " + meeting.getDescription());
+        else
+            meetingInfoLayout.removeView(description);
+        date.setText("Date: " + DateParserUtil.formatDate(meeting.getStartDateTime()));
+        time.setText("Time: " + DateParserUtil.formatTime(meeting.getStartDateTime()) +
+                " - " + DateParserUtil.formatTime(meeting.getEndDateTime()));
 
         CustomMapFragment customMapFragment = new CustomMapFragment();
-        customMapFragment.setLocation(meeting.getLocation());
-        getFragmentManager().beginTransaction().replace(R.id.location_frame, customMapFragment).commit();
-        FrameLayout layout = (FrameLayout) currentMeetingLayout.findViewById(R.id.location_frame);
+        customMapFragment.setLocation(new LatLng(meeting.getLocationLatitude(),
+                meeting.getLocationLongitude()));
+        getFragmentManager().beginTransaction().
+                replace(R.id.location_frame, customMapFragment).commit();
+        FrameLayout layout = (FrameLayout) meetingInfoLayout.findViewById(R.id.location_frame);
         layout.setBackgroundResource(R.drawable.view_border);
     }
 
     private void setButtonListeners() {
-        Button showParticipants = (Button) currentMeetingLayout
+        Button showParticipants = (Button) meetingInfoLayout
                 .findViewById(R.id.show_participants);
 
         showParticipants.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((MainActivity) getActivity()).changeFragment(new ParticipantsListFragment(
-                        Arrays.asList(meeting.getParticipants())));
+                        new ArrayList<ParticipantDTO>(meeting.getParticipants())));
             }
         });
-
     }
 
 }

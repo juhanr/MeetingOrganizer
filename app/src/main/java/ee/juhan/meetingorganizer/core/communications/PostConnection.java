@@ -1,8 +1,11 @@
 package ee.juhan.meetingorganizer.core.communications;
 
-import java.io.DataOutputStream;
+import org.apache.http.HttpStatus;
+
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.util.List;
 
@@ -50,26 +53,29 @@ public abstract class PostConnection extends Connection {
     }
 
 	/*
-	 * Collects a response from server and calls its handling method.
+     * Collects a response from server and calls its handling method.
 	 */
 
     private void doIo(HttpURLConnection connection) {
-        String serverResponse = "";
         try {
             writeStream(connection.getOutputStream());
-            serverResponse = readStream(connection.getInputStream());
+            if (connection.getResponseCode() < HttpStatus.SC_BAD_REQUEST) {
+                handleResponseBody(readStream(connection.getInputStream()));
+            } else {
+                System.err.println("Server error: " + readStream(connection.getErrorStream()));
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            handleResponseBody(null);
         }
-        handleResponseBody(serverResponse);
     }
 
 	/*
-	 * Sends output stream to the server.
+     * Sends output stream to the server.
 	 */
 
     private void writeStream(OutputStream out) throws Exception {
-        DataOutputStream writer = new DataOutputStream(out);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
         writeToConnection(writer);
         writer.flush();
         writer.close();
@@ -83,7 +89,7 @@ public abstract class PostConnection extends Connection {
      * @throws java.io.IOException
      */
 
-    public abstract void writeToConnection(DataOutputStream writer)
+    public abstract void writeToConnection(BufferedWriter writer)
             throws IOException;
 
 }

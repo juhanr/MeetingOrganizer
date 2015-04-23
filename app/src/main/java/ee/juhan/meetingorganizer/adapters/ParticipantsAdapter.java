@@ -13,15 +13,15 @@ import java.util.HashMap;
 import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.models.Participant;
+import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 
-public class ParticipantsAdapter extends ArrayAdapter<Participant> {
+public class ParticipantsAdapter extends ArrayAdapter<ParticipantDTO> {
 
-    private HashMap<Participant, Integer> mIdMap = new HashMap<>();
+    private HashMap<ParticipantDTO, Integer> mIdMap = new HashMap<>();
     private Context context;
-    private List<Participant> participantsList;
+    private List<ParticipantDTO> participantsList;
 
-    public ParticipantsAdapter(Context context, List<Participant> participantsList) {
+    public ParticipantsAdapter(Context context, List<ParticipantDTO> participantsList) {
         super(context, R.layout.list_item_participants, participantsList);
         this.context = context;
         this.participantsList = participantsList;
@@ -40,7 +40,7 @@ public class ParticipantsAdapter extends ArrayAdapter<Participant> {
         LinearLayout listItemView = (LinearLayout) inflater.inflate(
                 R.layout.list_item_participants, parent, false);
 
-        Participant participant = participantsList.get(position);
+        ParticipantDTO participant = participantsList.get(position);
 
         TextView participantNameView = (TextView) listItemView
                 .findViewById(R.id.participant_name);
@@ -52,7 +52,7 @@ public class ParticipantsAdapter extends ArrayAdapter<Participant> {
 
     @Override
     public long getItemId(int position) {
-        Participant item = getItem(position);
+        ParticipantDTO item = getItem(position);
         return mIdMap.get(item);
     }
 

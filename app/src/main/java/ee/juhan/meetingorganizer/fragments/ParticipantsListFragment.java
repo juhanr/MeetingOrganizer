@@ -16,22 +16,22 @@ import java.util.List;
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.ParticipantsAdapter;
-import ee.juhan.meetingorganizer.models.Participant;
+import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 
 public class ParticipantsListFragment extends Fragment {
 
-    private MainActivity activity;
     private final String title = "Participants";
+    private final List<ParticipantDTO> participantsList;
+    private MainActivity activity;
     private LinearLayout participantsListLayout;
     private ParticipantsAdapter adapter;
-    private final List<Participant> participantsList;
 
     public ParticipantsListFragment() {
         this.participantsList = null;
     }
 
     @SuppressLint("ValidFragment")
-    public ParticipantsListFragment(List<Participant> participantsList) {
+    public ParticipantsListFragment(List<ParticipantDTO> participantsList) {
         this.participantsList = participantsList;
     }
 
@@ -63,7 +63,7 @@ public class ParticipantsListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
-                Participant participant = (Participant) adapter.getItem(position);
+                ParticipantDTO participant = (ParticipantDTO) adapter.getItem(position);
             }
         });
 

@@ -8,8 +8,6 @@ import android.widget.DatePicker;
 
 import java.util.Calendar;
 
-import ee.juhan.meetingorganizer.models.Date;
-
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener {
 
@@ -34,9 +32,7 @@ public class DatePickerFragment extends DialogFragment
     }
 
     public void onDateSet(DatePicker view, int year, int month, int day) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        NewMeetingFragment.changeDate(new Date(day, month + 1, year));
+
     }
+
 }

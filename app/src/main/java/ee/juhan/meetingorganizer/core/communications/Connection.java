@@ -29,7 +29,7 @@ public abstract class Connection implements Runnable {
 
     private static final String ENCODING = "UTF-8";
 
-    private static final String DEFAULT_CONTENT_TYPE = "application/json";
+    private static final String DEFAULT_CONTENT_TYPE = "application/json;charset=UTF-8";
 
     private String urlString; // URL of the connection destination.
     private String cookie = ""; // Cookie for the request.
@@ -102,6 +102,25 @@ public abstract class Connection implements Runnable {
         }
     }
 
+    private String createUrl() {
+        if (parameters == null)
+            return urlString;
+        else
+            return urlString + "?" + parameters;
+    }
+
+	/*
+     * Generates a query.
+	 */
+
+    /**
+     * @return Used request method in string format.
+     */
+
+    protected String getRequestMethod() {
+        return requestMethod;
+    }
+
     /**
      * Use this to override the default request method.
      *
@@ -110,25 +129,6 @@ public abstract class Connection implements Runnable {
 
     public void setRequestMethod(String requestMethod) {
         this.requestMethod = requestMethod;
-    }
-
-	/*
-     * Generates a query.
-	 */
-
-    private String createUrl() {
-        if (parameters == null)
-            return urlString;
-        else
-            return urlString + "?" + parameters;
-    }
-
-    /**
-     * @return Used request method in string format.
-     */
-
-    protected String getRequestMethod() {
-        return requestMethod;
     }
 
 	/*
@@ -143,29 +143,24 @@ public abstract class Connection implements Runnable {
     }
 
 	/*
-	 * Collects a response from server and calls its handling method.
+     * Collects a response from server and calls its handling method.
 	 */
 
     private void doIo(HttpURLConnection connection) {
-        String serverResponse = "";
         try {
-            int status = connection.getResponseCode();
-            InputStream in;
-            if (status >= HttpStatus.SC_BAD_REQUEST) {
-                in = connection.getErrorStream();
-                System.out.println(readStream(in));
+            if (connection.getResponseCode() < HttpStatus.SC_BAD_REQUEST) {
+                handleResponseBody(readStream(connection.getInputStream()));
             } else {
-                in = connection.getInputStream();
-                handleResponseBody(readStream(in));
+                System.err.println("Server error: " + readStream(connection.getErrorStream()));
             }
-
         } catch (Exception e) {
             e.printStackTrace();
+            handleResponseBody(null);
         }
     }
 
 	/*
-	 * Collects cookies from header.
+     * Collects cookies from header.
 	 */
 
     protected List<String> collectResponseCookies(HttpURLConnection connection) {
@@ -182,7 +177,7 @@ public abstract class Connection implements Runnable {
     }
 
 	/*
-	 * Sets properties for the request.
+     * Sets properties for the request.
 	 */
 
     protected void handleRequestProperties(HttpURLConnection connection,
@@ -195,7 +190,7 @@ public abstract class Connection implements Runnable {
     }
 
 	/*
-	 * Handles connecting to given URL.
+     * Handles connecting to given URL.
 	 */
 
     private HttpURLConnection getConnection(String urlString) throws Exception {

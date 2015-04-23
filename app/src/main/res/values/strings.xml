@@ -9,7 +9,7 @@
 
     <string-array name="drawer_items_online">
         <item>New meeting</item>
-        <item>Current meeting</item>
+        <item>Ongoing meetings</item>
         <item>Future meetings</item>
         <item>Past meetings</item>
         <item>Invitations</item>
@@ -23,7 +23,7 @@
     <string-array name="location_items">
         <item>Specific location</item>
         <item>Generated from predefined locations</item>
-        <item>Generated on given filters</item>
+        <item>Generated from given parameters</item>
     </string-array>
 
     <string name="drawer_open">Open navigation drawer</string>

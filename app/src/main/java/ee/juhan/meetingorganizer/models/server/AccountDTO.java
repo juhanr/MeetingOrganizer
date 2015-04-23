@@ -2,6 +2,7 @@ package ee.juhan.meetingorganizer.models.server;
 
 public class AccountDTO {
 
+    private String name;
     private String email;
     private String password;
     private String phoneNumber;
@@ -9,7 +10,8 @@ public class AccountDTO {
     public AccountDTO() {
     }
 
-    public AccountDTO(String email, String password, String phoneNumber) {
+    public AccountDTO(String name, String email, String password, String phoneNumber) {
+        this.name = name;
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
@@ -18,6 +20,14 @@ public class AccountDTO {
     public AccountDTO(String email, String password) {
         this.email = email;
         this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
@@ -44,12 +54,4 @@ public class AccountDTO {
         this.phoneNumber = phoneNumber;
     }
 
-    @Override
-    public String toString() {
-        return "AccountDTO{" +
-                "email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                '}';
-    }
 }

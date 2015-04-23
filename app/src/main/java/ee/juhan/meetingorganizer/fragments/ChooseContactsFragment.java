@@ -1,13 +1,15 @@
 package ee.juhan.meetingorganizer.fragments;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.util.Log;
+import android.telephony.SmsManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,22 +20,29 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
+import ee.juhan.meetingorganizer.adapters.ContactsAdapter;
+import ee.juhan.meetingorganizer.core.communications.loaders.CheckContactsLoader;
+import ee.juhan.meetingorganizer.core.communications.loaders.NewMeetingLoader;
+import ee.juhan.meetingorganizer.models.server.ContactDTO;
+import ee.juhan.meetingorganizer.models.server.MeetingDTO;
+import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
+import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
+import ee.juhan.meetingorganizer.models.server.ServerResult;
 
 public class ChooseContactsFragment extends Fragment {
 
-    private MainActivity activity;
     private final String title = "Invite contacts";
-    private static HashMap<String, ArrayList<String>> contactsMap = new HashMap<String, ArrayList<String>>();
-    private static CheckBoxAdapter adapter;
-    private static ArrayList<String> contactNames;
+    private MainActivity activity;
+    private ContactsAdapter adapter;
+    private List<ContactDTO> contactsList = new ArrayList<ContactDTO>();
     private LinearLayout chooseContactsLayout;
+
+    private boolean participantsWithoutAccount;
 
     public ChooseContactsFragment() {
 
@@ -50,16 +59,14 @@ public class ChooseContactsFragment extends Fragment {
                              Bundle savedInstanceState) {
         activity.setTitle(title);
         createContactsMap();
-        if (contactsMap.size() == 0) {
+        if (contactsList.size() == 0) {
             chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) chooseContactsLayout
                     .findViewById(R.id.info_text);
             infoText.setText("No contacts found.");
         } else {
             chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_choose_contacts, container, false);
-            contactNames = new ArrayList<String>(contactsMap.keySet());
-
-            refreshListView();
+            checkContactsFromServer();
             setButtonListeners();
 
             ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listView);
@@ -75,6 +82,30 @@ public class ChooseContactsFragment extends Fragment {
         return chooseContactsLayout;
     }
 
+    private void checkContactsFromServer() {
+        CheckContactsLoader checkContactsLoader = new CheckContactsLoader(
+                activity.getUserId(), contactsList, activity.getSID()) {
+
+            @Override
+            public void handleResponse(final List<ContactDTO> response) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.dismissLoadingFragment();
+                        if (response != null) {
+                            contactsList = response;
+                            refreshListView();
+                        } else {
+                            activity.showToastMessage("Server response fail.");
+                        }
+                    }
+                });
+            }
+        };
+        activity.showLoadingFragment();
+        checkContactsLoader.retrieveResponse();
+    }
+
     private void setButtonListeners() {
         Button continueButton = (Button) chooseContactsLayout
                 .findViewById(R.id.continue_button);
@@ -82,11 +113,107 @@ public class ChooseContactsFragment extends Fragment {
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                HashSet<String> checkedContacts = adapter.getCheckedItems();
-                Log.d("DEBUG", checkedContacts.toString());
+                resetParticipants();
+                addContactsAsParticipants();
+                addLeaderInfo();
+                checkParticipantsWithoutAccount();
             }
         });
 
+    }
+
+    private void resetParticipants() {
+        NewMeetingFragment.newMeetingModel.setParticipants(new HashSet<ParticipantDTO>());
+        participantsWithoutAccount = false;
+    }
+
+    private void addContactsAsParticipants() {
+        for (ContactDTO checkedContact : adapter.getCheckedItems()) {
+            if (checkedContact.getAccountId() == 0) {
+                participantsWithoutAccount = true;
+            }
+            ParticipantDTO participant = new ParticipantDTO(
+                    checkedContact.getAccountId(), checkedContact.getName(),
+                    checkedContact.getEmail(), checkedContact.getPhoneNumber());
+            NewMeetingFragment.newMeetingModel.addParticipant(participant);
+        }
+    }
+
+    private void addLeaderInfo() {
+        NewMeetingFragment.newMeetingModel.setLeaderId(activity.getUserId());
+        ParticipantDTO participant = new ParticipantDTO(
+                NewMeetingFragment.newMeetingModel.getLeaderId(),
+                ParticipationAnswer.PARTICIPATING);
+        NewMeetingFragment.newMeetingModel.addParticipant(participant);
+    }
+
+    private void checkParticipantsWithoutAccount() {
+        if (participantsWithoutAccount) {
+            showSMSDialog();
+        } else {
+            sendNewMeetingRequest();
+        }
+    }
+
+    private void showSMSDialog() {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+//                        sendInvitationSMS();
+                        sendNewMeetingRequest();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        sendNewMeetingRequest();
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage("Some of the contacts don't have an account.\n" +
+                "Would you like to invite them via SMS?")
+                .setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
+    }
+
+    private void sendInvitationSMS() {
+        String message = "I would like to invite you to a meeting via Meeting Organizer. " +
+                "Please register to see the invitation.";
+        for (ParticipantDTO participant : NewMeetingFragment.newMeetingModel.getParticipants()) {
+            if (participant.getAccountId() == 0) {
+                SmsManager.getDefault().sendTextMessage(
+                        participant.getPhoneNumber(), null, message, null, null);
+            }
+        }
+    }
+
+    private void sendNewMeetingRequest() {
+        NewMeetingLoader newMeetingLoader = new NewMeetingLoader(
+                NewMeetingFragment.newMeetingModel, activity.getSID()) {
+
+            @Override
+            public void handleResponse(final ServerResult response) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.dismissLoadingFragment();
+                        if (response != null && response == ServerResult.SUCCESS) {
+                            activity.showToastMessage("New meeting created!");
+                            activity.changeFragment(new MeetingInfoFragment(
+                                    NewMeetingFragment.newMeetingModel), false);
+                            NewMeetingFragment.newMeetingModel = new MeetingDTO();
+                        } else {
+                            activity.showToastMessage("Server response fail.");
+                        }
+                    }
+                });
+            }
+        };
+        activity.showLoadingFragment();
+        newMeetingLoader.retrieveResponse();
     }
 
     public void createContactsMap() {
@@ -105,7 +232,6 @@ public class ChooseContactsFragment extends Fragment {
         if (numbersCur.moveToFirst()) {
             String name;
             String phoneNumber;
-            String email;
             int nameColumn = numbersCur
                     .getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
             int phoneColumn = numbersCur
@@ -113,9 +239,7 @@ public class ChooseContactsFragment extends Fragment {
             while (numbersCur.moveToNext()) {
                 name = numbersCur.getString(nameColumn);
                 phoneNumber = numbersCur.getString(phoneColumn);
-                ArrayList<String> list = new ArrayList<String>();
-                list.add(phoneNumber);
-                contactsMap.put(name, list);
+                contactsList.add(new ContactDTO(name, null, phoneNumber));
             }
         }
         numbersCur.close();
@@ -143,10 +267,13 @@ public class ChooseContactsFragment extends Fragment {
             while (cur.moveToNext()) {
                 String name = cur.getString(1);
                 String email = cur.getString(3);
-                ArrayList<String> list = contactsMap.get(name);
-                if (list != null) {
-                    list.add(email);
-                    contactsMap.put(name, list);
+                for (int i = 0; i < contactsList.size(); i++) {
+                    ContactDTO contact = contactsList.get(i);
+                    if (contact.getName().equals(name)) {
+                        contact.setEmail(email);
+                        contactsList.set(i, contact);
+                        break;
+                    }
                 }
             }
         }
@@ -154,9 +281,8 @@ public class ChooseContactsFragment extends Fragment {
     }
 
     public void refreshListView() {
-        Collections.sort(contactNames);
         ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listView);
-        adapter = new CheckBoxAdapter(getActivity(), contactNames);
+        adapter = new ContactsAdapter(getActivity(), contactsList);
         listview.setAdapter(adapter);
     }
 

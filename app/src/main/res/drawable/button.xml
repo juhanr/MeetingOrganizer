@@ -2,7 +2,7 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:state_pressed="true" android:state_focused="true">
+    <item android:state_focused="true" android:state_pressed="true">
         <shape>
             <stroke android:width="2dp" android:color="@color/jacksons_purple" />
             <corners android:radius="5dp" />
@@ -10,7 +10,7 @@
         </shape>
     </item>
 
-    <item android:state_pressed="true" android:state_focused="false">
+    <item android:state_focused="false" android:state_pressed="true">
         <shape>
             <stroke android:width="2dp" android:color="@color/jacksons_purple" />
             <corners android:radius="5dp" />
@@ -18,14 +18,14 @@
         </shape>
     </item>
 
-    <item android:state_pressed="false" android:state_focused="true">
+    <item android:state_focused="true" android:state_pressed="false">
         <shape>
             <corners android:radius="5dp" />
             <solid android:color="@color/chambray" />
         </shape>
     </item>
 
-    <item android:state_pressed="false" android:state_focused="false">
+    <item android:state_focused="false" android:state_pressed="false">
         <shape>
             <corners android:radius="5dp" />
             <solid android:color="@color/chambray" />
@@ -34,8 +34,8 @@
 
     <item android:state_enabled="true">
         <shape>
-            <padding android:left="10dp" android:top="10dp" android:right="10dp" android:bottom="10dp" />
-            <margin android:left="10dp" android:top="10dp" android:right="10dp" android:bottom="10dp" />
+            <padding android:bottom="10dp" android:left="10dp" android:right="10dp" android:top="10dp" />
+            <margin android:bottom="10dp" android:left="10dp" android:right="10dp" android:top="10dp" />
         </shape>
     </item>
 

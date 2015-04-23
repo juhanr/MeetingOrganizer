@@ -1,13 +1,12 @@
 package ee.juhan.meetingorganizer.core.communications.loaders;
 
-import com.google.gson.Gson;
-
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ee.juhan.meetingorganizer.core.communications.Connection;
+import ee.juhan.meetingorganizer.core.communications.GsonParser;
 
 /**
  * Class for making a HTTP get request to the server and retrieving a generic
@@ -21,11 +20,10 @@ import ee.juhan.meetingorganizer.core.communications.Connection;
 
 abstract public class GenericLoader<T> implements Runnable {
 
-    private Class<T> typeClass;
-    private Type typeToken;
-
     protected String url; // URL of the connection destination.
     protected String cookie; // Cookie string;
+    private Class<T> typeClass;
+    private Type typeToken;
     private Map<String, String> parameters = new HashMap<String, String>();
 
     private String requestMethod;
@@ -89,9 +87,9 @@ abstract public class GenericLoader<T> implements Runnable {
 
     protected T getObjectFromJSON(String json) {
         if (typeClass != null)
-            return new Gson().fromJson(json, typeClass);
+            return GsonParser.getInstance().fromJson(json, typeClass);
         else
-            return new Gson().fromJson(json, typeToken);
+            return GsonParser.getInstance().fromJson(json, typeToken);
     }
 
     /**
@@ -114,8 +112,12 @@ abstract public class GenericLoader<T> implements Runnable {
 
             @Override
             public void handleResponseBody(String response) {
-                T object = getObjectFromJSON(response);
-                handleResponse(object);
+                if (response == null) {
+                    handleResponse(null);
+                } else {
+                    T object = getObjectFromJSON(response);
+                    handleResponse(object);
+                }
             }
 
             @Override
@@ -162,4 +164,5 @@ abstract public class GenericLoader<T> implements Runnable {
      */
 
     abstract public void handleResponse(T response);
+
 }

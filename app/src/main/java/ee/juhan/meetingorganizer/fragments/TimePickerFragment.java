@@ -8,22 +8,25 @@ import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.widget.TimePicker;
 
-import ee.juhan.meetingorganizer.models.Time;
+import java.util.Calendar;
 
 @SuppressLint("ValidFragment")
 public class TimePickerFragment extends DialogFragment
         implements TimePickerDialog.OnTimeSetListener {
 
-    private int viewId;
-    private static int hour = 12;
-    private static int minute = 0;
+    private static int hour;
+    private static int minute;
 
-    public TimePickerFragment(int viewId) {
-        this.viewId = viewId;
+    public TimePickerFragment() {
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        if (hour == -1) {
+            final Calendar c = Calendar.getInstance();
+            hour = c.get(Calendar.HOUR_OF_DAY);
+            minute = c.get(Calendar.MINUTE);
+        }
         TimePickerDialog dialog = new TimePickerDialog(getActivity(), DatePickerDialog.THEME_HOLO_DARK,
                 this, hour, minute, true);
         dialog.setTitle("Choose a time");
@@ -31,9 +34,7 @@ public class TimePickerFragment extends DialogFragment
     }
 
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        this.hour = hourOfDay;
-        this.minute = minute;
-        NewMeetingFragment.changeTime(new Time(hourOfDay, minute), viewId);
+
     }
 
 }

@@ -13,15 +13,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.models.Meeting;
+import ee.juhan.meetingorganizer.models.server.MeetingDTO;
+import ee.juhan.meetingorganizer.util.DateParserUtil;
 
-public class MeetingsAdapter extends ArrayAdapter<Meeting> {
+public class MeetingsAdapter extends ArrayAdapter<MeetingDTO> {
 
-    private HashMap<Meeting, Integer> mIdMap = new HashMap<>();
+    private HashMap<MeetingDTO, Integer> mIdMap = new HashMap<>();
     private Context context;
-    private List<Meeting> meetingsList;
+    private List<MeetingDTO> meetingsList;
 
-    public MeetingsAdapter(Context context, List<Meeting> meetingsList) {
+    public MeetingsAdapter(Context context, List<MeetingDTO> meetingsList) {
         super(context, R.layout.list_item_meetings, meetingsList);
         this.context = context;
         this.meetingsList = meetingsList;
@@ -40,7 +41,7 @@ public class MeetingsAdapter extends ArrayAdapter<Meeting> {
         LinearLayout listItemView = (LinearLayout) inflater.inflate(
                 R.layout.list_item_meetings, parent, false);
 
-        Meeting meeting = meetingsList.get(position);
+        MeetingDTO meeting = meetingsList.get(position);
 
         TextView meetingTitleView = (TextView) listItemView
                 .findViewById(R.id.meeting_title);
@@ -49,16 +50,17 @@ public class MeetingsAdapter extends ArrayAdapter<Meeting> {
         TextView meetingTimeView = (TextView) listItemView
                 .findViewById(R.id.meeting_time);
 
-        meetingTitleView.setText(meeting.getTitle());
-        meetingDateView.setText(meeting.getDate() + "");
-        meetingTimeView.setText(meeting.getStartTime() + " - " + meeting.getEndTime());
+        meetingTitleView.setText("Title: " + meeting.getTitle());
+        meetingDateView.setText("Date: " + DateParserUtil.formatDate(meeting.getStartDateTime()));
+        meetingTimeView.setText("Time: " + DateParserUtil.formatTime(meeting.getStartDateTime())
+                + " - " + DateParserUtil.formatTime(meeting.getEndDateTime()));
 
         return listItemView;
     }
 
     @Override
     public long getItemId(int position) {
-        Meeting item = getItem(position);
+        MeetingDTO item = getItem(position);
         return mIdMap.get(item);
     }
 

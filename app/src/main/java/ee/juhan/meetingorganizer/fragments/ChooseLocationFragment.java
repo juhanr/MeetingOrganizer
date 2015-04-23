@@ -21,21 +21,17 @@ import java.util.List;
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
+import ee.juhan.meetingorganizer.models.server.LocationType;
 
 import static android.R.layout.simple_spinner_item;
 
 public class ChooseLocationFragment extends Fragment {
 
-    private MainActivity activity;
-    private final String title = "Choose location";
     private static CheckBoxAdapter adapter;
+    private final String title = "Choose location";
+    private MainActivity activity;
     private LinearLayout chooseLocationLayout;
-    public static LatLng location;
     private List<String> filtersList = Arrays.asList("Cafe", "Restaurant", "Park");
-    private int locationType;
-    private final int SPECIFIC_LOCATION = 1;
-    private final int GENERATED_FROM_LOCATIONS = 2;
-    private final int GENERATED_FROM_FILTERS = 3;
 
     public ChooseLocationFragment() {
 
@@ -64,7 +60,13 @@ public class ChooseLocationFragment extends Fragment {
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.changeFragment(new ChooseContactsFragment());
+                if (NewMeetingFragment.newMeetingModel.getLocationType() ==
+                        LocationType.SPECIFIC_LOCATION &&
+                        NewMeetingFragment.newMeetingModel.getLocationLatitude() != 0) {
+                    activity.changeFragment(new ChooseContactsFragment());
+                } else {
+                    activity.showToastMessage("Please choose a location!");
+                }
             }
         });
 
@@ -82,19 +84,28 @@ public class ChooseLocationFragment extends Fragment {
                 Object item = parent.getItemAtPosition(pos);
                 switch (pos) {
                     case 0:
-                        locationType = SPECIFIC_LOCATION;
+                        NewMeetingFragment.newMeetingModel.setLocationType(
+                                LocationType.SPECIFIC_LOCATION);
                         removeLocationChild();
                         CustomMapFragment customMapFragment = new CustomMapFragment();
+                        customMapFragment.setIsClickableMap(true);
+                        if (NewMeetingFragment.newMeetingModel.getLocationLatitude() != 0) {
+                            customMapFragment.setLocation(
+                                    new LatLng(NewMeetingFragment.newMeetingModel.getLocationLatitude(),
+                                            NewMeetingFragment.newMeetingModel.getLocationLongitude()));
+                        }
                         getFragmentManager().beginTransaction().replace(R.id.location_frame, customMapFragment).commit();
                         FrameLayout layout = (FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
                         layout.setBackgroundResource(R.drawable.view_border);
                         break;
                     case 1:
-                        locationType = GENERATED_FROM_LOCATIONS;
+                        NewMeetingFragment.newMeetingModel.setLocationType(
+                                LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS);
                         removeLocationChild();
                         break;
                     case 2:
-                        locationType = GENERATED_FROM_FILTERS;
+                        NewMeetingFragment.newMeetingModel.setLocationType(
+                                LocationType.GENERATED_FROM_PARAMETERS);
                         removeLocationChild();
                         ListView listView = new ListView(activity);
                         adapter = new CheckBoxAdapter(getActivity(), filtersList);
@@ -113,7 +124,6 @@ public class ChooseLocationFragment extends Fragment {
 
     public void addLocationChild(View child) {
         FrameLayout layout = (FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
-//        View child = activity.getLayoutInflater().inflate(childId, null);
         layout.addView(child);
     }
 

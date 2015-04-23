@@ -1,76 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    style="@style/FragmentLayout">
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/view_margin_small"
-        android:text="Title"
-        style="@style/Text" />
+    <LinearLayout
+        style="@style/FragmentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/title_textbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/view_margin_large"
-        style="@style/TextBox" />
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_margin_small"
+            android:text="Title" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/view_margin_small"
-        android:text="Date"
-        style="@style/Text" />
+        <EditText
+            android:id="@+id/title_textbox"
+            style="@style/TextBox"
+            android:layout_width="@dimen/textbox_width_normal"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_margin_large" />
 
-    <TextView
-        android:id="@+id/date_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/view_margin_large"
-        android:text="@string/not_set"
-        style="@style/Text" />
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_margin_small"
+            android:text="Description" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/view_margin_small"
-        android:text="Start time"
-        style="@style/Text" />
+        <EditText
+            android:id="@+id/description_textbox"
+            style="@style/TextBox"
+            android:layout_width="@dimen/textbox_width_normal"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_margin_large"
+            android:inputType="textMultiLine"
+            android:maxLength="255" />
 
-    <TextView
-        android:id="@+id/start_time_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/view_margin_large"
-        android:text="@string/not_set"
-        style="@style/Text" />
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_margin_small"
+            android:text="Date" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/view_margin_small"
-        android:text="End time"
-        style="@style/Text" />
+        <TextView
+            android:id="@+id/date_button"
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_margin_large"
+            android:text="@string/not_set" />
 
-    <TextView
-        android:id="@+id/end_time_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/view_margin_large"
-        android:text="@string/not_set"
-        style="@style/Text" />
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_margin_small"
+            android:text="Start time" />
 
-    <include layout="@layout/view_empty_space" />
+        <TextView
+            android:id="@+id/start_time_button"
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_margin_large"
+            android:text="@string/not_set" />
 
-    <Button
-        android:id="@+id/continue_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Continue"
-        style="@style/Button" />
+        <TextView
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_margin_small"
+            android:text="End time" />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/end_time_button"
+            style="@style/Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/not_set" />
+
+        <include layout="@layout/view_empty_space" />
+
+        <Button
+            android:id="@+id/continue_button"
+            style="@style/Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Continue" />
+
+    </LinearLayout>
+</ScrollView>

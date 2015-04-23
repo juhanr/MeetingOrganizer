@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/FragmentLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    style="@style/FragmentLayout">
+    android:orientation="vertical">
 
     <ListView
         android:id="@+id/listView"
@@ -13,9 +13,9 @@
 
     <Button
         android:id="@+id/continue_button"
+        style="@style/Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Continue"
-        style="@style/Button" />
+        android:text="Continue" />
 
 </LinearLayout>
