@@ -33,20 +33,14 @@ public class ParticipantsAdapter extends ArrayAdapter<ParticipantDTO> {
     @SuppressLint("ViewHolder")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         LinearLayout listItemView = (LinearLayout) inflater.inflate(
                 R.layout.list_item_participants, parent, false);
-
         ParticipantDTO participant = participantsList.get(position);
-
         TextView participantNameView = (TextView) listItemView
                 .findViewById(R.id.participant_name);
-
         participantNameView.setText(participant.getName());
-
         return listItemView;
     }
 

@@ -26,13 +26,15 @@ import java.util.List;
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.ContactsAdapter;
-import ee.juhan.meetingorganizer.core.communications.loaders.CheckContactsLoader;
-import ee.juhan.meetingorganizer.core.communications.loaders.NewMeetingLoader;
 import ee.juhan.meetingorganizer.models.server.ContactDTO;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
 import ee.juhan.meetingorganizer.models.server.ServerResult;
+import ee.juhan.meetingorganizer.rest.RestClient;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class ChooseContactsFragment extends Fragment {
 
@@ -83,27 +85,22 @@ public class ChooseContactsFragment extends Fragment {
     }
 
     private void checkContactsFromServer() {
-        CheckContactsLoader checkContactsLoader = new CheckContactsLoader(
-                activity.getUserId(), contactsList, activity.getSID()) {
-
-            @Override
-            public void handleResponse(final List<ContactDTO> response) {
-                activity.runOnUiThread(new Runnable() {
+        activity.showLoadingFragment();
+        RestClient.get().checkContactsRequest(contactsList, activity.getUserId(),
+                new Callback<List<ContactDTO>>() {
                     @Override
-                    public void run() {
+                    public void success(final List<ContactDTO> serverResponse, Response response) {
                         activity.dismissLoadingFragment();
-                        if (response != null) {
-                            contactsList = response;
-                            refreshListView();
-                        } else {
-                            activity.showToastMessage("Server response fail.");
-                        }
+                        contactsList = serverResponse;
+                        refreshListView();
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        activity.dismissLoadingFragment();
+                        activity.showToastMessage("Server response fail.");
                     }
                 });
-            }
-        };
-        activity.showLoadingFragment();
-        checkContactsLoader.retrieveResponse();
     }
 
     private void setButtonListeners() {
@@ -129,9 +126,7 @@ public class ChooseContactsFragment extends Fragment {
 
     private void addContactsAsParticipants() {
         for (ContactDTO checkedContact : adapter.getCheckedItems()) {
-            if (checkedContact.getAccountId() == 0) {
-                participantsWithoutAccount = true;
-            }
+            participantsWithoutAccount = checkedContact.getAccountId() == 0;
             ParticipantDTO participant = new ParticipantDTO(
                     checkedContact.getAccountId(), checkedContact.getName(),
                     checkedContact.getEmail(), checkedContact.getPhoneNumber());
@@ -191,16 +186,13 @@ public class ChooseContactsFragment extends Fragment {
     }
 
     private void sendNewMeetingRequest() {
-        NewMeetingLoader newMeetingLoader = new NewMeetingLoader(
-                NewMeetingFragment.newMeetingModel, activity.getSID()) {
-
-            @Override
-            public void handleResponse(final ServerResult response) {
-                activity.runOnUiThread(new Runnable() {
+        activity.showLoadingFragment();
+        RestClient.get().newMeetingRequest(NewMeetingFragment.newMeetingModel,
+                new Callback<ServerResult>() {
                     @Override
-                    public void run() {
+                    public void success(ServerResult serverResponse, Response response) {
                         activity.dismissLoadingFragment();
-                        if (response != null && response == ServerResult.SUCCESS) {
+                        if (serverResponse != null && serverResponse == ServerResult.SUCCESS) {
                             activity.showToastMessage("New meeting created!");
                             activity.changeFragment(new MeetingInfoFragment(
                                     NewMeetingFragment.newMeetingModel), false);
@@ -209,11 +201,13 @@ public class ChooseContactsFragment extends Fragment {
                             activity.showToastMessage("Server response fail.");
                         }
                     }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        activity.dismissLoadingFragment();
+                        activity.showToastMessage("Server response fail.");
+                    }
                 });
-            }
-        };
-        activity.showLoadingFragment();
-        newMeetingLoader.retrieveResponse();
     }
 
     public void createContactsMap() {

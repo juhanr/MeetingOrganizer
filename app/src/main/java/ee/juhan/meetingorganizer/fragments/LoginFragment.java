@@ -13,11 +13,14 @@ import android.widget.TextView;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.core.communications.loaders.LoginLoader;
 import ee.juhan.meetingorganizer.models.server.AccountDTO;
 import ee.juhan.meetingorganizer.models.server.ServerResponse;
 import ee.juhan.meetingorganizer.models.server.ServerResult;
+import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.PatternMatcherUtil;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class LoginFragment extends Fragment {
 
@@ -90,34 +93,30 @@ public class LoginFragment extends Fragment {
     }
 
     private void sendLoginRequest(final String email, String password) {
-        LoginLoader loginLoader = new LoginLoader(new AccountDTO(email, password)) {
-            @Override
-            public void handleResponse(final ServerResponse response) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        activity.dismissLoadingFragment();
-                        if (response != null) {
-                            ServerResult result = response.getResult();
-                            if (result == ServerResult.SUCCESS) {
-                                activity.showToastMessage("Log in successful!");
-                                activity.logIn(email, response.getSid(), response.getUserId());
-                            } else if (result == ServerResult.WRONG_PASSWORD) {
-                                activity.showToastMessage("Wrong password!");
-                            } else if (result == ServerResult.NO_ACCOUNT_FOUND) {
-                                activity.showToastMessage("No such account found!");
-                            } else {
-                                activity.showToastMessage("Server response fail.");
-                            }
-                        } else {
-                            activity.showToastMessage("Server response fail.");
-                        }
-                    }
-                });
-            }
-        };
         activity.showLoadingFragment();
-        loginLoader.retrieveResponse();
+        RestClient.get().loginRequest(new AccountDTO(email, password), new Callback<ServerResponse>() {
+            @Override
+            public void success(final ServerResponse serverResponse, Response response) {
+                activity.dismissLoadingFragment();
+                ServerResult result = serverResponse.getResult();
+                if (result == ServerResult.SUCCESS) {
+                    activity.showToastMessage("Log in successful!");
+                    activity.logIn(email, serverResponse.getSid(), serverResponse.getUserId());
+                } else if (result == ServerResult.WRONG_PASSWORD) {
+                    activity.showToastMessage("Wrong password!");
+                } else if (result == ServerResult.NO_ACCOUNT_FOUND) {
+                    activity.showToastMessage("No such account found!");
+                } else {
+                    activity.showToastMessage("Server response fail.");
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                activity.dismissLoadingFragment();
+                activity.showToastMessage("Server response fail.");
+            }
+        });
     }
 
 }

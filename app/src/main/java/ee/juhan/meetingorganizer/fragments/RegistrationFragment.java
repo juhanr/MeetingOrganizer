@@ -11,11 +11,14 @@ import android.widget.TextView;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.core.communications.loaders.RegistrationLoader;
 import ee.juhan.meetingorganizer.models.server.AccountDTO;
 import ee.juhan.meetingorganizer.models.server.ServerResponse;
 import ee.juhan.meetingorganizer.models.server.ServerResult;
+import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.PatternMatcherUtil;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class RegistrationFragment extends Fragment {
 
@@ -92,35 +95,31 @@ public class RegistrationFragment extends Fragment {
     }
 
     private void sendRegistrationRequest(String name, final String email, String password, String phoneNr) {
-        RegistrationLoader registrationLoader = new RegistrationLoader(
-                new AccountDTO(name, email, password, phoneNr)) {
-            @Override
-            public void handleResponse(final ServerResponse response) {
-                activity.runOnUiThread(new Runnable() {
+        activity.showLoadingFragment();
+        RestClient.get().registrationRequest(new AccountDTO(name, email, password, phoneNr),
+                new Callback<ServerResponse>() {
                     @Override
-                    public void run() {
+                    public void success(final ServerResponse serverResponse, Response response) {
                         activity.dismissLoadingFragment();
-                        if (response != null) {
-                            ServerResult result = response.getResult();
-                            if (result == ServerResult.SUCCESS) {
-                                activity.showToastMessage("Registration successful!");
-                                activity.logIn(email, response.getSid(), response.getUserId());
-                            } else if (result == ServerResult.EMAIL_IN_USE) {
-                                activity.showToastMessage("The e-mail is already in use");
-                            } else if (result == ServerResult.PHONE_NUMBER_IN_USE) {
-                                activity.showToastMessage("The phone number is already in use");
-                            } else {
-                                activity.showToastMessage("Server response fail.");
-                            }
+                        ServerResult result = serverResponse.getResult();
+                        if (result == ServerResult.SUCCESS) {
+                            activity.showToastMessage("Registration successful!");
+                            activity.logIn(email, serverResponse.getSid(), serverResponse.getUserId());
+                        } else if (result == ServerResult.EMAIL_IN_USE) {
+                            activity.showToastMessage("The e-mail is already in use");
+                        } else if (result == ServerResult.PHONE_NUMBER_IN_USE) {
+                            activity.showToastMessage("The phone number is already in use");
                         } else {
                             activity.showToastMessage("Server response fail.");
                         }
                     }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        activity.dismissLoadingFragment();
+                        activity.showToastMessage("Server response fail.");
+                    }
                 });
-            }
-        };
-        activity.showLoadingFragment();
-        registrationLoader.retrieveResponse();
     }
 
 }

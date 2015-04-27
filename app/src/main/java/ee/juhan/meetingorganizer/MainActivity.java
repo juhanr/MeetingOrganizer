@@ -30,6 +30,7 @@ import ee.juhan.meetingorganizer.fragments.LoginFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
 import ee.juhan.meetingorganizer.fragments.NewMeetingFragment;
 import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
+import ee.juhan.meetingorganizer.rest.RestClient;
 
 public class MainActivity extends Activity {
 
@@ -64,6 +65,7 @@ public class MainActivity extends Activity {
             setUpDrawer();
             setEmail("Not logged in");
         } else {
+            RestClient.setSID(getSID());
             isLoggedIn = true;
             setUpDrawer();
             setEmail(sharedPref.getString("email", ""));
@@ -98,6 +100,7 @@ public class MainActivity extends Activity {
     public void logIn(String email, String sid, Integer userId) {
         sharedPref.edit().putString("email", email).putString("sid", sid)
                 .putInt("userId", userId).commit();
+        RestClient.setSID(sid);
         setEmail(email);
         isLoggedIn = true;
         setUpDrawer();
@@ -106,6 +109,7 @@ public class MainActivity extends Activity {
     private void logOut() {
         sharedPref.edit().putString("email", null).putString("sid", null)
                 .putInt("userId", 0).commit();
+        RestClient.setSID(null);
         setEmail("Not logged in");
         isLoggedIn = false;
         setUpDrawer();
@@ -172,22 +176,25 @@ public class MainActivity extends Activity {
                 if (position >= 2 && position <= 5) {
                     meetingsListFragment = new MeetingsListFragment(
                             drawerItems[position - 1], this);
-                    meetingsListFragment.loadMeetingsList();
                 }
                 switch (position) {
                     case 1:
                         changeFragment(new NewMeetingFragment(), addToBackStack);
                         break;
                     case 2:
+                        meetingsListFragment.getMeetingsRequest(MeetingsListFragment.ONGOING_MEETINGS);
                         changeFragment(meetingsListFragment, addToBackStack);
                         break;
                     case 3:
+                        meetingsListFragment.getMeetingsRequest(MeetingsListFragment.FUTURE_MEETINGS);
                         changeFragment(meetingsListFragment, addToBackStack);
                         break;
                     case 4:
+                        meetingsListFragment.getMeetingsRequest(MeetingsListFragment.PAST_MEETINGS);
                         changeFragment(meetingsListFragment, addToBackStack);
                         break;
                     case 5:
+                        meetingsListFragment.getMeetingsRequest(MeetingsListFragment.INVITATIONS);
                         changeFragment(meetingsListFragment, addToBackStack);
                         break;
                     default:

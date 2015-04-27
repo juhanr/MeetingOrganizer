@@ -3,6 +3,7 @@ package ee.juhan.meetingorganizer.fragments;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,15 +17,19 @@ import java.util.List;
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.MeetingsAdapter;
-import ee.juhan.meetingorganizer.core.communications.loaders.FutureMeetingsLoader;
-import ee.juhan.meetingorganizer.core.communications.loaders.InvitationsLoader;
-import ee.juhan.meetingorganizer.core.communications.loaders.OngoingMeetingsLoader;
-import ee.juhan.meetingorganizer.core.communications.loaders.PastMeetingsLoader;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
+import ee.juhan.meetingorganizer.rest.RestClient;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 @SuppressLint("ValidFragment")
 public class MeetingsListFragment extends Fragment {
 
+    static final public String ONGOING_MEETINGS = "ongoing-meetings";
+    static final public String FUTURE_MEETINGS = "future-meetings";
+    static final public String PAST_MEETINGS = "past-meetings";
+    static final public String INVITATIONS = "invitations";
     private final String title;
     private MainActivity activity;
     private LinearLayout meetingsListLayout;
@@ -49,10 +54,7 @@ public class MeetingsListFragment extends Fragment {
         if (meetingsList == null || meetingsList.size() == 0) {
             meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) meetingsListLayout.findViewById(R.id.info_text);
-            if (title.equals("Invitations"))
-                infoText.setText("No invitations found.");
-            else
-                infoText.setText("No meetings found.");
+            infoText.setText("No meetings found.");
         } else {
             meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.layout_listview, container, false);
             refreshListView();
@@ -60,112 +62,25 @@ public class MeetingsListFragment extends Fragment {
         return meetingsListLayout;
     }
 
-    public void loadMeetingsList() {
-        if (title.equals("Ongoing meetings")) {
-            loadOngoingMeetings();
-        } else if (title.equals("Future meetings")) {
-            loadFutureMeetings();
-        } else if (title.equals("Past meetings")) {
-            loadPastMeetings();
-        } else if (title.equals("Invitations")) {
-            loadInvitations();
-        }
-    }
-
-    private void loadOngoingMeetings() {
-        OngoingMeetingsLoader ongoingMeetingsLoader = new OngoingMeetingsLoader(
-                activity.getUserId(), activity.getSID()) {
-
-            @Override
-            public void handleResponse(final List<MeetingDTO> response) {
-                activity.runOnUiThread(new Runnable() {
+    public void getMeetingsRequest(String meetingsType) {
+        activity.showLoadingFragment();
+        RestClient.get().getMeetingsRequest(meetingsType, activity.getUserId(),
+                new Callback<List<MeetingDTO>>() {
                     @Override
-                    public void run() {
+                    public void success(final List<MeetingDTO> serverResponse, Response response) {
                         activity.dismissLoadingFragment();
-                        if (response != null) {
-                            meetingsList = response;
-                        } else {
-                            activity.showToastMessage("Server response fail.");
-                        }
+                        meetingsList = serverResponse;
                         refreshFragment();
                     }
-                });
-            }
-        };
-        activity.showLoadingFragment();
-        ongoingMeetingsLoader.retrieveResponse();
-    }
 
-    private void loadFutureMeetings() {
-        FutureMeetingsLoader futureMeetingsLoader = new FutureMeetingsLoader(
-                activity.getUserId(), activity.getSID()) {
-
-            @Override
-            public void handleResponse(final List<MeetingDTO> response) {
-                activity.runOnUiThread(new Runnable() {
                     @Override
-                    public void run() {
+                    public void failure(RetrofitError error) {
                         activity.dismissLoadingFragment();
-                        if (response != null) {
-                            meetingsList = response;
-                        } else {
-                            activity.showToastMessage("Server response fail.");
-                        }
-                        refreshFragment();
+                        activity.showToastMessage("Server response fail.");
+                        if (error.getMessage() != null)
+                            Log.d("DEBUG", String.valueOf(error.getMessage()));
                     }
                 });
-            }
-        };
-        activity.showLoadingFragment();
-        futureMeetingsLoader.retrieveResponse();
-    }
-
-    private void loadPastMeetings() {
-        PastMeetingsLoader pastMeetingsLoader = new PastMeetingsLoader(
-                activity.getUserId(), activity.getSID()) {
-
-            @Override
-            public void handleResponse(final List<MeetingDTO> response) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        activity.dismissLoadingFragment();
-                        if (response != null) {
-                            meetingsList = response;
-                        } else {
-                            activity.showToastMessage("Server response fail.");
-                        }
-                        refreshFragment();
-                    }
-                });
-            }
-        };
-        activity.showLoadingFragment();
-        pastMeetingsLoader.retrieveResponse();
-    }
-
-    private void loadInvitations() {
-        InvitationsLoader invitationsLoader = new InvitationsLoader(
-                activity.getUserId(), activity.getSID()) {
-
-            @Override
-            public void handleResponse(final List<MeetingDTO> response) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        activity.dismissLoadingFragment();
-                        if (response != null) {
-                            meetingsList = response;
-                        } else {
-                            activity.showToastMessage("Server response fail.");
-                        }
-                        refreshFragment();
-                    }
-                });
-            }
-        };
-        activity.showLoadingFragment();
-        invitationsLoader.retrieveResponse();
     }
 
     private void refreshFragment() {
