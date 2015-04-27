@@ -1,4 +1,4 @@
-package ee.juhan.meetingorganizer.fragments;
+package ee.juhan.meetingorganizer.fragments.dialog;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -13,13 +13,13 @@ import ee.juhan.meetingorganizer.R;
 
 public class LoadingFragment extends DialogFragment {
 
-    private LinearLayout loadingLayout;
+    private LinearLayout dialogLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        loadingLayout = (LinearLayout) inflater.inflate(R.layout.fragment_loader, container, false);
-        return loadingLayout;
+        dialogLayout = (LinearLayout) inflater.inflate(R.layout.fragment_loader, container, false);
+        return dialogLayout;
     }
 
     @Override

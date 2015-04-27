@@ -1,10 +1,8 @@
 package ee.juhan.meetingorganizer.fragments;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,11 +24,11 @@ import java.util.List;
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.ContactsAdapter;
+import ee.juhan.meetingorganizer.fragments.dialog.YesNoFragment;
 import ee.juhan.meetingorganizer.models.server.ContactDTO;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
-import ee.juhan.meetingorganizer.models.server.ServerResult;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -144,43 +142,61 @@ public class ChooseContactsFragment extends Fragment {
 
     private void checkParticipantsWithoutAccount() {
         if (participantsWithoutAccount) {
-            showSMSDialog();
+            showAskSMSDialog();
         } else {
             sendNewMeetingRequest();
         }
     }
 
-    private void showSMSDialog() {
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-//                        sendInvitationSMS();
-                        sendNewMeetingRequest();
-                        break;
-
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        sendNewMeetingRequest();
-                        break;
-                }
-            }
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage("Some of the contacts don't have an account.\n" +
+    private void showAskSMSDialog() {
+        final YesNoFragment yesNoFragment = new YesNoFragment();
+        yesNoFragment.setMessage("Some of the contacts don't have an account.\n" +
                 "Would you like to invite them via SMS?")
-                .setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
+                .setPositiveButton(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showWriteSMSDialog();
+                        yesNoFragment.dismiss();
+                    }
+                })
+                .setNegativeButton(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        sendNewMeetingRequest();
+                        yesNoFragment.dismiss();
+                    }
+                })
+                .hideInput().show(getFragmentManager(), "YesNoFragment");
     }
 
-    private void sendInvitationSMS() {
-        String message = "I would like to invite you to a meeting via Meeting Organizer. " +
+    private void showWriteSMSDialog() {
+        String defaultMessage = "I would like to invite you to a meeting via Meeting Organizer. " +
                 "Please register to see the invitation.";
+        final YesNoFragment yesNoFragment = new YesNoFragment();
+        yesNoFragment.setMessage("Please write a SMS to send.")
+                .setInputText(defaultMessage)
+                .setPositiveButton("Send", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        sendInvitationSMS(yesNoFragment.getInputValue());
+                        sendNewMeetingRequest();
+                        yesNoFragment.dismiss();
+                    }
+                })
+                .setNegativeButton("Cancel", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        yesNoFragment.dismiss();
+                    }
+                })
+                .show(getFragmentManager(), "YesNoFragment");
+    }
+
+    private void sendInvitationSMS(String smsMessage) {
         for (ParticipantDTO participant : NewMeetingFragment.newMeetingModel.getParticipants()) {
             if (participant.getAccountId() == 0) {
                 SmsManager.getDefault().sendTextMessage(
-                        participant.getPhoneNumber(), null, message, null, null);
+                        participant.getPhoneNumber(), null, smsMessage, null, null);
             }
         }
     }
@@ -188,18 +204,13 @@ public class ChooseContactsFragment extends Fragment {
     private void sendNewMeetingRequest() {
         activity.showLoadingFragment();
         RestClient.get().newMeetingRequest(NewMeetingFragment.newMeetingModel,
-                new Callback<ServerResult>() {
+                new Callback<MeetingDTO>() {
                     @Override
-                    public void success(ServerResult serverResponse, Response response) {
+                    public void success(MeetingDTO serverResponse, Response response) {
                         activity.dismissLoadingFragment();
-                        if (serverResponse != null && serverResponse == ServerResult.SUCCESS) {
-                            activity.showToastMessage("New meeting created!");
-                            activity.changeFragment(new MeetingInfoFragment(
-                                    NewMeetingFragment.newMeetingModel), false);
-                            NewMeetingFragment.newMeetingModel = new MeetingDTO();
-                        } else {
-                            activity.showToastMessage("Server response fail.");
-                        }
+                        activity.showToastMessage("New meeting created!");
+                        activity.changeFragment(new MeetingInfoFragment(serverResponse), false);
+                        NewMeetingFragment.newMeetingModel = new MeetingDTO();
                     }
 
                     @Override

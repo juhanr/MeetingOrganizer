@@ -157,9 +157,9 @@ public class NewMeetingFragment extends Fragment {
             setViewText(R.id.date_button, underlineString(
                     DateParserUtil.formatDate(newMeetingModel.getStartDateTime())));
             setViewText(R.id.start_time_button, underlineString(
-                    DateParserUtil.formatDate(newMeetingModel.getStartDateTime())));
+                    DateParserUtil.formatTime(newMeetingModel.getStartDateTime())));
             setViewText(R.id.end_time_button, underlineString(
-                    DateParserUtil.formatDate(newMeetingModel.getEndDateTime())));
+                    DateParserUtil.formatTime(newMeetingModel.getEndDateTime())));
         }
     }
 

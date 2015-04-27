@@ -6,7 +6,6 @@ import ee.juhan.meetingorganizer.models.server.AccountDTO;
 import ee.juhan.meetingorganizer.models.server.ContactDTO;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.models.server.ServerResponse;
-import ee.juhan.meetingorganizer.models.server.ServerResult;
 import retrofit.Callback;
 import retrofit.http.Body;
 import retrofit.http.GET;
@@ -39,7 +38,7 @@ public interface RestService {
 
     @POST(NEW_MEETING)
     void newMeetingRequest(@Body MeetingDTO meetingDTO,
-                           Callback<ServerResult> callback);
+                           Callback<MeetingDTO> callback);
 
     @GET(MEETING + "/{meetingsType}/{id}")
     void getMeetingsRequest(@Path("meetingsType") String listType,

@@ -1,4 +1,4 @@
-package ee.juhan.meetingorganizer.fragments;
+package ee.juhan.meetingorganizer.fragments.dialog;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;

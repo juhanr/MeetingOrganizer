@@ -25,11 +25,11 @@ import android.widget.Toast;
 
 import java.util.HashMap;
 
-import ee.juhan.meetingorganizer.fragments.LoadingFragment;
 import ee.juhan.meetingorganizer.fragments.LoginFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
 import ee.juhan.meetingorganizer.fragments.NewMeetingFragment;
 import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
+import ee.juhan.meetingorganizer.fragments.dialog.LoadingFragment;
 import ee.juhan.meetingorganizer.rest.RestClient;
 
 public class MainActivity extends Activity {

@@ -1,5 +1,7 @@
 package ee.juhan.meetingorganizer.fragments;
 
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,9 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
 
 import ee.juhan.meetingorganizer.MainActivity;
 
@@ -26,6 +31,8 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     private LatLng location;
     private boolean isClickableMap;
 
+    private ViewGroup mapLayout;
+
     public CustomMapFragment() {
 
     }
@@ -39,9 +46,9 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
+        mapLayout = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
         initializeMap();
-        return v;
+        return mapLayout;
     }
 
     private void initializeMap() {
@@ -74,12 +81,26 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     }
 
     private void setLocationMarker(LatLng latLng) {
+        try {
+            Geocoder geocoder = new Geocoder(activity.getBaseContext());
+            List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            setLocationMarker(latLng, addresses.get(0).getAddressLine(0));
+        } catch (IOException e) {
+            e.printStackTrace();
+            setLocationMarker(latLng, "");
+        }
+    }
+
+    private void setLocationMarker(LatLng latLng, String address) {
+        if (locationMarker != null)
+            locationMarker.remove();
         locationMarker = map.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title("Meeting location")
-                .snippet("Meeting point"));
+                .snippet(address));
         locationMarker.showInfoWindow();
     }
+
 
     public void setLocation(LatLng latLng) {
         location = latLng;
@@ -93,6 +114,24 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
         if (map != null) {
             map.clear();
             location = null;
+        }
+    }
+
+    public void searchMap(String locationName) {
+        try {
+            Geocoder geocoder = new Geocoder(activity.getBaseContext());
+            List<Address> addresses = geocoder.getFromLocationName(locationName, 3);
+            if (addresses.size() > 0) {
+                LatLng latLng = new LatLng(addresses.get(0).getLatitude(),
+                        addresses.get(0).getLongitude());
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        latLng, defaultCameraZoom));
+                setLocationMarker(latLng, addresses.get(0).getAddressLine(0));
+            } else {
+                activity.showToastMessage("Location not found!");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -32,6 +33,7 @@ public class ChooseLocationFragment extends Fragment {
     private MainActivity activity;
     private LinearLayout chooseLocationLayout;
     private List<String> filtersList = Arrays.asList("Cafe", "Restaurant", "Park");
+    private CustomMapFragment customMapFragment;
 
     public ChooseLocationFragment() {
 
@@ -47,7 +49,8 @@ public class ChooseLocationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         activity.setTitle(title);
-        chooseLocationLayout = (LinearLayout) inflater.inflate(R.layout.fragment_choose_location, container, false);
+        chooseLocationLayout = (LinearLayout) inflater
+                .inflate(R.layout.fragment_choose_location, container, false);
         setLocationSpinner();
         setButtonListeners();
         return chooseLocationLayout;
@@ -72,7 +75,7 @@ public class ChooseLocationFragment extends Fragment {
 
     }
 
-    public void setLocationSpinner() {
+    private void setLocationSpinner() {
         Spinner spinner = (Spinner) chooseLocationLayout.findViewById(R.id.location_spinner);
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(activity,
                 R.array.location_items, simple_spinner_item);
@@ -87,15 +90,18 @@ public class ChooseLocationFragment extends Fragment {
                         NewMeetingFragment.newMeetingModel.setLocationType(
                                 LocationType.SPECIFIC_LOCATION);
                         removeLocationChild();
-                        CustomMapFragment customMapFragment = new CustomMapFragment();
+                        setUpMapSearch();
+                        customMapFragment = new CustomMapFragment();
                         customMapFragment.setIsClickableMap(true);
                         if (NewMeetingFragment.newMeetingModel.getLocationLatitude() != 0) {
                             customMapFragment.setLocation(
                                     new LatLng(NewMeetingFragment.newMeetingModel.getLocationLatitude(),
                                             NewMeetingFragment.newMeetingModel.getLocationLongitude()));
                         }
-                        getFragmentManager().beginTransaction().replace(R.id.location_frame, customMapFragment).commit();
-                        FrameLayout layout = (FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
+                        getFragmentManager().beginTransaction()
+                                .replace(R.id.location_frame, customMapFragment).commit();
+                        FrameLayout layout = (FrameLayout) chooseLocationLayout
+                                .findViewById(R.id.location_frame);
                         layout.setBackgroundResource(R.drawable.view_border);
                         break;
                     case 1:
@@ -122,15 +128,34 @@ public class ChooseLocationFragment extends Fragment {
         });
     }
 
-    public void addLocationChild(View child) {
+    private void setUpMapSearch() {
+        View mapSearchLayout = activity.getLayoutInflater()
+                .inflate(R.layout.view_map_search, null);
+        FrameLayout mapSearchFrame = (FrameLayout) chooseLocationLayout
+                .findViewById(R.id.map_search_frame);
+        mapSearchFrame.addView(mapSearchLayout);
+
+        final EditText searchEditText = (EditText) mapSearchLayout.findViewById(R.id.map_search_textbox);
+        Button searchButton = (Button) mapSearchLayout.findViewById(R.id.map_search_button);
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                customMapFragment.searchMap(searchEditText.getText().toString());
+            }
+        });
+    }
+
+    private void addLocationChild(View child) {
         FrameLayout layout = (FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
         layout.addView(child);
     }
 
-    public void removeLocationChild() {
-        FrameLayout layout = (FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
-        layout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-        layout.removeAllViews();
+    private void removeLocationChild() {
+        FrameLayout mapLayout = (FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
+        mapLayout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        mapLayout.removeAllViews();
+        FrameLayout searchLayout = (FrameLayout) chooseLocationLayout.findViewById(R.id.map_search_frame);
+        searchLayout.removeAllViews();
     }
 
 }
