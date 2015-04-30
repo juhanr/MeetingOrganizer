@@ -27,7 +27,7 @@ import ee.juhan.meetingorganizer.util.DateParserUtil;
 public class NewMeetingFragment extends Fragment {
 
     public static MeetingDTO newMeetingModel = new MeetingDTO();
-    private final String title = "New meeting";
+    private String title;
     private MainActivity activity;
     private ViewGroup newMeetingLayout;
 
@@ -39,6 +39,7 @@ public class NewMeetingFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
+        title = getString(R.string.title_new_meeting);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class NewMeetingFragment extends Fragment {
                             }
                         };
                 Calendar c = Calendar.getInstance();
-                if (!getViewText(R.id.date_button).equals("Not set")) {
+                if (!getViewText(R.id.date_button).equals(getString(R.string.textview_not_set_u))) {
                     c.setTime(DateParserUtil.parseDate(getViewText(R.id.date_button)));
                 }
                 DatePickerDialog dialog = new DatePickerDialog(activity,
@@ -98,7 +99,7 @@ public class NewMeetingFragment extends Fragment {
                             }
                         };
                 Calendar c = Calendar.getInstance();
-                if (!getViewText(R.id.start_time_button).equals("Not set")) {
+                if (!getViewText(R.id.start_time_button).equals(getString(R.string.textview_not_set_u))) {
                     c.setTime(DateParserUtil.parseTime(getViewText(R.id.start_time_button)));
                 }
                 TimePickerDialog dialog = new TimePickerDialog(activity,
@@ -121,7 +122,7 @@ public class NewMeetingFragment extends Fragment {
                             }
                         };
                 Calendar c = Calendar.getInstance();
-                if (!getViewText(R.id.end_time_button).equals("Not set")) {
+                if (!getViewText(R.id.end_time_button).equals(getString(R.string.textview_not_set_u))) {
                     c.setTime(DateParserUtil.parseTime(getViewText(R.id.end_time_button)));
                 }
                 TimePickerDialog dialog = new TimePickerDialog(activity,
@@ -165,17 +166,17 @@ public class NewMeetingFragment extends Fragment {
 
     private boolean isValidData() {
         if (getViewText(R.id.title_textbox).length() == 0) {
-            activity.showToastMessage("Please enter a title!");
-        } else if (getViewText(R.id.date_button).equals("Not set")) {
-            activity.showToastMessage("Please set a date!");
-        } else if (getViewText(R.id.start_time_button).equals("Not set")) {
-            activity.showToastMessage("Please set a start time!");
-        } else if (getViewText(R.id.end_time_button).equals("Not set")) {
-            activity.showToastMessage("Please set an end time!");
+            activity.showToastMessage(getString(R.string.toast_please_enter_title));
+        } else if (getViewText(R.id.date_button).equals(getString(R.string.textview_not_set_u))) {
+            activity.showToastMessage(getString(R.string.toast_please_set_date));
+        } else if (getViewText(R.id.start_time_button).equals(getString(R.string.textview_not_set_u))) {
+            activity.showToastMessage(getString(R.string.toast_please_set_start_time));
+        } else if (getViewText(R.id.end_time_button).equals(getString(R.string.textview_not_set_u))) {
+            activity.showToastMessage(getString(R.string.toast_please_set_end_time));
         } else if (newMeetingModel.getStartDateTime().before(new Date())) {
-            activity.showToastMessage("The start time must be in the future!");
+            activity.showToastMessage(getString(R.string.toast_start_time_future));
         } else if (newMeetingModel.getStartDateTime().after(newMeetingModel.getEndDateTime())) {
-            activity.showToastMessage("The end time must be after start time!");
+            activity.showToastMessage(getString(R.string.toast_end_time_after_start));
         } else {
             return true;
         }

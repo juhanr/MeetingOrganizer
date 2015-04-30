@@ -50,10 +50,13 @@ public class MeetingsAdapter extends ArrayAdapter<MeetingDTO> {
         TextView meetingTimeView = (TextView) listItemView
                 .findViewById(R.id.meeting_time);
 
-        meetingTitleView.setText("Title: " + meeting.getTitle());
-        meetingDateView.setText("Date: " + DateParserUtil.formatDate(meeting.getStartDateTime()));
-        meetingTimeView.setText("Time: " + DateParserUtil.formatTime(meeting.getStartDateTime())
-                + " - " + DateParserUtil.formatTime(meeting.getEndDateTime()));
+        meetingTitleView.setText(context.getString(R.string.textview_title) + ": "
+                + meeting.getTitle());
+        meetingDateView.setText(context.getString(R.string.textview_date) + ": "
+                + DateParserUtil.formatDate(meeting.getStartDateTime()));
+        meetingTimeView.setText(context.getString(R.string.textview_time) + ": "
+                + DateParserUtil.formatTime(meeting.getStartDateTime()) + " - "
+                + DateParserUtil.formatTime(meeting.getEndDateTime()));
 
         return listItemView;
     }

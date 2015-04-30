@@ -10,6 +10,8 @@ import android.widget.TimePicker;
 
 import java.util.Calendar;
 
+import ee.juhan.meetingorganizer.R;
+
 @SuppressLint("ValidFragment")
 public class TimePickerFragment extends DialogFragment
         implements TimePickerDialog.OnTimeSetListener {
@@ -29,7 +31,7 @@ public class TimePickerFragment extends DialogFragment
         }
         TimePickerDialog dialog = new TimePickerDialog(getActivity(), DatePickerDialog.THEME_HOLO_DARK,
                 this, hour, minute, true);
-        dialog.setTitle("Choose a time");
+        dialog.setTitle(getString(R.string.textview_choose_time));
         return dialog;
     }
 

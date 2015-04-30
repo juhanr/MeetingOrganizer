@@ -8,6 +8,8 @@ import android.widget.DatePicker;
 
 import java.util.Calendar;
 
+import ee.juhan.meetingorganizer.R;
+
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener {
 
@@ -27,7 +29,7 @@ public class DatePickerFragment extends DialogFragment
 
         DatePickerDialog dialog = new DatePickerDialog(getActivity(), DatePickerDialog.THEME_HOLO_DARK,
                 this, year, month, day);
-        dialog.setTitle("Choose a date");
+        dialog.setTitle(getString(R.string.textview_choose_date));
         return dialog;
     }
 

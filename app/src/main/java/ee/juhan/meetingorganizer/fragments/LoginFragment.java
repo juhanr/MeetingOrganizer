@@ -24,7 +24,7 @@ import retrofit.client.Response;
 
 public class LoginFragment extends Fragment {
 
-    private final String title = "Log in";
+    private String title;
     private MainActivity activity;
     private LinearLayout loginLayout;
 
@@ -35,6 +35,7 @@ public class LoginFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
+        title = getString(R.string.title_login);
     }
 
     @Override
@@ -74,9 +75,9 @@ public class LoginFragment extends Fragment {
 
     private boolean isValidData() {
         if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.email_textbox))) {
-            activity.showToastMessage("Invalid email address!");
+            activity.showToastMessage(getString(R.string.toast_invalid_email));
         } else if (getViewText(R.id.password_textbox).length() < 5) {
-            activity.showToastMessage("Password must be at least 5 characters long!");
+            activity.showToastMessage(getString(R.string.toast_short_password));
         } else {
             return true;
         }
@@ -100,21 +101,21 @@ public class LoginFragment extends Fragment {
                 activity.dismissLoadingFragment();
                 ServerResult result = serverResponse.getResult();
                 if (result == ServerResult.SUCCESS) {
-                    activity.showToastMessage("Log in successful!");
+                    activity.showToastMessage(getString(R.string.toast_login_successful));
                     activity.logIn(email, serverResponse.getSid(), serverResponse.getUserId());
                 } else if (result == ServerResult.WRONG_PASSWORD) {
-                    activity.showToastMessage("Wrong password!");
+                    activity.showToastMessage(getString(R.string.toast_wrong_password));
                 } else if (result == ServerResult.NO_ACCOUNT_FOUND) {
-                    activity.showToastMessage("No such account found!");
+                    activity.showToastMessage(getString(R.string.toast_no_account));
                 } else {
-                    activity.showToastMessage("Server response fail.");
+                    activity.showToastMessage(getString(R.string.toast_server_fail));
                 }
             }
 
             @Override
             public void failure(RetrofitError error) {
                 activity.dismissLoadingFragment();
-                activity.showToastMessage("Server response fail.");
+                activity.showToastMessage(getString(R.string.toast_server_fail));
             }
         });
     }

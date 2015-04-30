@@ -19,11 +19,12 @@ import java.io.IOException;
 import java.util.List;
 
 import ee.juhan.meetingorganizer.MainActivity;
+import ee.juhan.meetingorganizer.R;
 
 public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnCameraChangeListener {
 
-    MainActivity activity;
+    private MainActivity activity;
     private GoogleMap map;
     private LatLng defaultCameraLatLng = new LatLng(59.437046, 24.753742);
     private float defaultCameraZoom = 10;
@@ -96,7 +97,7 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
             locationMarker.remove();
         locationMarker = map.addMarker(new MarkerOptions()
                 .position(latLng)
-                .title("Meeting location")
+                .title(getString(R.string.textview_meeting_location))
                 .snippet(address));
         locationMarker.showInfoWindow();
     }
@@ -128,7 +129,7 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
                         latLng, defaultCameraZoom));
                 setLocationMarker(latLng, addresses.get(0).getAddressLine(0));
             } else {
-                activity.showToastMessage("Location not found!");
+                activity.showToastMessage(getString(R.string.toast_location_not_found));
             }
         } catch (IOException e) {
             e.printStackTrace();

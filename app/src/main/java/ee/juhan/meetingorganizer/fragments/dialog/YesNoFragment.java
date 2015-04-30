@@ -17,14 +17,13 @@ import ee.juhan.meetingorganizer.R;
 
 public class YesNoFragment extends DialogFragment {
 
-    private final YesNoFragment yesNoFragment = this;
     private LinearLayout dialogLayout;
     private String messageText;
     private String inputText;
     private String inputHint;
     private boolean hideInput;
-    private String positiveButtonText = "Yes";
-    private String negativeButtonText = "No";
+    private String positiveButtonText = getString(R.string.button_yes);
+    private String negativeButtonText = getString(R.string.button_no);
     private View.OnClickListener positiveButtonListener;
     private View.OnClickListener negativeButtonListener;
 

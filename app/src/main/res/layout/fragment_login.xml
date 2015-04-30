@@ -9,7 +9,7 @@
         style="@style/Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="E-mail" />
+        android:text="@string/textview_email" />
 
     <EditText
         android:id="@+id/email_textbox"
@@ -22,7 +22,7 @@
         style="@style/Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Password" />
+        android:text="@string/textview_password" />
 
     <EditText
         android:id="@+id/password_textbox"
@@ -37,7 +37,7 @@
         style="@style/Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/create_account" />
+        android:text="@string/textview_create_account_u" />
 
     <include layout="@layout/view_empty_space" />
 
@@ -46,6 +46,6 @@
         style="@style/Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Log in" />
+        android:text="@string/button_login" />
 
 </LinearLayout>

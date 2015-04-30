@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/view_margin_small"
             android:layout_weight="0.5"
-            android:text="Yes" />
+            android:text="@string/button_yes" />
 
         <Button
             android:id="@+id/dialog_negative_button"
@@ -46,6 +46,6 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/view_margin_small"
             android:layout_weight="0.5"
-            android:text="No" />
+            android:text="@string/button_no" />
     </LinearLayout>
 </LinearLayout>

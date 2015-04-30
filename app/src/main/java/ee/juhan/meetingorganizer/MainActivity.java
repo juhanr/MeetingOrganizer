@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
     private void checkIfLoggedIn() {
         if (getSID() == null) {
             setUpDrawer();
-            setEmail("Not logged in");
+            setEmail(getString(R.string.textview_not_logged_in));
         } else {
             RestClient.setSID(getSID());
             isLoggedIn = true;
@@ -75,9 +75,9 @@ public class MainActivity extends Activity {
     private void createDrawerItemsHashMap() {
         drawerItemsHashMap.clear();
         if (isLoggedIn)
-            drawerItems = getResources().getStringArray(R.array.drawer_items_online);
+            drawerItems = getResources().getStringArray(R.array.array_drawer_items_online);
         else
-            drawerItems = getResources().getStringArray(R.array.drawer_items_offline);
+            drawerItems = getResources().getStringArray(R.array.array_drawer_items_offline);
         Integer position = 1;
         for (String item : drawerItems) {
             drawerItemsHashMap.put(item, position);
@@ -110,7 +110,7 @@ public class MainActivity extends Activity {
         sharedPref.edit().putString("email", null).putString("sid", null)
                 .putInt("userId", 0).commit();
         RestClient.setSID(null);
-        setEmail("Not logged in");
+        setEmail(getString(R.string.textview_not_logged_in));
         isLoggedIn = false;
         setUpDrawer();
     }
@@ -174,8 +174,7 @@ public class MainActivity extends Activity {
             if (isLoggedIn) {
                 MeetingsListFragment meetingsListFragment = null;
                 if (position >= 2 && position <= 5) {
-                    meetingsListFragment = new MeetingsListFragment(
-                            drawerItems[position - 1], this);
+                    meetingsListFragment = new MeetingsListFragment(this, drawerItems[position - 1]);
                 }
                 switch (position) {
                     case 1:
@@ -314,7 +313,7 @@ public class MainActivity extends Activity {
 
     public void showLoadingFragment() {
         loadingFragment = new LoadingFragment();
-        loadingFragment.show(getFragmentManager(), "loaderFragment");
+        loadingFragment.show(getFragmentManager(), "LoaderFragment");
     }
 
     public void dismissLoadingFragment() {

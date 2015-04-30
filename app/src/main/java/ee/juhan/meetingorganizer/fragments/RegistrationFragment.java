@@ -22,7 +22,7 @@ import retrofit.client.Response;
 
 public class RegistrationFragment extends Fragment {
 
-    private final String title = "Registration";
+    private String title;
     private MainActivity activity;
     private ViewGroup registrationLayout;
 
@@ -33,6 +33,7 @@ public class RegistrationFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
+        title = getString(R.string.title_registration);
     }
 
     @Override
@@ -67,18 +68,18 @@ public class RegistrationFragment extends Fragment {
 
     private boolean isValidData() {
         if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.email_textbox))) {
-            activity.showToastMessage("Invalid email address!");
+            activity.showToastMessage(getString(R.string.toast_invalid_email));
         } else if (getViewText(R.id.password_textbox).length() < 5) {
-            activity.showToastMessage("Password must be at least 5 characters long!");
+            activity.showToastMessage(getString(R.string.toast_short_password));
         } else if (!getViewText(R.id.password_textbox).equals(
                 getViewText(R.id.password_confirmation_textbox))) {
-            activity.showToastMessage("The passwords don't match!");
+            activity.showToastMessage(getString(R.string.toast_passwords_dont_match));
         } else if (!PatternMatcherUtil.isValidName(getViewText(R.id.name_textbox))) {
-            activity.showToastMessage("Please enter your full name!");
+            activity.showToastMessage(getString(R.string.toast_please_enter_full_name));
         } else if (!PatternMatcherUtil.isValidAreaNumber(getViewText(R.id.area_number_textbox))) {
-            activity.showToastMessage("Invalid area number!");
+            activity.showToastMessage(getString(R.string.toast_invalid_area_code));
         } else if (!PatternMatcherUtil.isValidPhoneNumber(getViewText(R.id.phone_number_textbox))) {
-            activity.showToastMessage("Invalid phone number!");
+            activity.showToastMessage(getString(R.string.toast_invalid_phone_number));
         } else {
             return true;
         }
@@ -103,21 +104,21 @@ public class RegistrationFragment extends Fragment {
                         activity.dismissLoadingFragment();
                         ServerResult result = serverResponse.getResult();
                         if (result == ServerResult.SUCCESS) {
-                            activity.showToastMessage("Registration successful!");
+                            activity.showToastMessage(getString(R.string.toast_registration_successful));
                             activity.logIn(email, serverResponse.getSid(), serverResponse.getUserId());
                         } else if (result == ServerResult.EMAIL_IN_USE) {
-                            activity.showToastMessage("The e-mail is already in use");
+                            activity.showToastMessage(getString(R.string.toast_email_in_use));
                         } else if (result == ServerResult.PHONE_NUMBER_IN_USE) {
-                            activity.showToastMessage("The phone number is already in use");
+                            activity.showToastMessage(getString(R.string.toast_phone_number_in_use));
                         } else {
-                            activity.showToastMessage("Server response fail.");
+                            activity.showToastMessage(getString(R.string.toast_server_fail));
                         }
                     }
 
                     @Override
                     public void failure(RetrofitError error) {
                         activity.dismissLoadingFragment();
-                        activity.showToastMessage("Server response fail.");
+                        activity.showToastMessage(getString(R.string.toast_server_fail));
                     }
                 });
     }

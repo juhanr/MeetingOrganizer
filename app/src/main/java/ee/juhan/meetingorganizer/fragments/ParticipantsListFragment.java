@@ -20,8 +20,8 @@ import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 
 public class ParticipantsListFragment extends Fragment {
 
-    private final String title = "Participants";
     private final List<ParticipantDTO> participantsList;
+    private String title;
     private MainActivity activity;
     private LinearLayout participantsListLayout;
     private ParticipantsAdapter adapter;
@@ -39,6 +39,7 @@ public class ParticipantsListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
+        title = getString(R.string.title_participants);
     }
 
     @Override
@@ -48,7 +49,7 @@ public class ParticipantsListFragment extends Fragment {
         if (participantsList == null || participantsList.size() == 0) {
             participantsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) participantsListLayout.findViewById(R.id.info_text);
-            infoText.setText("No participants found.");
+            infoText.setText(getString(R.string.textview_no_participants));
         } else {
             participantsListLayout = (LinearLayout) inflater.inflate(R.layout.layout_listview, container, false);
             refreshListView();

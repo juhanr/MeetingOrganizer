@@ -16,5 +16,5 @@
         style="@style/Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Loading, please wait..." />
+        android:text="@string/textview_loading" />
 </LinearLayout>

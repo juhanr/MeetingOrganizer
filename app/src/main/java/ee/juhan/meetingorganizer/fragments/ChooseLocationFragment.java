@@ -1,5 +1,6 @@
 package ee.juhan.meetingorganizer.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -28,11 +29,12 @@ import static android.R.layout.simple_spinner_item;
 
 public class ChooseLocationFragment extends Fragment {
 
-    private static CheckBoxAdapter adapter;
-    private final String title = "Choose location";
+    private String title;
     private MainActivity activity;
     private LinearLayout chooseLocationLayout;
-    private List<String> filtersList = Arrays.asList("Cafe", "Restaurant", "Park");
+    private CheckBoxAdapter adapter;
+    private List<String> filtersList = Arrays.asList(
+            getResources().getStringArray(R.array.array_location_parameters));
     private CustomMapFragment customMapFragment;
 
     public ChooseLocationFragment() {
@@ -43,6 +45,7 @@ public class ChooseLocationFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
+        title = getString(R.string.title_choose_location);
     }
 
     @Override
@@ -68,7 +71,7 @@ public class ChooseLocationFragment extends Fragment {
                         NewMeetingFragment.newMeetingModel.getLocationLatitude() != 0) {
                     activity.changeFragment(new ChooseContactsFragment());
                 } else {
-                    activity.showToastMessage("Please choose a location!");
+                    activity.showToastMessage(getString(R.string.toast_please_choose_location));
                 }
             }
         });
@@ -78,13 +81,12 @@ public class ChooseLocationFragment extends Fragment {
     private void setLocationSpinner() {
         Spinner spinner = (Spinner) chooseLocationLayout.findViewById(R.id.location_spinner);
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(activity,
-                R.array.location_items, simple_spinner_item);
+                R.array.array_location_items, simple_spinner_item);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerAdapter);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                Object item = parent.getItemAtPosition(pos);
                 switch (pos) {
                     case 0:
                         NewMeetingFragment.newMeetingModel.setLocationType(
@@ -128,6 +130,7 @@ public class ChooseLocationFragment extends Fragment {
         });
     }
 
+    @SuppressLint("InflateParams")
     private void setUpMapSearch() {
         View mapSearchLayout = activity.getLayoutInflater()
                 .inflate(R.layout.view_map_search, null);

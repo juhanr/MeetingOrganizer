@@ -3,7 +3,6 @@ package ee.juhan.meetingorganizer.fragments;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,9 +35,9 @@ public class MeetingsListFragment extends Fragment {
     private MeetingsAdapter adapter;
     private List<MeetingDTO> meetingsList;
 
-    public MeetingsListFragment(String title, MainActivity activity) {
-        this.title = title;
+    public MeetingsListFragment(MainActivity activity, String title) {
         this.activity = activity;
+        this.title = title;
     }
 
     @Override
@@ -54,7 +53,7 @@ public class MeetingsListFragment extends Fragment {
         if (meetingsList == null || meetingsList.size() == 0) {
             meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) meetingsListLayout.findViewById(R.id.info_text);
-            infoText.setText("No meetings found.");
+            infoText.setText(getString(R.string.textview_no_meetings));
         } else {
             meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.layout_listview, container, false);
             refreshListView();
@@ -76,9 +75,7 @@ public class MeetingsListFragment extends Fragment {
                     @Override
                     public void failure(RetrofitError error) {
                         activity.dismissLoadingFragment();
-                        activity.showToastMessage("Server response fail.");
-                        if (error.getMessage() != null)
-                            Log.d("DEBUG", String.valueOf(error.getMessage()));
+                        activity.showToastMessage(getString(R.string.toast_server_fail));
                     }
                 });
     }
@@ -98,7 +95,7 @@ public class MeetingsListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
-                MeetingDTO meeting = (MeetingDTO) adapter.getItem(position);
+                MeetingDTO meeting = adapter.getItem(position);
                 ((MainActivity) getActivity()).changeFragment(new MeetingInfoFragment(meeting));
             }
         });

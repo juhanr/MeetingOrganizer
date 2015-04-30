@@ -7,19 +7,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.LinearLayout;
 
 import ee.juhan.meetingorganizer.R;
 
 public class LoadingFragment extends DialogFragment {
 
-    private LinearLayout dialogLayout;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        dialogLayout = (LinearLayout) inflater.inflate(R.layout.fragment_loader, container, false);
-        return dialogLayout;
+        return inflater.inflate(R.layout.fragment_loader, container, false);
     }
 
     @Override

@@ -36,10 +36,10 @@ import retrofit.client.Response;
 
 public class ChooseContactsFragment extends Fragment {
 
-    private final String title = "Invite contacts";
+    private String title;
     private MainActivity activity;
     private ContactsAdapter adapter;
-    private List<ContactDTO> contactsList = new ArrayList<ContactDTO>();
+    private List<ContactDTO> contactsList = new ArrayList<>();
     private LinearLayout chooseContactsLayout;
 
     private boolean participantsWithoutAccount;
@@ -52,6 +52,7 @@ public class ChooseContactsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
+        title = getString(R.string.title_invite_contacts);
     }
 
     @Override
@@ -63,7 +64,7 @@ public class ChooseContactsFragment extends Fragment {
             chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) chooseContactsLayout
                     .findViewById(R.id.info_text);
-            infoText.setText("No contacts found.");
+            infoText.setText(getString(R.string.textview_no_contacts));
         } else {
             chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_choose_contacts, container, false);
             checkContactsFromServer();
@@ -96,7 +97,7 @@ public class ChooseContactsFragment extends Fragment {
                     @Override
                     public void failure(RetrofitError error) {
                         activity.dismissLoadingFragment();
-                        activity.showToastMessage("Server response fail.");
+                        activity.showToastMessage(getString(R.string.toast_server_fail));
                     }
                 });
     }
@@ -150,8 +151,7 @@ public class ChooseContactsFragment extends Fragment {
 
     private void showAskSMSDialog() {
         final YesNoFragment yesNoFragment = new YesNoFragment();
-        yesNoFragment.setMessage("Some of the contacts don't have an account.\n" +
-                "Would you like to invite them via SMS?")
+        yesNoFragment.setMessage(getString(R.string.textview_info_invite_via_sms))
                 .setPositiveButton(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -170,12 +170,10 @@ public class ChooseContactsFragment extends Fragment {
     }
 
     private void showWriteSMSDialog() {
-        String defaultMessage = "I would like to invite you to a meeting via Meeting Organizer. " +
-                "Please register to see the invitation.";
         final YesNoFragment yesNoFragment = new YesNoFragment();
-        yesNoFragment.setMessage("Please write a SMS to send.")
-                .setInputText(defaultMessage)
-                .setPositiveButton("Send", new View.OnClickListener() {
+        yesNoFragment.setMessage(getString(R.string.textview_please_write_sms))
+                .setInputText(getString(R.string.message_invite_via_sms))
+                .setPositiveButton(getString(R.string.button_send), new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         sendInvitationSMS(yesNoFragment.getInputValue());
@@ -183,7 +181,7 @@ public class ChooseContactsFragment extends Fragment {
                         yesNoFragment.dismiss();
                     }
                 })
-                .setNegativeButton("Cancel", new View.OnClickListener() {
+                .setNegativeButton(getString(R.string.button_cancel), new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         yesNoFragment.dismiss();
@@ -208,7 +206,7 @@ public class ChooseContactsFragment extends Fragment {
                     @Override
                     public void success(MeetingDTO serverResponse, Response response) {
                         activity.dismissLoadingFragment();
-                        activity.showToastMessage("New meeting created!");
+                        activity.showToastMessage(getString(R.string.toast_meeting_created));
                         activity.changeFragment(new MeetingInfoFragment(serverResponse), false);
                         NewMeetingFragment.newMeetingModel = new MeetingDTO();
                     }
@@ -216,7 +214,7 @@ public class ChooseContactsFragment extends Fragment {
                     @Override
                     public void failure(RetrofitError error) {
                         activity.dismissLoadingFragment();
-                        activity.showToastMessage("Server response fail.");
+                        activity.showToastMessage(getString(R.string.toast_server_fail));
                     }
                 });
     }

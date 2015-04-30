@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="Title" />
+            android:text="@string/textview_title" />
 
         <EditText
             android:id="@+id/title_textbox"
@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="Description" />
+            android:text="@string/textview_description" />
 
         <EditText
             android:id="@+id/description_textbox"
@@ -45,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="Date" />
+            android:text="@string/textview_date" />
 
         <TextView
             android:id="@+id/date_button"
@@ -53,14 +53,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/view_margin_large"
-            android:text="@string/not_set" />
+            android:text="@string/textview_not_set_u" />
 
         <TextView
             style="@style/Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="Start time" />
+            android:text="@string/textview_start_time" />
 
         <TextView
             android:id="@+id/start_time_button"
@@ -68,21 +68,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/view_margin_large"
-            android:text="@string/not_set" />
+            android:text="@string/textview_not_set_u" />
 
         <TextView
             style="@style/Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="End time" />
+            android:text="@string/textview_end_time" />
 
         <TextView
             android:id="@+id/end_time_button"
             style="@style/Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/not_set" />
+            android:text="@string/textview_not_set_u" />
 
         <include layout="@layout/view_empty_space" />
 
@@ -91,7 +91,7 @@
             style="@style/Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Continue" />
+            android:text="@string/button_continue" />
 
     </LinearLayout>
 </ScrollView>
