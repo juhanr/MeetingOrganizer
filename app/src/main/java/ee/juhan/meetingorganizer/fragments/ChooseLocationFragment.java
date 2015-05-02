@@ -1,7 +1,11 @@
 package ee.juhan.meetingorganizer.fragments;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,9 +37,8 @@ public class ChooseLocationFragment extends Fragment {
     private MainActivity activity;
     private LinearLayout chooseLocationLayout;
     private CheckBoxAdapter adapter;
-    private List<String> filtersList = Arrays.asList(
-            getResources().getStringArray(R.array.array_location_parameters));
-    private CustomMapFragment customMapFragment;
+    private List<String> filtersList;
+    private CustomMapFragment customMapFragment = new CustomMapFragment();
 
     public ChooseLocationFragment() {
 
@@ -46,6 +49,8 @@ public class ChooseLocationFragment extends Fragment {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
         title = getString(R.string.title_choose_location);
+        filtersList = Arrays.asList(
+                getResources().getStringArray(R.array.array_location_parameters));
     }
 
     @Override
@@ -93,6 +98,7 @@ public class ChooseLocationFragment extends Fragment {
                                 LocationType.SPECIFIC_LOCATION);
                         removeLocationChild();
                         setUpMapSearch();
+
                         customMapFragment = new CustomMapFragment();
                         customMapFragment.setIsClickableMap(true);
                         if (NewMeetingFragment.newMeetingModel.getLocationLatitude() != 0) {
@@ -159,6 +165,25 @@ public class ChooseLocationFragment extends Fragment {
         mapLayout.removeAllViews();
         FrameLayout searchLayout = (FrameLayout) chooseLocationLayout.findViewById(R.id.map_search_frame);
         searchLayout.removeAllViews();
+    }
+
+    @Override
+    public Animator onCreateAnimator(int transit, boolean enter, int nextAnim) {
+        final Animator anim = AnimatorInflater.loadAnimator(getActivity(), nextAnim);
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    customMapFragment.setMapVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    customMapFragment.setMapVisibility(View.VISIBLE);
+                }
+            });
+        }
+        return anim;
     }
 
 }

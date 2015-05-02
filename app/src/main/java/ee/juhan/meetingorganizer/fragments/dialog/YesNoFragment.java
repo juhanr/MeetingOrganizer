@@ -22,8 +22,8 @@ public class YesNoFragment extends DialogFragment {
     private String inputText;
     private String inputHint;
     private boolean hideInput;
-    private String positiveButtonText = getString(R.string.button_yes);
-    private String negativeButtonText = getString(R.string.button_no);
+    private String positiveButtonText;
+    private String negativeButtonText;
     private View.OnClickListener positiveButtonListener;
     private View.OnClickListener negativeButtonListener;
 
@@ -47,8 +47,10 @@ public class YesNoFragment extends DialogFragment {
             Button negativeButton = (Button) dialogLayout.findViewById(R.id.dialog_negative_button);
 
             messageTextView.setText(messageText);
-            positiveButton.setText(positiveButtonText);
-            negativeButton.setText(negativeButtonText);
+            if (positiveButtonText != null)
+                positiveButton.setText(positiveButtonText);
+            if (negativeButtonText != null)
+                negativeButton.setText(negativeButtonText);
             positiveButton.setOnClickListener(positiveButtonListener);
             negativeButton.setOnClickListener(negativeButtonListener);
             if (inputEditText != null) {

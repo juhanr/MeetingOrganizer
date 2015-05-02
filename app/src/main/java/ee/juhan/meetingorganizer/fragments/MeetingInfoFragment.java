@@ -1,7 +1,11 @@
 package ee.juhan.meetingorganizer.fragments;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +30,7 @@ public class MeetingInfoFragment extends Fragment {
     private MainActivity activity;
     private LinearLayout meetingInfoLayout;
     private MeetingDTO meeting;
+    private CustomMapFragment customMapFragment = new CustomMapFragment();
 
     public MeetingInfoFragment() {
         meeting = null;
@@ -77,7 +82,7 @@ public class MeetingInfoFragment extends Fragment {
                 + DateParserUtil.formatTime(meeting.getStartDateTime()) + " - "
                 + DateParserUtil.formatTime(meeting.getEndDateTime()));
 
-        CustomMapFragment customMapFragment = new CustomMapFragment();
+        customMapFragment = new CustomMapFragment();
         customMapFragment.setLocation(new LatLng(meeting.getLocationLatitude(),
                 meeting.getLocationLongitude()));
         getFragmentManager().beginTransaction().
@@ -97,6 +102,25 @@ public class MeetingInfoFragment extends Fragment {
                         new ArrayList<>(meeting.getParticipants())));
             }
         });
+    }
+
+    @Override
+    public Animator onCreateAnimator(int transit, boolean enter, int nextAnim) {
+        final Animator anim = AnimatorInflater.loadAnimator(getActivity(), nextAnim);
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    customMapFragment.setMapVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    customMapFragment.setMapVisibility(View.VISIBLE);
+                }
+            });
+        }
+        return anim;
     }
 
 }

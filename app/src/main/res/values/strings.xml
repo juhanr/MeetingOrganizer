@@ -72,7 +72,7 @@
     <string name="toast_registration_successful">Registration successful!</string>
 
     <!-- New meeting strings -->
-    <string name="textview_description">description</string>
+    <string name="textview_description">Description</string>
     <string name="textview_end_time">End time</string>
     <string name="textview_not_set_u"><u>Not set</u></string>
     <string name="textview_start_time">Start time</string>
@@ -88,6 +88,7 @@
     <string name="button_search">Search</string>
     <string name="textview_meeting_location">Meeting location</string>
     <string name="title_choose_location">Choose a location</string>
+    <string name="toast_geocoder_service_error">Service currently not available.</string>
     <string name="toast_location_not_found">Location not found!</string>
     <string name="toast_please_choose_location">Please choose a location!</string>
 
@@ -118,5 +119,8 @@
     <!-- Participant info strings -->
     <string name="textview_no_participants">No participants found.</string>
     <string name="title_participants">Participants</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

@@ -2,10 +2,12 @@ package ee.juhan.meetingorganizer.fragments;
 
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,6 +26,7 @@ import ee.juhan.meetingorganizer.R;
 public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnCameraChangeListener {
 
+    private static int mapVisibility;
     private MainActivity activity;
     private GoogleMap map;
     private LatLng defaultCameraLatLng = new LatLng(59.437046, 24.753742);
@@ -31,7 +34,6 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     private Marker locationMarker;
     private LatLng location;
     private boolean isClickableMap;
-
     private ViewGroup mapLayout;
 
     public CustomMapFragment() {
@@ -48,8 +50,20 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mapLayout = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
+        checkAndroidVersion();
         initializeMap();
         return mapLayout;
+    }
+
+    private void checkAndroidVersion() {
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            FrameLayout frameLayout = new FrameLayout(activity);
+            frameLayout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            mapLayout.addView(frameLayout,
+                    new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
+            mapLayout.setVisibility(mapVisibility);
+        }
     }
 
     private void initializeMap() {
@@ -111,6 +125,12 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
         this.isClickableMap = isClickableMap;
     }
 
+    public void setMapVisibility(int visibility) {
+        CustomMapFragment.mapVisibility = visibility;
+        if (mapLayout != null)
+            mapLayout.setVisibility(visibility);
+    }
+
     public void clearMap() {
         if (map != null) {
             map.clear();
@@ -133,6 +153,7 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
             }
         } catch (IOException e) {
             e.printStackTrace();
+            activity.showToastMessage(getString(R.string.toast_geocoder_service_error));
         }
     }
 
@@ -145,4 +166,5 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     public boolean onMyLocationButtonClick() {
         return false;
     }
+
 }
