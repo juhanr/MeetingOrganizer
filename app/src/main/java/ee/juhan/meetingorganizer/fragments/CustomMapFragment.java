@@ -22,11 +22,12 @@ import java.util.List;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
+import ee.juhan.meetingorganizer.models.server.MapCoordinate;
 
 public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnCameraChangeListener {
 
-    private static int mapVisibility;
+    private static int mapVisibility = View.VISIBLE;
     private MainActivity activity;
     private GoogleMap map;
     private LatLng defaultCameraLatLng = new LatLng(59.437046, 24.753742);
@@ -76,8 +77,8 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
                 map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
                     public void onMapClick(LatLng latLng) {
-                        NewMeetingFragment.newMeetingModel.setLocationLatitude(latLng.latitude);
-                        NewMeetingFragment.newMeetingModel.setLocationLongitude(latLng.longitude);
+                        NewMeetingFragment.newMeetingModel
+                                .setLocation(new MapCoordinate(latLng.latitude, latLng.longitude));
                         if (locationMarker != null)
                             locationMarker.remove();
                         setLocationMarker(latLng);

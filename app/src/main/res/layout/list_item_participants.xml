@@ -3,9 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/view_margin_medium"
-    android:paddingTop="@dimen/view_margin_medium">
+    android:orientation="horizontal"
+    android:paddingBottom="@dimen/view_margin_small"
+    android:paddingTop="@dimen/view_margin_small">
 
     <TextView
         android:id="@+id/participant_name"

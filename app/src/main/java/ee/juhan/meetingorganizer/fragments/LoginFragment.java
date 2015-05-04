@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import ee.juhan.meetingorganizer.MainActivity;
@@ -26,7 +25,7 @@ public class LoginFragment extends Fragment {
 
     private String title;
     private MainActivity activity;
-    private LinearLayout loginLayout;
+    private ViewGroup loginLayout;
 
     public LoginFragment() {
     }
@@ -43,7 +42,7 @@ public class LoginFragment extends Fragment {
                              Bundle savedInstanceState) {
         activity.setTitle(title);
         activity.setDrawerItem(activity.getDrawerItemPosition(title));
-        loginLayout = (LinearLayout) inflater.inflate(R.layout.fragment_login, container, false);
+        loginLayout = (ViewGroup) inflater.inflate(R.layout.fragment_login, container, false);
         setButtonListeners();
         return loginLayout;
     }

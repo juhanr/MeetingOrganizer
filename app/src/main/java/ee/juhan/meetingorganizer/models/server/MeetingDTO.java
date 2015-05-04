@@ -1,34 +1,34 @@
 package ee.juhan.meetingorganizer.models.server;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 public class MeetingDTO {
 
+    private int id;
     private int leaderId;
     private String title;
     private String description;
     private Date startDateTime;
     private Date endDateTime;
-    private double locationLatitude;
-    private double locationLongitude;
+    private MapCoordinate location;
     private LocationType locationType;
-    private Set<ParticipantDTO> participants = new HashSet<>();
+    private ArrayList<ParticipantDTO> participants = new ArrayList<>();
 
     public MeetingDTO() {
 
     }
 
-    public MeetingDTO(int leaderId, String title, String description, Date startDateTime, Date endDateTime,
-                      double locationLatitude, double locationLongitude, LocationType locationType) {
+    public MeetingDTO(int id, int leaderId, String title, String description,
+                      Date startDateTime, Date endDateTime, MapCoordinate location,
+                      LocationType locationType) {
+        this.id = id;
         this.leaderId = leaderId;
         this.title = title;
         this.description = description;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
-        this.locationLatitude = locationLatitude;
-        this.locationLongitude = locationLongitude;
+        this.location = location;
         this.locationType = locationType;
     }
 
@@ -42,15 +42,21 @@ public class MeetingDTO {
         this.locationType = locationType;
     }
 
-    public MeetingDTO(String title, String description, double locationLatitude,
-                      double locationLongitude, LocationType locationType,
-                      Set<ParticipantDTO> participants) {
+    public MeetingDTO(String title, String description, MapCoordinate location,
+                      LocationType locationType, ArrayList<ParticipantDTO> participants) {
         this.title = title;
         this.description = description;
-        this.locationLatitude = locationLatitude;
-        this.locationLongitude = locationLongitude;
+        this.location = location;
         this.locationType = locationType;
         this.participants = participants;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getLeaderId() {
@@ -93,20 +99,12 @@ public class MeetingDTO {
         this.endDateTime = endTime;
     }
 
-    public double getLocationLatitude() {
-        return locationLatitude;
+    public MapCoordinate getLocation() {
+        return location;
     }
 
-    public void setLocationLatitude(double locationLatitude) {
-        this.locationLatitude = locationLatitude;
-    }
-
-    public double getLocationLongitude() {
-        return locationLongitude;
-    }
-
-    public void setLocationLongitude(double locationLongitude) {
-        this.locationLongitude = locationLongitude;
+    public void setLocation(MapCoordinate location) {
+        this.location = location;
     }
 
     public LocationType getLocationType() {
@@ -117,11 +115,11 @@ public class MeetingDTO {
         this.locationType = locationType;
     }
 
-    public Set<ParticipantDTO> getParticipants() {
+    public ArrayList<ParticipantDTO> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(Set<ParticipantDTO> participants) {
+    public void setParticipants(ArrayList<ParticipantDTO> participants) {
         this.participants = participants;
     }
 

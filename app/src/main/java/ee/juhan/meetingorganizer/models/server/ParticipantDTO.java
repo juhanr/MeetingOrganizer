@@ -2,23 +2,22 @@ package ee.juhan.meetingorganizer.models.server;
 
 public class ParticipantDTO {
 
+    private int id;
     private int accountId;
     private String name;
     private String email;
     private String phoneNumber;
     private ParticipationAnswer participationAnswer = ParticipationAnswer.NOT_ANSWERED;
-    private double locationLatitude;
-    private double locationLongitude;
+    private MapCoordinate location;
 
     public ParticipantDTO() {
     }
 
-    public ParticipantDTO(int accountId, ParticipationAnswer participationAnswer,
-                          double locationLatitude, double locationLongitude) {
+    public ParticipantDTO(int id, int accountId, ParticipationAnswer participationAnswer,
+                          MapCoordinate location) {
         this.accountId = accountId;
         this.participationAnswer = participationAnswer;
-        this.locationLatitude = locationLatitude;
-        this.locationLongitude = locationLongitude;
+        this.location = location;
     }
 
     public ParticipantDTO(int accountId, ParticipationAnswer participationAnswer) {
@@ -35,6 +34,14 @@ public class ParticipantDTO {
 
     public ParticipantDTO(String name) {
         this.name = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getAccountId() {
@@ -77,20 +84,12 @@ public class ParticipantDTO {
         this.participationAnswer = participationAnswer;
     }
 
-    public double getLocationLatitude() {
-        return locationLatitude;
+    public MapCoordinate getLocation() {
+        return location;
     }
 
-    public void setLocationLatitude(double locationLatitude) {
-        this.locationLatitude = locationLatitude;
-    }
-
-    public double getLocationLongitude() {
-        return locationLongitude;
-    }
-
-    public void setLocationLongitude(double locationLongitude) {
-        this.locationLongitude = locationLongitude;
+    public void setLocation(MapCoordinate location) {
+        this.location = location;
     }
 
 }

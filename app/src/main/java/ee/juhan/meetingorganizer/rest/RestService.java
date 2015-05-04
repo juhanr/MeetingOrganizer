@@ -5,6 +5,7 @@ import java.util.List;
 import ee.juhan.meetingorganizer.models.server.AccountDTO;
 import ee.juhan.meetingorganizer.models.server.ContactDTO;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
+import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 import ee.juhan.meetingorganizer.models.server.ServerResponse;
 import retrofit.Callback;
 import retrofit.http.Body;
@@ -16,6 +17,7 @@ public interface RestService {
 
     static final public String MEETING = "/meeting";
     static final public String NEW_MEETING = MEETING + "/new";
+    static final public String UPDATE_PARTICIPANT = "/update-participant";
 
     static final public String REGISTER = "/register";
     static final public String LOGIN = "/login";
@@ -40,10 +42,15 @@ public interface RestService {
     void newMeetingRequest(@Body MeetingDTO meetingDTO,
                            Callback<MeetingDTO> callback);
 
-    @GET(MEETING + "/{meetingsType}/{id}")
+    @GET(MEETING + "/{meetingsType}" + ACCOUNT + "/{accountId}")
     void getMeetingsRequest(@Path("meetingsType") String listType,
-                            @Path("id") int accountId,
+                            @Path("accountId") int accountId,
                             Callback<List<MeetingDTO>> callback);
+
+    @POST(MEETING + "/{meetingId}" + UPDATE_PARTICIPANT)
+    void updateParticipantRequest(@Body ParticipantDTO participantDTO,
+                                  @Path("meetingId") int meetingId,
+                                  Callback<MeetingDTO> callback);
 
 
 }

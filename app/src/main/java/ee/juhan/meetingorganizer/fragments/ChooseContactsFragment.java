@@ -13,12 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import ee.juhan.meetingorganizer.MainActivity;
@@ -40,7 +38,7 @@ public class ChooseContactsFragment extends Fragment {
     private MainActivity activity;
     private ContactsAdapter adapter;
     private List<ContactDTO> contactsList = new ArrayList<>();
-    private LinearLayout chooseContactsLayout;
+    private ViewGroup chooseContactsLayout;
 
     private boolean participantsWithoutAccount;
 
@@ -61,17 +59,17 @@ public class ChooseContactsFragment extends Fragment {
         activity.setTitle(title);
         createContactsMap();
         if (contactsList.size() == 0) {
-            chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
+            chooseContactsLayout = (ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) chooseContactsLayout
                     .findViewById(R.id.info_text);
             infoText.setText(getString(R.string.textview_no_contacts));
         } else {
-            chooseContactsLayout = (LinearLayout) inflater.inflate(R.layout.fragment_choose_contacts, container, false);
+            chooseContactsLayout = (ViewGroup) inflater.inflate(R.layout.fragment_choose_contacts, container, false);
             checkContactsFromServer();
             setButtonListeners();
 
-            ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listView);
-            listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            ListView listView = (ListView) chooseContactsLayout.findViewById(R.id.listView);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, final View view,
@@ -110,8 +108,8 @@ public class ChooseContactsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 resetParticipants();
-                addContactsAsParticipants();
                 addLeaderInfo();
+                addContactsAsParticipants();
                 checkParticipantsWithoutAccount();
             }
         });
@@ -119,7 +117,7 @@ public class ChooseContactsFragment extends Fragment {
     }
 
     private void resetParticipants() {
-        NewMeetingFragment.newMeetingModel.setParticipants(new HashSet<ParticipantDTO>());
+        NewMeetingFragment.newMeetingModel.setParticipants(new ArrayList<ParticipantDTO>());
         participantsWithoutAccount = false;
     }
 

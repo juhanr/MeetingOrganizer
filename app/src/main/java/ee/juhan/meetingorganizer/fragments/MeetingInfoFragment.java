@@ -12,23 +12,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
+import java.util.Date;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
+import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
+import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
+import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.DateParserUtil;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class MeetingInfoFragment extends Fragment {
 
     private String title;
     private MainActivity activity;
-    private LinearLayout meetingInfoLayout;
+    private ViewGroup meetingInfoLayout;
     private MeetingDTO meeting;
     private CustomMapFragment customMapFragment = new CustomMapFragment();
 
@@ -53,29 +58,29 @@ public class MeetingInfoFragment extends Fragment {
                              Bundle savedInstanceState) {
         activity.setTitle(title);
         if (meeting == null) {
-            meetingInfoLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
+            meetingInfoLayout = (ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) meetingInfoLayout.findViewById(R.id.info_text);
             infoText.setText(getString(R.string.textview_no_info));
         } else {
-            meetingInfoLayout = (LinearLayout) inflater.inflate(R.layout.fragment_meeting_info, container, false);
-            populateLayout(meeting);
+            meetingInfoLayout = (ViewGroup) inflater.inflate(R.layout.fragment_meeting_info, container, false);
+            populateLayout();
             setButtonListeners();
         }
         return meetingInfoLayout;
     }
 
-    private void populateLayout(MeetingDTO meeting) {
+    private void populateLayout() {
         TextView title = (TextView) meetingInfoLayout.findViewById(R.id.meeting_title);
         TextView description = (TextView) meetingInfoLayout.findViewById(R.id.meeting_description);
         TextView date = (TextView) meetingInfoLayout.findViewById(R.id.meeting_date);
         TextView time = (TextView) meetingInfoLayout.findViewById(R.id.meeting_time);
 
         title.setText(getString(R.string.textview_title) + ": " + meeting.getTitle());
-        if (!description.getText().equals(""))
+        if (!description.getText().toString().trim().equals(""))
             description.setText(getString(R.string.textview_description) + ": "
                     + meeting.getDescription());
         else
-            meetingInfoLayout.removeView(description);
+            description.setText(getString(R.string.textview_description) + ": None");
         date.setText(getString(R.string.textview_date) + ": "
                 + DateParserUtil.formatDate(meeting.getStartDateTime()));
         time.setText(getString(R.string.textview_time) + ": "
@@ -83,12 +88,16 @@ public class MeetingInfoFragment extends Fragment {
                 + DateParserUtil.formatTime(meeting.getEndDateTime()));
 
         customMapFragment = new CustomMapFragment();
-        customMapFragment.setLocation(new LatLng(meeting.getLocationLatitude(),
-                meeting.getLocationLongitude()));
+        if (meeting.getLocation() != null) {
+            customMapFragment.setLocation(new LatLng(
+                    meeting.getLocation().getLatitude(), meeting.getLocation().getLongitude()));
+        }
         getFragmentManager().beginTransaction().
                 replace(R.id.location_frame, customMapFragment).commit();
         FrameLayout layout = (FrameLayout) meetingInfoLayout.findViewById(R.id.location_frame);
         layout.setBackgroundResource(R.drawable.view_border);
+
+        setAnswerButtons();
     }
 
     private void setButtonListeners() {
@@ -98,10 +107,70 @@ public class MeetingInfoFragment extends Fragment {
         showParticipants.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity) getActivity()).changeFragment(new ParticipantsListFragment(
-                        new ArrayList<>(meeting.getParticipants())));
+                ((MainActivity) getActivity())
+                        .changeFragment(new ParticipantsListFragment(meeting.getParticipants()));
             }
         });
+    }
+
+    private void setAnswerButtons() {
+        final ParticipantDTO participantObject = getParticipantObject();
+        if (participantObject.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED
+                && meeting.getEndDateTime().after(new Date())) {
+            Button acceptInvitation = (Button) meetingInfoLayout
+                    .findViewById(R.id.accept_invitation);
+            Button denyInvitation = (Button) meetingInfoLayout
+                    .findViewById(R.id.deny_invitation);
+
+            acceptInvitation.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
+                    sendUpdateParticipantRequest(participantObject);
+                }
+            });
+
+            denyInvitation.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    participantObject.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
+                    sendUpdateParticipantRequest(participantObject);
+                }
+            });
+        } else {
+            ViewGroup answerButtons = (ViewGroup) meetingInfoLayout
+                    .findViewById(R.id.invitation_answer_buttons);
+            answerButtons.setVisibility(View.GONE);
+        }
+    }
+
+    private void sendUpdateParticipantRequest(ParticipantDTO participantDTO) {
+        activity.showLoadingFragment();
+        RestClient.get().updateParticipantRequest(participantDTO, meeting.getId(),
+                new Callback<MeetingDTO>() {
+                    @Override
+                    public void success(MeetingDTO serverResponse, Response response) {
+                        activity.dismissLoadingFragment();
+                        meeting = serverResponse;
+                        populateLayout();
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        activity.dismissLoadingFragment();
+                        activity.showToastMessage(getString(R.string.toast_server_fail));
+                    }
+                });
+    }
+
+    private ParticipantDTO getParticipantObject() {
+        int accountId = activity.getUserId();
+        for (ParticipantDTO participant : meeting.getParticipants()) {
+            if (participant.getAccountId() == accountId) {
+                return participant;
+            }
+        }
+        return null;
     }
 
     @Override

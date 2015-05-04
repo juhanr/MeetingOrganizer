@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -41,6 +42,11 @@ public class ParticipantsAdapter extends ArrayAdapter<ParticipantDTO> {
         TextView participantNameView = (TextView) listItemView
                 .findViewById(R.id.participant_name);
         participantNameView.setText(participant.getName());
+        if (participant.getAccountId() != 0) {
+            ImageView accountIcon = new ImageView(context);
+            accountIcon.setBackgroundResource(R.mipmap.ic_account);
+            listItemView.addView(accountIcon);
+        }
         return listItemView;
     }
 

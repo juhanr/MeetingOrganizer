@@ -279,6 +279,10 @@ public class MainActivity extends Activity {
         ft.commit();
     }
 
+    public void refreshFragment(Fragment fragment) {
+        getFragmentManager().beginTransaction().detach(fragment).attach(fragment).commit();
+    }
+
     /**
      * Displays a toast message with the given message.
      *

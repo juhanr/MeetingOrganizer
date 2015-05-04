@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -31,7 +30,7 @@ public class MeetingsListFragment extends Fragment {
     static final public String INVITATIONS = "invitations";
     private final String title;
     private MainActivity activity;
-    private LinearLayout meetingsListLayout;
+    private ViewGroup meetingsListLayout;
     private MeetingsAdapter adapter;
     private List<MeetingDTO> meetingsList;
 
@@ -51,17 +50,18 @@ public class MeetingsListFragment extends Fragment {
         activity.setTitle(title);
         activity.setDrawerItem(activity.getDrawerItemPosition(title));
         if (meetingsList == null || meetingsList.size() == 0) {
-            meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
+            meetingsListLayout = (ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) meetingsListLayout.findViewById(R.id.info_text);
             infoText.setText(getString(R.string.textview_no_meetings));
         } else {
-            meetingsListLayout = (LinearLayout) inflater.inflate(R.layout.layout_listview, container, false);
+            meetingsListLayout = (ViewGroup) inflater.inflate(R.layout.layout_listview, container, false);
             refreshListView();
         }
         return meetingsListLayout;
     }
 
     public void getMeetingsRequest(String meetingsType) {
+        final Fragment fragment = this;
         activity.showLoadingFragment();
         RestClient.get().getMeetingsRequest(meetingsType, activity.getUserId(),
                 new Callback<List<MeetingDTO>>() {
@@ -69,7 +69,7 @@ public class MeetingsListFragment extends Fragment {
                     public void success(final List<MeetingDTO> serverResponse, Response response) {
                         activity.dismissLoadingFragment();
                         meetingsList = serverResponse;
-                        refreshFragment();
+                        activity.refreshFragment(fragment);
                     }
 
                     @Override
@@ -78,14 +78,6 @@ public class MeetingsListFragment extends Fragment {
                         activity.showToastMessage(getString(R.string.toast_server_fail));
                     }
                 });
-    }
-
-    private void refreshFragment() {
-        activity.getFragmentManager()
-                .beginTransaction()
-                .detach(this)
-                .attach(this)
-                .commit();
     }
 
     private void refreshListView() {

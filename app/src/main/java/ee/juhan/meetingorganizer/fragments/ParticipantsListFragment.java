@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,7 +22,7 @@ public class ParticipantsListFragment extends Fragment {
     private final List<ParticipantDTO> participantsList;
     private String title;
     private MainActivity activity;
-    private LinearLayout participantsListLayout;
+    private ViewGroup participantsListLayout;
     private ParticipantsAdapter adapter;
 
     public ParticipantsListFragment() {
@@ -47,11 +46,11 @@ public class ParticipantsListFragment extends Fragment {
                              Bundle savedInstanceState) {
         activity.setTitle(title);
         if (participantsList == null || participantsList.size() == 0) {
-            participantsListLayout = (LinearLayout) inflater.inflate(R.layout.fragment_no_data, container, false);
+            participantsListLayout = (ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
             TextView infoText = (TextView) participantsListLayout.findViewById(R.id.info_text);
             infoText.setText(getString(R.string.textview_no_participants));
         } else {
-            participantsListLayout = (LinearLayout) inflater.inflate(R.layout.layout_listview, container, false);
+            participantsListLayout = (ViewGroup) inflater.inflate(R.layout.layout_listview, container, false);
             refreshListView();
         }
         return participantsListLayout;
@@ -65,6 +64,7 @@ public class ParticipantsListFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
                 ParticipantDTO participant = (ParticipantDTO) adapter.getItem(position);
+                activity.changeFragment(new ParticipantInfoFragment(participant));
             }
         });
 

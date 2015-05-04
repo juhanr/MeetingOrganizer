@@ -15,7 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -35,7 +34,7 @@ public class ChooseLocationFragment extends Fragment {
 
     private String title;
     private MainActivity activity;
-    private LinearLayout chooseLocationLayout;
+    private ViewGroup chooseLocationLayout;
     private CheckBoxAdapter adapter;
     private List<String> filtersList;
     private CustomMapFragment customMapFragment = new CustomMapFragment();
@@ -57,7 +56,7 @@ public class ChooseLocationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         activity.setTitle(title);
-        chooseLocationLayout = (LinearLayout) inflater
+        chooseLocationLayout = (ViewGroup) inflater
                 .inflate(R.layout.fragment_choose_location, container, false);
         setLocationSpinner();
         setButtonListeners();
@@ -73,7 +72,7 @@ public class ChooseLocationFragment extends Fragment {
             public void onClick(View v) {
                 if (NewMeetingFragment.newMeetingModel.getLocationType() ==
                         LocationType.SPECIFIC_LOCATION &&
-                        NewMeetingFragment.newMeetingModel.getLocationLatitude() != 0) {
+                        NewMeetingFragment.newMeetingModel.getLocation() != null) {
                     activity.changeFragment(new ChooseContactsFragment());
                 } else {
                     activity.showToastMessage(getString(R.string.toast_please_choose_location));
@@ -101,10 +100,10 @@ public class ChooseLocationFragment extends Fragment {
 
                         customMapFragment = new CustomMapFragment();
                         customMapFragment.setIsClickableMap(true);
-                        if (NewMeetingFragment.newMeetingModel.getLocationLatitude() != 0) {
+                        if (NewMeetingFragment.newMeetingModel.getLocation() != null) {
                             customMapFragment.setLocation(
-                                    new LatLng(NewMeetingFragment.newMeetingModel.getLocationLatitude(),
-                                            NewMeetingFragment.newMeetingModel.getLocationLongitude()));
+                                    new LatLng(NewMeetingFragment.newMeetingModel.getLocation().getLatitude(),
+                                            NewMeetingFragment.newMeetingModel.getLocation().getLongitude()));
                         }
                         getFragmentManager().beginTransaction()
                                 .replace(R.id.location_frame, customMapFragment).commit();
