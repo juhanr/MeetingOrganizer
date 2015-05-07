@@ -20,6 +20,8 @@ import java.util.Date;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
+import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
+import ee.juhan.meetingorganizer.models.server.LocationType;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
@@ -76,7 +78,7 @@ public class MeetingInfoFragment extends Fragment {
         TextView time = (TextView) meetingInfoLayout.findViewById(R.id.meeting_time);
 
         title.setText(getString(R.string.textview_title) + ": " + meeting.getTitle());
-        if (!description.getText().toString().trim().equals(""))
+        if (!meeting.getDescription().trim().equals(""))
             description.setText(getString(R.string.textview_description) + ": "
                     + meeting.getDescription());
         else
@@ -125,16 +127,30 @@ public class MeetingInfoFragment extends Fragment {
             acceptInvitation.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
-                    sendUpdateParticipantRequest(participantObject);
+                    if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS
+                            && MyLocationListener.getMyLocation() != null
+                            || meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
+                        participantObject.setLocation(MyLocationListener.getMyLocation());
+                        participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
+                        sendUpdateParticipantRequest(participantObject);
+                    } else {
+                        activity.showToastMessage(getString(R.string.toast_please_get_your_location));
+                    }
                 }
             });
 
             denyInvitation.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    participantObject.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
-                    sendUpdateParticipantRequest(participantObject);
+                    if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS
+                            && MyLocationListener.getMyLocation() != null
+                            || meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
+                        participantObject.setLocation(MyLocationListener.getMyLocation());
+                        participantObject.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
+                        sendUpdateParticipantRequest(participantObject);
+                    } else {
+                        activity.showToastMessage(getString(R.string.toast_please_get_your_location));
+                    }
                 }
             });
         } else {

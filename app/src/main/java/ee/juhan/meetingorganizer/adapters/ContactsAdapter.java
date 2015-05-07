@@ -70,7 +70,7 @@ public class ContactsAdapter extends ArrayAdapter<ContactDTO> {
 
         if (contact.getAccountId() != 0) {
             ImageView accountIcon = new ImageView(context);
-            accountIcon.setBackgroundResource(R.mipmap.ic_account);
+            accountIcon.setBackgroundResource(R.drawable.ic_account);
             listItemView.addView(accountIcon);
         }
 

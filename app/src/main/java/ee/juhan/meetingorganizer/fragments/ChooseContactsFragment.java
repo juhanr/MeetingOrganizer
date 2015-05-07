@@ -23,6 +23,7 @@ import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.ContactsAdapter;
 import ee.juhan.meetingorganizer.fragments.dialog.YesNoFragment;
+import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
 import ee.juhan.meetingorganizer.models.server.ContactDTO;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
@@ -117,7 +118,7 @@ public class ChooseContactsFragment extends Fragment {
     }
 
     private void resetParticipants() {
-        NewMeetingFragment.newMeetingModel.setParticipants(new ArrayList<ParticipantDTO>());
+        NewMeetingFragment.getNewMeetingModel().setParticipants(new ArrayList<ParticipantDTO>());
         participantsWithoutAccount = false;
     }
 
@@ -127,16 +128,16 @@ public class ChooseContactsFragment extends Fragment {
             ParticipantDTO participant = new ParticipantDTO(
                     checkedContact.getAccountId(), checkedContact.getName(),
                     checkedContact.getEmail(), checkedContact.getPhoneNumber());
-            NewMeetingFragment.newMeetingModel.addParticipant(participant);
+            NewMeetingFragment.getNewMeetingModel().addParticipant(participant);
         }
     }
 
     private void addLeaderInfo() {
-        NewMeetingFragment.newMeetingModel.setLeaderId(activity.getUserId());
+        NewMeetingFragment.getNewMeetingModel().setLeaderId(activity.getUserId());
         ParticipantDTO participant = new ParticipantDTO(
-                NewMeetingFragment.newMeetingModel.getLeaderId(),
-                ParticipationAnswer.PARTICIPATING);
-        NewMeetingFragment.newMeetingModel.addParticipant(participant);
+                NewMeetingFragment.getNewMeetingModel().getLeaderId(),
+                ParticipationAnswer.PARTICIPATING, MyLocationListener.getMyLocation());
+        NewMeetingFragment.getNewMeetingModel().addParticipant(participant);
     }
 
     private void checkParticipantsWithoutAccount() {
@@ -189,7 +190,7 @@ public class ChooseContactsFragment extends Fragment {
     }
 
     private void sendInvitationSMS(String smsMessage) {
-        for (ParticipantDTO participant : NewMeetingFragment.newMeetingModel.getParticipants()) {
+        for (ParticipantDTO participant : NewMeetingFragment.getNewMeetingModel().getParticipants()) {
             if (participant.getAccountId() == 0) {
                 SmsManager.getDefault().sendTextMessage(
                         participant.getPhoneNumber(), null, smsMessage, null, null);
@@ -199,14 +200,14 @@ public class ChooseContactsFragment extends Fragment {
 
     private void sendNewMeetingRequest() {
         activity.showLoadingFragment();
-        RestClient.get().newMeetingRequest(NewMeetingFragment.newMeetingModel,
+        RestClient.get().newMeetingRequest(NewMeetingFragment.getNewMeetingModel(),
                 new Callback<MeetingDTO>() {
                     @Override
                     public void success(MeetingDTO serverResponse, Response response) {
                         activity.dismissLoadingFragment();
                         activity.showToastMessage(getString(R.string.toast_meeting_created));
                         activity.changeFragment(new MeetingInfoFragment(serverResponse), false);
-                        NewMeetingFragment.newMeetingModel = new MeetingDTO();
+                        NewMeetingFragment.setNewMeetingModel(new MeetingDTO());
                     }
 
                     @Override

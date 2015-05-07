@@ -20,9 +20,11 @@ public class ParticipantDTO {
         this.location = location;
     }
 
-    public ParticipantDTO(int accountId, ParticipationAnswer participationAnswer) {
+    public ParticipantDTO(int accountId, ParticipationAnswer participationAnswer,
+                          MapCoordinate location) {
         this.accountId = accountId;
         this.participationAnswer = participationAnswer;
+        this.location = location;
     }
 
     public ParticipantDTO(int accountId, String name, String email, String phoneNumber) {

@@ -69,6 +69,8 @@
                 android:text="@string/button_deny" />
         </LinearLayout>
 
+        <include layout="@layout/view_empty_space" />
+
         <Button
             android:id="@+id/show_participants"
             style="@style/Button"

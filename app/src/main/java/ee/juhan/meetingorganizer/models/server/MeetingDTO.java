@@ -2,6 +2,7 @@ package ee.juhan.meetingorganizer.models.server;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 
 public class MeetingDTO {
 
@@ -14,6 +15,7 @@ public class MeetingDTO {
     private MapCoordinate location;
     private LocationType locationType;
     private ArrayList<ParticipantDTO> participants = new ArrayList<>();
+    private HashSet<MapCoordinate> predefinedLocations = new HashSet<>();
 
     public MeetingDTO() {
 
@@ -125,6 +127,22 @@ public class MeetingDTO {
 
     public boolean addParticipant(ParticipantDTO participant) {
         return participants.add(participant);
+    }
+
+    public HashSet<MapCoordinate> getPredefinedLocations() {
+        return predefinedLocations;
+    }
+
+    public void setPredefinedLocations(HashSet<MapCoordinate> predefinedLocations) {
+        this.predefinedLocations = predefinedLocations;
+    }
+
+    public void addPredefinedLocation(MapCoordinate predefinedLocation) {
+        this.predefinedLocations.add(predefinedLocation);
+    }
+
+    public void removePredefinedLocation(MapCoordinate predefinedLocation) {
+        this.predefinedLocations.remove(predefinedLocation);
     }
 
 }

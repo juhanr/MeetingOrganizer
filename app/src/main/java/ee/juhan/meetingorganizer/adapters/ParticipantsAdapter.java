@@ -44,7 +44,7 @@ public class ParticipantsAdapter extends ArrayAdapter<ParticipantDTO> {
         participantNameView.setText(participant.getName());
         if (participant.getAccountId() != 0) {
             ImageView accountIcon = new ImageView(context);
-            accountIcon.setBackgroundResource(R.mipmap.ic_account);
+            accountIcon.setBackgroundResource(R.drawable.ic_account);
             listItemView.addView(accountIcon);
         }
         return listItemView;

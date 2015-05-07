@@ -26,13 +26,21 @@ import ee.juhan.meetingorganizer.util.DateParserUtil;
 
 public class NewMeetingFragment extends Fragment {
 
-    public static MeetingDTO newMeetingModel = new MeetingDTO();
+    private static MeetingDTO newMeetingModel = new MeetingDTO();
     private String title;
     private MainActivity activity;
     private ViewGroup newMeetingLayout;
 
     public NewMeetingFragment() {
 
+    }
+
+    public static MeetingDTO getNewMeetingModel() {
+        return NewMeetingFragment.newMeetingModel;
+    }
+
+    public static void setNewMeetingModel(MeetingDTO meetingModel) {
+        NewMeetingFragment.newMeetingModel = meetingModel;
     }
 
     @Override

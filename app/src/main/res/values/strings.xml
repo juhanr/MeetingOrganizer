@@ -87,16 +87,18 @@
 
     <!-- Choose location strings -->
     <string name="button_search">Search</string>
+    <string name="button_add_location">Add location</string>
     <string name="textview_meeting_location">Meeting location</string>
     <string name="title_choose_location">Choose a location</string>
     <string name="toast_geocoder_service_error">Service currently not available.</string>
     <string name="toast_location_not_found">Location not found!</string>
     <string name="toast_please_choose_location">Please choose a location!</string>
+    <string name="toast_please_get_your_location">Please get your location!</string>
 
     <string-array name="array_location_items">
         <item>Specific location</item>
         <item>Generated from predefined locations</item>
-        <item>Generated from given parameters</item>
+        <!--<item>Generated from given parameters</item>    -->
     </string-array>
 
     <string-array name="array_location_parameters">
