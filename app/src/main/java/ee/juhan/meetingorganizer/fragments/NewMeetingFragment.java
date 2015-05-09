@@ -181,7 +181,7 @@ public class NewMeetingFragment extends Fragment {
             activity.showToastMessage(getString(R.string.toast_please_set_start_time));
         } else if (getViewText(R.id.end_time_button).equals(getString(R.string.textview_not_set_u))) {
             activity.showToastMessage(getString(R.string.toast_please_set_end_time));
-        } else if (newMeetingModel.getStartDateTime().before(new Date())) {
+        } else if (newMeetingModel.getStartDateTime().before(getCurrentTime(-1))) {
             activity.showToastMessage(getString(R.string.toast_start_time_future));
         } else if (newMeetingModel.getStartDateTime().after(newMeetingModel.getEndDateTime())) {
             activity.showToastMessage(getString(R.string.toast_end_time_after_start));
@@ -189,6 +189,10 @@ public class NewMeetingFragment extends Fragment {
             return true;
         }
         return false;
+    }
+
+    private Date getCurrentTime(int offsetInMinutes) {
+        return new Date((new Date()).getTime() + 60000 * offsetInMinutes);
     }
 
     private String getViewText(int viewId) {

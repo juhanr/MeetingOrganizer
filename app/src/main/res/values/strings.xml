@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Meeting Organizer</string>
+    <string name="app_name">Meeting Organiser</string>
     <string name="action_settings">Settings</string>
 
     <!-- General strings -->
@@ -37,14 +37,13 @@
 
     <!-- Dialog strings -->
     <string name="button_cancel">Cancel</string>
-    <string name="button_send">Send</string>
+    <string name="button_send_sms">Send SMS</string>
     <string name="textview_choose_date">Choose a date</string>
     <string name="textview_choose_time">Choose a time</string>
     <string name="textview_please_write_sms">Please write a SMS to send.</string>
-    <string name="textview_info_invite_via_sms">Some of the contacts don\'t have an account.\n
-        Would you like to invite them via SMS?</string>
+    <string name="textview_info_invite_via_sms">" of the contacts don\'t have an account.\nWould you like to invite them via SMS?\n(Some additional fees may apply)"</string>
     <string name="message_invite_via_sms">I would like to invite you to a meeting via
-        Meeting Organizer. Please register to see the invitation.</string>
+        Meeting Organiser. Please register to see the invitation.</string>
 
     <!-- Log in and registration strings -->
     <string name="textview_password">Password</string>
@@ -111,6 +110,7 @@
     <string name="button_create_meeting">Create meeting</string>
     <string name="textview_no_contacts">No contacts found</string>
     <string name="title_invite_contacts">Invite contacts</string>
+    <string name="toast_please_choose_contacts">Please choose contacts to invite!</string>
     <string name="toast_meeting_created">New meeting created!</string>
 
     <!-- Meeting info strings -->
@@ -123,6 +123,10 @@
 
     <!-- Participant info strings -->
     <string name="textview_no_participants">No participants found.</string>
+    <string name="textview_participating">Participating</string>
+    <string name="textview_not_answered">Not answered</string>
+    <string name="textview_yes">Yes</string>
+    <string name="textview_no">No</string>
     <string name="title_participants">Participants</string>
 
 </resources>

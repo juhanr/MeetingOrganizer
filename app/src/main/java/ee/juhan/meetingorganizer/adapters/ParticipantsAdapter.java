@@ -15,6 +15,7 @@ import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
+import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
 
 public class ParticipantsAdapter extends ArrayAdapter<ParticipantDTO> {
 
@@ -42,12 +43,19 @@ public class ParticipantsAdapter extends ArrayAdapter<ParticipantDTO> {
         TextView participantNameView = (TextView) listItemView
                 .findViewById(R.id.participant_name);
         participantNameView.setText(participant.getName());
-        if (participant.getAccountId() != 0) {
-            ImageView accountIcon = new ImageView(context);
-            accountIcon.setBackgroundResource(R.drawable.ic_account);
-            listItemView.addView(accountIcon);
-        }
+        if (participant.getParticipationAnswer() == ParticipationAnswer.PARTICIPATING)
+            addIcon(listItemView, R.drawable.ic_check_mark);
+        else if (participant.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED)
+            addIcon(listItemView, R.drawable.ic_question_mark);
+        if (participant.getAccountId() != 0)
+            addIcon(listItemView, R.drawable.ic_account);
         return listItemView;
+    }
+
+    private void addIcon(ViewGroup listItemView, int iconResource) {
+        ImageView accountIcon = new ImageView(context);
+        accountIcon.setBackgroundResource(iconResource);
+        listItemView.addView(accountIcon);
     }
 
     @Override

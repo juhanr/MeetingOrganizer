@@ -15,3 +15,13 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-dontwarn com.squareup.okhttp.**
+-dontwarn rx.**
+-dontwarn retrofit.**
+-dontwarn okio.**
+
+-keep class ee.juhan.meetingorganizer.models.server.** { *; }
+-keep class retrofit.** { *; }
+
+-keepattributes Signature

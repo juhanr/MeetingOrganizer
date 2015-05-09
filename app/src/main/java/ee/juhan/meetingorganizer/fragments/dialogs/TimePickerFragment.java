@@ -1,4 +1,4 @@
-package ee.juhan.meetingorganizer.fragments.dialog;
+package ee.juhan.meetingorganizer.fragments.dialogs;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;

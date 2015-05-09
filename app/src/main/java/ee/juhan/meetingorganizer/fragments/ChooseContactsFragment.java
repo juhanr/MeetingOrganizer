@@ -22,7 +22,7 @@ import java.util.List;
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.ContactsAdapter;
-import ee.juhan.meetingorganizer.fragments.dialog.YesNoFragment;
+import ee.juhan.meetingorganizer.fragments.dialogs.YesNoFragment;
 import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
 import ee.juhan.meetingorganizer.models.server.ContactDTO;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
@@ -41,7 +41,7 @@ public class ChooseContactsFragment extends Fragment {
     private List<ContactDTO> contactsList = new ArrayList<>();
     private ViewGroup chooseContactsLayout;
 
-    private boolean participantsWithoutAccount;
+    private int participantsWithoutAccount = 0;
 
     public ChooseContactsFragment() {
 
@@ -89,7 +89,7 @@ public class ChooseContactsFragment extends Fragment {
                     @Override
                     public void success(final List<ContactDTO> serverResponse, Response response) {
                         activity.dismissLoadingFragment();
-                        contactsList = serverResponse;
+                        updateContactsList(serverResponse);
                         refreshListView();
                     }
 
@@ -101,6 +101,18 @@ public class ChooseContactsFragment extends Fragment {
                 });
     }
 
+    private void updateContactsList(List<ContactDTO> newList) {
+        int userId = activity.getUserId();
+        for (int i = 0; i < newList.size(); i++) {
+            ContactDTO contact = newList.get(i);
+            if (contact.getAccountId() == userId) {
+                newList.remove(i);
+                break;
+            }
+        }
+        contactsList = newList;
+    }
+
     private void setButtonListeners() {
         Button continueButton = (Button) chooseContactsLayout
                 .findViewById(R.id.continue_button);
@@ -108,10 +120,14 @@ public class ChooseContactsFragment extends Fragment {
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resetParticipants();
-                addLeaderInfo();
-                addContactsAsParticipants();
-                checkParticipantsWithoutAccount();
+                if (adapter.getCheckedItems().size() > 0) {
+                    resetParticipants();
+                    addLeaderInfo();
+                    addContactsAsParticipants();
+                    checkParticipantsWithoutAccount();
+                } else {
+                    activity.showToastMessage(getString(R.string.toast_please_choose_contacts));
+                }
             }
         });
 
@@ -119,12 +135,13 @@ public class ChooseContactsFragment extends Fragment {
 
     private void resetParticipants() {
         NewMeetingFragment.getNewMeetingModel().setParticipants(new ArrayList<ParticipantDTO>());
-        participantsWithoutAccount = false;
+        participantsWithoutAccount = 0;
     }
 
     private void addContactsAsParticipants() {
         for (ContactDTO checkedContact : adapter.getCheckedItems()) {
-            participantsWithoutAccount = checkedContact.getAccountId() == 0;
+            if (checkedContact.getAccountId() == 0)
+                participantsWithoutAccount++;
             ParticipantDTO participant = new ParticipantDTO(
                     checkedContact.getAccountId(), checkedContact.getName(),
                     checkedContact.getEmail(), checkedContact.getPhoneNumber());
@@ -141,7 +158,7 @@ public class ChooseContactsFragment extends Fragment {
     }
 
     private void checkParticipantsWithoutAccount() {
-        if (participantsWithoutAccount) {
+        if (participantsWithoutAccount > 0) {
             showAskSMSDialog();
         } else {
             sendNewMeetingRequest();
@@ -150,7 +167,8 @@ public class ChooseContactsFragment extends Fragment {
 
     private void showAskSMSDialog() {
         final YesNoFragment yesNoFragment = new YesNoFragment();
-        yesNoFragment.setMessage(getString(R.string.textview_info_invite_via_sms))
+        yesNoFragment.setMessage(participantsWithoutAccount +
+                getString(R.string.textview_info_invite_via_sms))
                 .setPositiveButton(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -172,7 +190,7 @@ public class ChooseContactsFragment extends Fragment {
         final YesNoFragment yesNoFragment = new YesNoFragment();
         yesNoFragment.setMessage(getString(R.string.textview_please_write_sms))
                 .setInputText(getString(R.string.message_invite_via_sms))
-                .setPositiveButton(getString(R.string.button_send), new View.OnClickListener() {
+                .setPositiveButton(getString(R.string.button_send_sms), new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         sendInvitationSMS(yesNoFragment.getInputValue());

@@ -11,7 +11,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,7 +28,7 @@ import ee.juhan.meetingorganizer.fragments.LoginFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
 import ee.juhan.meetingorganizer.fragments.NewMeetingFragment;
 import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
-import ee.juhan.meetingorganizer.fragments.dialog.LoadingFragment;
+import ee.juhan.meetingorganizer.fragments.dialogs.LoadingFragment;
 import ee.juhan.meetingorganizer.rest.RestClient;
 
 public class MainActivity extends Activity {
@@ -50,6 +49,8 @@ public class MainActivity extends Activity {
 
     private boolean isLoggedIn;
     private LoadingFragment loadingFragment;
+
+    private int backStackCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,14 +163,14 @@ public class MainActivity extends Activity {
                 R.layout.drawer_list_item, drawerItems));
 
         currentDrawerItemPosition = 0;
-        selectDrawerItem(1, false);
+        selectDrawerItem(1, true);
     }
 
     public void selectDrawerItem(int position) {
-        selectDrawerItem(position, true);
+        selectDrawerItem(position, false);
     }
 
-    public void selectDrawerItem(int position, boolean addToBackStack) {
+    public void selectDrawerItem(int position, boolean resetBackStackCounter) {
         if (position != currentDrawerItemPosition && position != 0) {
             if (isLoggedIn) {
                 MeetingsListFragment meetingsListFragment = null;
@@ -178,38 +179,38 @@ public class MainActivity extends Activity {
                 }
                 switch (position) {
                     case 1:
-                        changeFragment(new NewMeetingFragment(), addToBackStack);
+                        changeFragment(new NewMeetingFragment(), resetBackStackCounter);
                         break;
                     case 2:
                         meetingsListFragment.getMeetingsRequest(MeetingsListFragment.ONGOING_MEETINGS);
-                        changeFragment(meetingsListFragment, addToBackStack);
+                        changeFragment(meetingsListFragment, resetBackStackCounter);
                         break;
                     case 3:
                         meetingsListFragment.getMeetingsRequest(MeetingsListFragment.FUTURE_MEETINGS);
-                        changeFragment(meetingsListFragment, addToBackStack);
+                        changeFragment(meetingsListFragment, resetBackStackCounter);
                         break;
                     case 4:
                         meetingsListFragment.getMeetingsRequest(MeetingsListFragment.PAST_MEETINGS);
-                        changeFragment(meetingsListFragment, addToBackStack);
+                        changeFragment(meetingsListFragment, resetBackStackCounter);
                         break;
                     case 5:
                         meetingsListFragment.getMeetingsRequest(MeetingsListFragment.INVITATIONS);
-                        changeFragment(meetingsListFragment, addToBackStack);
+                        changeFragment(meetingsListFragment, resetBackStackCounter);
                         break;
                     default:
-                        changeFragment(new NewMeetingFragment(), addToBackStack);
+                        changeFragment(new NewMeetingFragment(), resetBackStackCounter);
                         break;
                 }
             } else {
                 switch (position) {
                     case 1:
-                        changeFragment(new LoginFragment(), addToBackStack);
+                        changeFragment(new LoginFragment(), resetBackStackCounter);
                         break;
                     case 2:
-                        changeFragment(new RegistrationFragment(), addToBackStack);
+                        changeFragment(new RegistrationFragment(), resetBackStackCounter);
                         break;
                     default:
-                        changeFragment(new LoginFragment(), addToBackStack);
+                        changeFragment(new LoginFragment(), resetBackStackCounter);
                         break;
                 }
             }
@@ -266,15 +267,17 @@ public class MainActivity extends Activity {
     }
 
     public void changeFragment(Fragment fragment) {
-        changeFragment(fragment, true);
+        changeFragment(fragment, false);
     }
 
-    public void changeFragment(Fragment fragment, boolean addToBackStack) {
+    public void changeFragment(Fragment fragment, boolean resetBackStackCounter) {
+        if (resetBackStackCounter)
+            backStackCounter = getFragmentManager().getBackStackEntryCount();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right,
                 R.anim.slide_in_right, R.anim.slide_out_left);
         ft.replace(R.id.fragment_container, fragment);
-        if (addToBackStack)
+        if (!resetBackStackCounter)
             ft.addToBackStack(null);
         ft.commit();
     }
@@ -305,14 +308,14 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            if (this.getFragmentManager().getBackStackEntryCount() != 0) {
-                this.getFragmentManager().popBackStack();
-                return true;
-            }
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawers();
+        } else if (getFragmentManager().getBackStackEntryCount() - backStackCounter > 0) {
+            getFragmentManager().popBackStack();
+        } else {
+            moveTaskToBack(true);
         }
-        return super.onKeyDown(keyCode, event);
     }
 
     public void showLoadingFragment() {

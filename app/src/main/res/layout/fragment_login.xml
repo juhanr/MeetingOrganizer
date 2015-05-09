@@ -3,6 +3,7 @@
     style="@style/FragmentLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
     android:orientation="vertical">
 
     <TextView
@@ -16,6 +17,7 @@
         style="@style/TextBox"
         android:layout_width="@dimen/textbox_width_normal"
         android:layout_height="wrap_content"
+        android:inputType="textEmailAddress"
         android:maxLength="40" />
 
     <TextView
