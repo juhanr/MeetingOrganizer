@@ -15,15 +15,15 @@ import retrofit.http.Path;
 
 public interface RestService {
 
-    static final public String MEETING = "/meeting";
-    static final public String NEW_MEETING = MEETING + "/new";
-    static final public String UPDATE_PARTICIPANT = "/update-participant";
+    public static final String MEETING = "/meeting";
+    public static final String NEW_MEETING = MEETING + "/new";
+    public static final String UPDATE_PARTICIPANT = "/update-participant";
 
-    static final public String REGISTER = "/register";
-    static final public String LOGIN = "/login";
+    public static final String REGISTER = "/register";
+    public static final String LOGIN = "/login";
 
-    static final public String ACCOUNT = "/account";
-    static final public String CHECK_CONTACTS = "/check-contacts";
+    public static final String ACCOUNT = "/account";
+    public static final String CHECK_CONTACTS = "/check-contacts";
 
     @POST(LOGIN)
     void loginRequest(@Body AccountDTO accountDTO,
@@ -51,6 +51,5 @@ public interface RestService {
     void updateParticipantRequest(@Body ParticipantDTO participantDTO,
                                   @Path("meetingId") int meetingId,
                                   Callback<MeetingDTO> callback);
-
 
 }

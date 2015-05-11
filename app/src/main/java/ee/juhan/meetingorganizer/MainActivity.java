@@ -75,10 +75,8 @@ public class MainActivity extends Activity {
 
     private void createDrawerItemsHashMap() {
         drawerItemsHashMap.clear();
-        if (isLoggedIn)
-            drawerItems = getResources().getStringArray(R.array.array_drawer_items_online);
-        else
-            drawerItems = getResources().getStringArray(R.array.array_drawer_items_offline);
+        drawerItems = isLoggedIn ? getResources().getStringArray(R.array.array_drawer_items_online)
+                : getResources().getStringArray(R.array.array_drawer_items_offline);
         Integer position = 1;
         for (String item : drawerItems) {
             drawerItemsHashMap.put(item, position);
@@ -133,13 +131,9 @@ public class MainActivity extends Activity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
-        drawerToggle = new ActionBarDrawerToggle(
-                this,
-                drawerLayout,
-                R.drawable.ic_drawer,
-                R.string.drawer_open,
-                R.string.drawer_close
-        ) {
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
+                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+
             public void onDrawerClosed(View view) {
                 getActionBar().setTitle(title);
                 invalidateOptionsMenu();
@@ -244,9 +238,12 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.clear();
+        if (isLoggedIn) {
+            getMenuInflater().inflate(R.menu.menu_main, menu);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -257,10 +254,10 @@ public class MainActivity extends Activity {
             return true;
         }
 
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.action_logout) {
+        if (id == R.id.action_logout) {
             logOut();
+        } else {
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -271,14 +268,15 @@ public class MainActivity extends Activity {
     }
 
     public void changeFragment(Fragment fragment, boolean resetBackStackCounter) {
-        if (resetBackStackCounter)
-            backStackCounter = getFragmentManager().getBackStackEntryCount();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right,
                 R.anim.slide_in_right, R.anim.slide_out_left);
         ft.replace(R.id.fragment_container, fragment);
-        if (!resetBackStackCounter)
+        if (resetBackStackCounter) {
+            backStackCounter = getFragmentManager().getBackStackEntryCount();
+        } else {
             ft.addToBackStack(null);
+        }
         ft.commit();
     }
 
@@ -303,8 +301,9 @@ public class MainActivity extends Activity {
      */
 
     public void cancelToastMessage() {
-        if (toast != null)
+        if (toast != null) {
             toast.cancel();
+        }
     }
 
     @Override

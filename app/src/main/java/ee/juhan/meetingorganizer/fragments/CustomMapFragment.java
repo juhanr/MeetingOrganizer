@@ -41,7 +41,6 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     private LatLng location;
     private boolean isClickableMap;
     private ViewGroup mapLayout;
-
     private String markerAddress = "";
 
     public CustomMapFragment() {
@@ -72,9 +71,8 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             FrameLayout frameLayout = new FrameLayout(activity);
             frameLayout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            mapLayout.addView(frameLayout,
-                    new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT));
+            mapLayout.addView(frameLayout, new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             mapLayout.setVisibility(mapVisibility);
         }
     }
@@ -94,8 +92,9 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
                             NewMeetingFragment.getNewMeetingModel()
                                     .setLocation(new MapCoordinate(latLng.latitude, latLng.longitude));
                         }
-                        if (locationMarker != null)
+                        if (locationMarker != null) {
                             locationMarker.remove();
+                        }
                         setLocationMarker(latLng);
                     }
                 });
@@ -132,8 +131,9 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     private void setLocationMarker(LatLng latLng, String address) {
         this.location = latLng;
         this.markerAddress = address;
-        if (locationMarker != null)
+        if (locationMarker != null) {
             locationMarker.remove();
+        }
         locationMarker = map.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title(getString(R.string.textview_meeting_location))
@@ -155,8 +155,9 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
 
     public void setMapVisibility(int visibility) {
         CustomMapFragment.mapVisibility = visibility;
-        if (mapLayout != null)
+        if (mapLayout != null) {
             mapLayout.setVisibility(visibility);
+        }
     }
 
     public String getMarkerAddress() {

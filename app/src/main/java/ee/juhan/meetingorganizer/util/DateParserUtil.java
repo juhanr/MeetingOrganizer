@@ -7,10 +7,10 @@ import java.util.TimeZone;
 
 public class DateParserUtil {
 
-    private static SimpleDateFormat URL_DATETIME_FORMAT = new SimpleDateFormat("dd-MM-yyyy-HH-mm");
-    private static SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-    private static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
-    private static SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
+    private static final SimpleDateFormat URL_DATETIME_FORMAT = new SimpleDateFormat("dd-MM-yyyy-HH-mm");
+    private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
 
     static {
         DATETIME_FORMAT.setTimeZone(TimeZone.getDefault());

@@ -76,13 +76,13 @@ public class MeetingInfoFragment extends Fragment {
         TextView description = (TextView) meetingInfoLayout.findViewById(R.id.meeting_description);
         TextView date = (TextView) meetingInfoLayout.findViewById(R.id.meeting_date);
         TextView time = (TextView) meetingInfoLayout.findViewById(R.id.meeting_time);
-
         title.setText(getString(R.string.textview_title) + ": " + meeting.getTitle());
-        if (!meeting.getDescription().trim().equals(""))
+        if (!meeting.getDescription().trim().equals("")) {
             description.setText(getString(R.string.textview_description) + ": "
                     + meeting.getDescription());
-        else
+        } else {
             description.setText(getString(R.string.textview_description) + ": None");
+        }
         date.setText(getString(R.string.textview_date) + ": "
                 + DateParserUtil.formatDate(meeting.getStartDateTime()));
         time.setText(getString(R.string.textview_time) + ": "
@@ -98,19 +98,17 @@ public class MeetingInfoFragment extends Fragment {
                 replace(R.id.location_frame, customMapFragment).commit();
         FrameLayout layout = (FrameLayout) meetingInfoLayout.findViewById(R.id.location_frame);
         layout.setBackgroundResource(R.drawable.view_border);
-
         setAnswerButtons();
     }
 
     private void setButtonListeners() {
         Button showParticipants = (Button) meetingInfoLayout
                 .findViewById(R.id.show_participants);
-
         showParticipants.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity) getActivity())
-                        .changeFragment(new ParticipantsListFragment(meeting.getParticipants()));
+                ((MainActivity) getActivity()).changeFragment(
+                        new ParticipantsListFragment(meeting.getParticipants()));
             }
         });
     }
@@ -123,7 +121,6 @@ public class MeetingInfoFragment extends Fragment {
                     .findViewById(R.id.accept_invitation);
             Button denyInvitation = (Button) meetingInfoLayout
                     .findViewById(R.id.deny_invitation);
-
             acceptInvitation.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -138,7 +135,6 @@ public class MeetingInfoFragment extends Fragment {
                     }
                 }
             });
-
             denyInvitation.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

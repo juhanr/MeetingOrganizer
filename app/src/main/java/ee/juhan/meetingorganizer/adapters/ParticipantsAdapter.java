@@ -43,12 +43,14 @@ public class ParticipantsAdapter extends ArrayAdapter<ParticipantDTO> {
         TextView participantNameView = (TextView) listItemView
                 .findViewById(R.id.participant_name);
         participantNameView.setText(participant.getName());
-        if (participant.getParticipationAnswer() == ParticipationAnswer.PARTICIPATING)
+        if (participant.getParticipationAnswer() == ParticipationAnswer.PARTICIPATING) {
             addIcon(listItemView, R.drawable.ic_check_mark);
-        else if (participant.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED)
+        } else if (participant.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED) {
             addIcon(listItemView, R.drawable.ic_question_mark);
-        if (participant.getAccountId() != 0)
+        }
+        if (participant.getAccountId() != 0) {
             addIcon(listItemView, R.drawable.ic_account);
+        }
         return listItemView;
     }
 

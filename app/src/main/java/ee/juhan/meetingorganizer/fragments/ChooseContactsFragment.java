@@ -140,8 +140,9 @@ public class ChooseContactsFragment extends Fragment {
 
     private void addContactsAsParticipants() {
         for (ContactDTO checkedContact : adapter.getCheckedItems()) {
-            if (checkedContact.getAccountId() == 0)
+            if (checkedContact.getAccountId() == 0) {
                 participantsWithoutAccount++;
+            }
             ParticipantDTO participant = new ParticipantDTO(
                     checkedContact.getAccountId(), checkedContact.getName(),
                     checkedContact.getEmail(), checkedContact.getPhoneNumber());

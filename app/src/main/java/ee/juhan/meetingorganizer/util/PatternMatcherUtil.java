@@ -2,7 +2,6 @@ package ee.juhan.meetingorganizer.util;
 
 import android.util.Patterns;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PatternMatcherUtil {
@@ -16,18 +15,15 @@ public class PatternMatcherUtil {
     }
 
     public static boolean isValidName(CharSequence name) {
-        Matcher matcher = NAME_REGEX.matcher(name);
-        return matcher.find();
+        return NAME_REGEX.matcher(name).find();
     }
 
     public static boolean isValidPhoneNumber(CharSequence phoneNumber) {
-        Matcher matcher = PHONE_NUMBER_REGEX.matcher(phoneNumber);
-        return matcher.find();
+        return PHONE_NUMBER_REGEX.matcher(phoneNumber).find();
     }
 
     public static boolean isValidAreaNumber(CharSequence areaNumber) {
-        Matcher matcher = AREA_NUMBER_REGEX.matcher(areaNumber);
-        return matcher.find();
+        return AREA_NUMBER_REGEX.matcher(areaNumber).find();
     }
 
 }

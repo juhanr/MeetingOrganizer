@@ -45,12 +45,13 @@ public class YesNoFragment extends DialogFragment {
             EditText inputEditText = (EditText) dialogLayout.findViewById(R.id.dialog_input);
             Button positiveButton = (Button) dialogLayout.findViewById(R.id.dialog_positive_button);
             Button negativeButton = (Button) dialogLayout.findViewById(R.id.dialog_negative_button);
-
             messageTextView.setText(messageText);
-            if (positiveButtonText != null)
+            if (positiveButtonText != null) {
                 positiveButton.setText(positiveButtonText);
-            if (negativeButtonText != null)
+            }
+            if (negativeButtonText != null) {
                 negativeButton.setText(negativeButtonText);
+            }
             positiveButton.setOnClickListener(positiveButtonListener);
             negativeButton.setOnClickListener(negativeButtonListener);
             if (inputEditText != null) {
@@ -121,8 +122,7 @@ public class YesNoFragment extends DialogFragment {
         return this;
     }
 
-    public YesNoFragment setNegativeButton(
-            android.view.View.OnClickListener buttonClickListener) {
+    public YesNoFragment setNegativeButton(android.view.View.OnClickListener buttonClickListener) {
         negativeButtonListener = buttonClickListener;
         return this;
     }

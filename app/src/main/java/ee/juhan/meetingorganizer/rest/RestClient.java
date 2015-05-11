@@ -19,11 +19,11 @@ import retrofit.converter.GsonConverter;
 
 public class RestClient {
 
-    static final public String ROOT = "https://calm-woodland-1752.herokuapp.com";
+    public static final String ROOT = "https://calm-woodland-1752.herokuapp.com";
 
     private static RestService REST_CLIENT;
-    static private String sid;
-    static private RequestInterceptor REQUEST_INTERCEPTOR = new RequestInterceptor() {
+    private static String sid;
+    private static RequestInterceptor REQUEST_INTERCEPTOR = new RequestInterceptor() {
         @Override
         public void intercept(RequestFacade request) {
             request.addHeader("Cookie", "sid=" + sid);

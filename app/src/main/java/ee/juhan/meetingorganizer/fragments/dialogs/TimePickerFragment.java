@@ -29,8 +29,8 @@ public class TimePickerFragment extends DialogFragment
             hour = c.get(Calendar.HOUR_OF_DAY);
             minute = c.get(Calendar.MINUTE);
         }
-        TimePickerDialog dialog = new TimePickerDialog(getActivity(), DatePickerDialog.THEME_HOLO_DARK,
-                this, hour, minute, true);
+        TimePickerDialog dialog = new TimePickerDialog(getActivity(),
+                DatePickerDialog.THEME_HOLO_DARK, this, hour, minute, true);
         dialog.setTitle(getString(R.string.textview_choose_time));
         return dialog;
     }

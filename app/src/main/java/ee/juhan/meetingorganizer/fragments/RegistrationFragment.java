@@ -49,7 +49,6 @@ public class RegistrationFragment extends Fragment {
     private void setButtonListeners() {
         Button registerButton = (Button) registrationLayout
                 .findViewById(R.id.register_button);
-
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,11 +87,13 @@ public class RegistrationFragment extends Fragment {
 
     private String getViewText(int viewId) {
         View view = registrationLayout.findViewById(viewId);
-        if (view instanceof EditText)
+        if (view instanceof EditText) {
             return ((EditText) view).getText().toString().trim();
-        else if (view instanceof TextView)
+        } else if (view instanceof TextView) {
             return ((TextView) view).getText().toString().trim();
-        else return null;
+        } else {
+            return null;
+        }
     }
 
     private void sendRegistrationRequest(String name, final String email, String password, String phoneNr) {

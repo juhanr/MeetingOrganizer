@@ -37,8 +37,7 @@ public class ParticipantInfoFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         activity.setTitle(title);
         participantInfoLayout = (ViewGroup) inflater.inflate(R.layout.fragment_participant_info, container, false);
         populateLayout(participant);
@@ -50,16 +49,16 @@ public class ParticipantInfoFragment extends Fragment {
         TextView phoneNumber = (TextView) participantInfoLayout.findViewById(R.id.participant_phone_number);
         TextView email = (TextView) participantInfoLayout.findViewById(R.id.participant_email);
         TextView answer = (TextView) participantInfoLayout.findViewById(R.id.participant_answer);
-
         name.setText(getString(R.string.textview_name) + ": " + participant.getName());
         phoneNumber.setText(getString(R.string.textview_phone_number) + ": " + participant.getPhoneNumber());
         email.setText(getString(R.string.textview_email) + ": " + participant.getEmail());
-        if (participant.getParticipationAnswer() == ParticipationAnswer.PARTICIPATING)
+        if (participant.getParticipationAnswer() == ParticipationAnswer.PARTICIPATING) {
             answer.setText(getString(R.string.textview_participating) + ": " + getString(R.string.textview_yes));
-        else if (participant.getParticipationAnswer() == ParticipationAnswer.NOT_PARTICIPATING)
+        } else if (participant.getParticipationAnswer() == ParticipationAnswer.NOT_PARTICIPATING) {
             answer.setText(getString(R.string.textview_participating) + ": " + getString(R.string.textview_no));
-        else if (participant.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED)
+        } else if (participant.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED) {
             answer.setText(getString(R.string.textview_participating) + ": " + getString(R.string.textview_not_answered));
+        }
     }
 
 }

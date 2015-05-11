@@ -52,7 +52,6 @@ public class LoginFragment extends Fragment {
                 .findViewById(R.id.login_button);
         TextView createAccountButton = (TextView) loginLayout
                 .findViewById(R.id.create_account_textbutton);
-
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,14 +61,12 @@ public class LoginFragment extends Fragment {
                 }
             }
         });
-
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 activity.selectDrawerItem(2);
             }
         });
-
     }
 
     private boolean isValidData() {
@@ -85,11 +82,13 @@ public class LoginFragment extends Fragment {
 
     private String getViewText(int viewId) {
         View view = loginLayout.findViewById(viewId);
-        if (view instanceof EditText)
+        if (view instanceof EditText) {
             return ((EditText) view).getText().toString().trim();
-        else if (view instanceof TextView)
+        } else if (view instanceof TextView) {
             return ((TextView) view).getText().toString().trim();
-        else return null;
+        } else {
+            return null;
+        }
     }
 
     private void sendLoginRequest(final String email, String password) {

@@ -55,16 +55,15 @@ public class ChooseLocationFragment extends Fragment {
         super.onCreate(savedInstanceState);
         activity = (MainActivity) getActivity();
         title = getString(R.string.title_choose_location);
-        filtersList = Arrays.asList(
-                getResources().getStringArray(R.array.array_location_parameters));
+        filtersList = Arrays.asList(getResources().getStringArray(R.array.array_location_parameters));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         activity.setTitle(title);
-        chooseLocationLayout = (ViewGroup) inflater
-                .inflate(R.layout.fragment_choose_location, container, false);
+        chooseLocationLayout = (ViewGroup) inflater.inflate(
+                R.layout.fragment_choose_location, container, false);
         setLocationSpinner();
         setButtonListeners();
         return chooseLocationLayout;
@@ -103,7 +102,6 @@ public class ChooseLocationFragment extends Fragment {
                 R.array.array_location_items, simple_spinner_item);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerAdapter);
-
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                 switch (pos) {
@@ -154,9 +152,9 @@ public class ChooseLocationFragment extends Fragment {
         customMapFragment = new CustomMapFragment();
         customMapFragment.setIsClickableMap(true);
         if (NewMeetingFragment.getNewMeetingModel().getLocation() != null) {
-            customMapFragment.setLocation(
-                    new LatLng(NewMeetingFragment.getNewMeetingModel().getLocation().getLatitude(),
-                            NewMeetingFragment.getNewMeetingModel().getLocation().getLongitude()));
+            customMapFragment.setLocation(new LatLng(
+                    NewMeetingFragment.getNewMeetingModel().getLocation().getLatitude(),
+                    NewMeetingFragment.getNewMeetingModel().getLocation().getLongitude()));
         }
         getFragmentManager().beginTransaction()
                 .replace(R.id.location_frame, customMapFragment).commit();
@@ -172,7 +170,6 @@ public class ChooseLocationFragment extends Fragment {
         FrameLayout mapSearchFrame = (FrameLayout) chooseLocationLayout
                 .findViewById(R.id.map_search_frame);
         mapSearchFrame.addView(mapSearchLayout);
-
         final EditText searchEditText = (EditText) mapSearchLayout.findViewById(R.id.map_search_textbox);
         Button searchButton = (Button) mapSearchLayout.findViewById(R.id.map_search_button);
         searchButton.setOnClickListener(new View.OnClickListener() {

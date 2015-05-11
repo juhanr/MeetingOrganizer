@@ -91,7 +91,6 @@ public class MeetingsListFragment extends Fragment {
                 ((MainActivity) getActivity()).changeFragment(new MeetingInfoFragment(meeting));
             }
         });
-
         adapter = new MeetingsAdapter(getActivity(), meetingsList);
         listview.setAdapter(adapter);
     }

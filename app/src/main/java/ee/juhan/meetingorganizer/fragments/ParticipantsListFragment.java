@@ -67,7 +67,6 @@ public class ParticipantsListFragment extends Fragment {
                 activity.changeFragment(new ParticipantInfoFragment(participant));
             }
         });
-
         adapter = new ParticipantsAdapter(getActivity(), participantsList);
         listview.setAdapter(adapter);
     }

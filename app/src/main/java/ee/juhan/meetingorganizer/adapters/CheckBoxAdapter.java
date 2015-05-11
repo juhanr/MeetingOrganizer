@@ -33,13 +33,10 @@ public class CheckBoxAdapter extends ArrayAdapter<String> {
     @SuppressLint("ViewHolder")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         LinearLayout listItemView = (LinearLayout) inflater.inflate(
                 R.layout.list_item_checkbox, parent, false);
-
         CheckBox checkBox = (CheckBox) listItemView
                 .findViewById(R.id.checkbox);
         checkBox.setText(getItem(position));
@@ -49,13 +46,14 @@ public class CheckBoxAdapter extends ArrayAdapter<String> {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         String contactName = (String) ((CheckBox) buttonView).getText();
-                        if (isChecked)
+                        if (isChecked) {
                             checkedItems.add(contactName);
-                        else checkedItems.remove(contactName);
+                        } else {
+                            checkedItems.remove(contactName);
+                        }
                     }
                 }
         );
-
         return listItemView;
     }
 

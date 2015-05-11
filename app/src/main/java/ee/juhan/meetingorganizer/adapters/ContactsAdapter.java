@@ -38,10 +38,8 @@ public class ContactsAdapter extends ArrayAdapter<ContactDTO> {
         ContactDTO contact = getItem(position);
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         LinearLayout listItemView = (LinearLayout) inflater.inflate(
                 R.layout.list_item_checkbox, parent, false);
-
         CheckBox checkBox = (CheckBox) listItemView
                 .findViewById(R.id.checkbox);
         if (checkedItems.contains(contact)) {
@@ -61,19 +59,19 @@ public class ContactsAdapter extends ArrayAdapter<ContactDTO> {
                                 break;
                             }
                         }
-                        if (isChecked)
+                        if (isChecked) {
                             checkedItems.add(chosenContact);
-                        else checkedItems.remove(chosenContact);
+                        } else {
+                            checkedItems.remove(chosenContact);
+                        }
                     }
                 }
         );
-
         if (contact.getAccountId() != 0) {
             ImageView accountIcon = new ImageView(context);
             accountIcon.setBackgroundResource(R.drawable.ic_account);
             listItemView.addView(accountIcon);
         }
-
         return listItemView;
     }
 

@@ -70,7 +70,6 @@ public class NewMeetingFragment extends Fragment {
                 .findViewById(R.id.end_time_button);
         Button continueButton = (Button) newMeetingLayout
                 .findViewById(R.id.continue_button);
-
         dateButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,7 +92,6 @@ public class NewMeetingFragment extends Fragment {
                 dialog.show();
             }
         });
-
         startTimeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,7 +114,6 @@ public class NewMeetingFragment extends Fragment {
                 dialog.show();
             }
         });
-
         endTimeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -153,10 +150,7 @@ public class NewMeetingFragment extends Fragment {
     }
 
     private String formatString(int n) {
-        if (n < 10)
-            return "0" + n;
-        else
-            return "" + n;
+        return (n < 10) ? "0" + n : "" + n;
     }
 
     private void setSavedData() {
@@ -197,19 +191,22 @@ public class NewMeetingFragment extends Fragment {
 
     private String getViewText(int viewId) {
         View view = newMeetingLayout.findViewById(viewId);
-        if (view instanceof EditText)
+        if (view instanceof EditText) {
             return ((EditText) view).getText().toString().trim();
-        else if (view instanceof TextView)
+        } else if (view instanceof TextView) {
             return ((TextView) view).getText().toString().trim();
-        else return null;
+        } else {
+            return null;
+        }
     }
 
     private void setViewText(int viewId, Spanned text) {
         View view = newMeetingLayout.findViewById(viewId);
-        if (view instanceof EditText)
+        if (view instanceof EditText) {
             ((EditText) view).setText(text);
-        else if (view instanceof TextView)
+        } else if (view instanceof TextView) {
             ((TextView) view).setText(text);
+        }
     }
 
     private void setViewText(int viewId, String text) {
@@ -220,29 +217,23 @@ public class NewMeetingFragment extends Fragment {
         newMeetingModel.setTitle(getViewText(R.id.title_textbox));
         newMeetingModel.setDescription(getViewText(R.id.description_textbox));
         newMeetingModel.setStartDateTime(DateParserUtil.parseDateTime(
-                getViewText(R.id.date_button) + " " +
-                        getViewText(R.id.start_time_button)));
+                getViewText(R.id.date_button) + " " + getViewText(R.id.start_time_button)));
         newMeetingModel.setEndDateTime(DateParserUtil.parseDateTime(
-                getViewText(R.id.date_button) + " " +
-                        getViewText(R.id.end_time_button)));
-
+                getViewText(R.id.date_button) + " " + getViewText(R.id.end_time_button)));
     }
 
     private void setDate(String date) {
-        TextView dateButton = (TextView) newMeetingLayout
-                .findViewById(R.id.date_button);
+        TextView dateButton = (TextView) newMeetingLayout.findViewById(R.id.date_button);
         dateButton.setText(underlineString(date));
     }
 
     private void setStartTime(String time) {
-        TextView startTimeButton = (TextView) newMeetingLayout
-                .findViewById(R.id.start_time_button);
+        TextView startTimeButton = (TextView) newMeetingLayout.findViewById(R.id.start_time_button);
         startTimeButton.setText(underlineString(time));
     }
 
     private void setEndTime(String time) {
-        TextView endTimeButton = (TextView) newMeetingLayout
-                .findViewById(R.id.end_time_button);
+        TextView endTimeButton = (TextView) newMeetingLayout.findViewById(R.id.end_time_button);
         endTimeButton.setText(underlineString(time));
     }
 

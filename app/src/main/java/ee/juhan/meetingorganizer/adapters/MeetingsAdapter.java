@@ -34,22 +34,17 @@ public class MeetingsAdapter extends ArrayAdapter<MeetingDTO> {
     @SuppressLint("ViewHolder")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         LinearLayout listItemView = (LinearLayout) inflater.inflate(
                 R.layout.list_item_meetings, parent, false);
-
         MeetingDTO meeting = meetingsList.get(position);
-
         TextView meetingTitleView = (TextView) listItemView
                 .findViewById(R.id.meeting_title);
         TextView meetingDateView = (TextView) listItemView
                 .findViewById(R.id.meeting_date);
         TextView meetingTimeView = (TextView) listItemView
                 .findViewById(R.id.meeting_time);
-
         meetingTitleView.setText(context.getString(R.string.textview_title) + ": "
                 + meeting.getTitle());
         meetingDateView.setText(context.getString(R.string.textview_date) + ": "
@@ -57,7 +52,6 @@ public class MeetingsAdapter extends ArrayAdapter<MeetingDTO> {
         meetingTimeView.setText(context.getString(R.string.textview_time) + ": "
                 + DateParserUtil.formatTime(meeting.getStartDateTime()) + " - "
                 + DateParserUtil.formatTime(meeting.getEndDateTime()));
-
         return listItemView;
     }
 
