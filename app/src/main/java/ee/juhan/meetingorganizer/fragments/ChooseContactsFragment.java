@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -21,7 +22,7 @@ import java.util.List;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.adapters.ContactsAdapter;
+import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
 import ee.juhan.meetingorganizer.fragments.dialogs.YesNoFragment;
 import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
 import ee.juhan.meetingorganizer.models.server.ContactDTO;
@@ -116,7 +117,6 @@ public class ChooseContactsFragment extends Fragment {
     private void setButtonListeners() {
         Button continueButton = (Button) chooseContactsLayout
                 .findViewById(R.id.continue_button);
-
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,7 +134,7 @@ public class ChooseContactsFragment extends Fragment {
     }
 
     private void resetParticipants() {
-        NewMeetingFragment.getNewMeetingModel().setParticipants(new ArrayList<ParticipantDTO>());
+        NewMeetingFragment.getNewMeetingModel().getParticipants().clear();
         participantsWithoutAccount = 0;
     }
 
@@ -284,17 +284,19 @@ public class ChooseContactsFragment extends Fragment {
                 + " COLLATE NOCASE";
         String filter = ContactsContract.CommonDataKinds.Email.DATA + " NOT LIKE ''";
         Cursor cur = cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, PROJECTION, filter, null, order);
-        if (cur.moveToFirst()) {
-            while (cur.moveToNext()) {
-                String name = cur.getString(1);
-                String email = cur.getString(3);
-                for (int i = 0; i < contactsList.size(); i++) {
-                    ContactDTO contact = contactsList.get(i);
-                    if (contact.getName().equals(name)) {
-                        contact.setEmail(email);
-                        contactsList.set(i, contact);
-                        break;
-                    }
+        if (!cur.moveToFirst()) {
+            cur.close();
+            return;
+        }
+        while (cur.moveToNext()) {
+            String name = cur.getString(1);
+            String email = cur.getString(3);
+            for (int i = 0; i < contactsList.size(); i++) {
+                ContactDTO contact = contactsList.get(i);
+                if (contact.getName().equals(name)) {
+                    contact.setEmail(email);
+                    contactsList.set(i, contact);
+                    break;
                 }
             }
         }
@@ -305,6 +307,42 @@ public class ChooseContactsFragment extends Fragment {
         ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.listView);
         adapter = new ContactsAdapter(getActivity(), contactsList);
         listview.setAdapter(adapter);
+    }
+
+    private class ContactsAdapter extends CheckBoxAdapter<ContactDTO> {
+
+        public ContactsAdapter(Context context, List<ContactDTO> objects) {
+            super(context, objects);
+        }
+
+        @Override
+        protected void setUpCheckBox() {
+            ContactDTO contact = super.getCurrentItem();
+            if (super.getCheckedItems().contains(contact)) {
+                super.getCheckBox().setChecked(true);
+            }
+            super.setCheckBoxText(contact.getName());
+            if (contact.getAccountId() != 0) {
+                super.addIcon(R.drawable.ic_account);
+            }
+        }
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            String contactName = buttonView.getText().toString();
+            ContactDTO chosenContact = new ContactDTO();
+            for (ContactDTO contact : super.getObjects()) {
+                if (contact.getName().equals(contactName)) {
+                    chosenContact = contact;
+                    break;
+                }
+            }
+            if (isChecked) {
+                super.getCheckedItems().add(chosenContact);
+            } else {
+                super.getCheckedItems().remove(chosenContact);
+            }
+        }
     }
 
 }

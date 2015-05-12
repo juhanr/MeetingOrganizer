@@ -40,7 +40,7 @@ public class MeetingInfoFragment extends Fragment {
     private CustomMapFragment customMapFragment = new CustomMapFragment();
 
     public MeetingInfoFragment() {
-        meeting = null;
+        this.meeting = null;
     }
 
     @SuppressLint("ValidFragment")
@@ -77,11 +77,11 @@ public class MeetingInfoFragment extends Fragment {
         TextView date = (TextView) meetingInfoLayout.findViewById(R.id.meeting_date);
         TextView time = (TextView) meetingInfoLayout.findViewById(R.id.meeting_time);
         title.setText(getString(R.string.textview_title) + ": " + meeting.getTitle());
-        if (!meeting.getDescription().trim().equals("")) {
+        if (meeting.getDescription().trim().equals("")) {
+            description.setText(getString(R.string.textview_description) + ": None");
+        } else {
             description.setText(getString(R.string.textview_description) + ": "
                     + meeting.getDescription());
-        } else {
-            description.setText(getString(R.string.textview_description) + ": None");
         }
         date.setText(getString(R.string.textview_date) + ": "
                 + DateParserUtil.formatDate(meeting.getStartDateTime()));
@@ -89,6 +89,11 @@ public class MeetingInfoFragment extends Fragment {
                 + DateParserUtil.formatTime(meeting.getStartDateTime()) + " - "
                 + DateParserUtil.formatTime(meeting.getEndDateTime()));
 
+        setUpMapFragment();
+        setAnswerButtons();
+    }
+
+    private void setUpMapFragment() {
         customMapFragment = new CustomMapFragment();
         if (meeting.getLocation() != null) {
             customMapFragment.setLocation(new LatLng(
@@ -98,7 +103,6 @@ public class MeetingInfoFragment extends Fragment {
                 replace(R.id.location_frame, customMapFragment).commit();
         FrameLayout layout = (FrameLayout) meetingInfoLayout.findViewById(R.id.location_frame);
         layout.setBackgroundResource(R.drawable.view_border);
-        setAnswerButtons();
     }
 
     private void setButtonListeners() {

@@ -14,7 +14,6 @@ import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.models.server.AccountDTO;
 import ee.juhan.meetingorganizer.models.server.ServerResponse;
-import ee.juhan.meetingorganizer.models.server.ServerResult;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.PatternMatcherUtil;
 import retrofit.Callback;
@@ -87,7 +86,7 @@ public class LoginFragment extends Fragment {
         } else if (view instanceof TextView) {
             return ((TextView) view).getText().toString().trim();
         } else {
-            return null;
+            return "";
         }
     }
 
@@ -97,16 +96,20 @@ public class LoginFragment extends Fragment {
             @Override
             public void success(final ServerResponse serverResponse, Response response) {
                 activity.dismissLoadingFragment();
-                ServerResult result = serverResponse.getResult();
-                if (result == ServerResult.SUCCESS) {
-                    activity.showToastMessage(getString(R.string.toast_login_successful));
-                    activity.logIn(email, serverResponse.getSid(), serverResponse.getUserId());
-                } else if (result == ServerResult.WRONG_PASSWORD) {
-                    activity.showToastMessage(getString(R.string.toast_wrong_password));
-                } else if (result == ServerResult.NO_ACCOUNT_FOUND) {
-                    activity.showToastMessage(getString(R.string.toast_no_account));
-                } else {
-                    activity.showToastMessage(getString(R.string.toast_server_fail));
+                switch (serverResponse.getResult()) {
+                    case SUCCESS:
+                        activity.showToastMessage(getString(R.string.toast_login_successful));
+                        activity.logIn(email, serverResponse.getSid(), serverResponse.getUserId());
+                        break;
+                    case WRONG_PASSWORD:
+                        activity.showToastMessage(getString(R.string.toast_wrong_password));
+                        break;
+                    case NO_ACCOUNT_FOUND:
+                        activity.showToastMessage(getString(R.string.toast_no_account));
+                        break;
+                    case FAIL:
+                        activity.showToastMessage(getString(R.string.toast_server_fail));
+                        break;
                 }
             }
 

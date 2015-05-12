@@ -1,6 +1,5 @@
 package ee.juhan.meetingorganizer;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -8,9 +7,10 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,8 +33,7 @@ import ee.juhan.meetingorganizer.rest.RestClient;
 
 public class MainActivity extends Activity {
 
-    public HashMap<String, Integer> drawerItemsHashMap = new HashMap<String, Integer>();
-    private ActionBar actionBar;
+    private HashMap<String, Integer> drawerItemsHashMap = new HashMap<>();
     private DrawerLayout drawerLayout;
     private ListView drawerListView;
     private ActionBarDrawerToggle drawerToggle;
@@ -56,7 +55,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        actionBar = getActionBar();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         checkIfLoggedIn();
     }
@@ -98,7 +96,7 @@ public class MainActivity extends Activity {
 
     public void logIn(String email, String sid, Integer userId) {
         sharedPref.edit().putString("email", email).putString("sid", sid)
-                .putInt("userId", userId).commit();
+                .putInt("userId", userId).apply();
         RestClient.setSID(sid);
         setEmail(email);
         isLoggedIn = true;
@@ -107,7 +105,7 @@ public class MainActivity extends Activity {
 
     private void logOut() {
         sharedPref.edit().putString("email", null).putString("sid", null)
-                .putInt("userId", 0).commit();
+                .putInt("userId", 0).apply();
         RestClient.setSID(null);
         setEmail(getString(R.string.textview_not_logged_in));
         isLoggedIn = false;
@@ -131,8 +129,8 @@ public class MainActivity extends Activity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
-        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
-                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, new Toolbar(this),
+                R.string.drawer_open, R.string.drawer_close) {
 
             public void onDrawerClosed(View view) {
                 getActionBar().setTitle(title);
@@ -153,8 +151,7 @@ public class MainActivity extends Activity {
         }
 
         drawerLayout.setDrawerListener(drawerToggle);
-        drawerListView.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, drawerItems));
+        drawerListView.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, drawerItems));
 
         currentDrawerItemPosition = 0;
         selectDrawerItem(1, true);
@@ -165,53 +162,55 @@ public class MainActivity extends Activity {
     }
 
     public void selectDrawerItem(int position, boolean resetBackStackCounter) {
-        if (position != currentDrawerItemPosition && position != 0) {
-            if (isLoggedIn) {
-                MeetingsListFragment meetingsListFragment = null;
-                if (position >= 2 && position <= 5) {
-                    meetingsListFragment = new MeetingsListFragment(this, drawerItems[position - 1]);
-                }
-                switch (position) {
-                    case 1:
-                        changeFragment(new NewMeetingFragment(), resetBackStackCounter);
-                        break;
-                    case 2:
-                        meetingsListFragment.getMeetingsRequest(MeetingsListFragment.ONGOING_MEETINGS);
-                        changeFragment(meetingsListFragment, resetBackStackCounter);
-                        break;
-                    case 3:
-                        meetingsListFragment.getMeetingsRequest(MeetingsListFragment.FUTURE_MEETINGS);
-                        changeFragment(meetingsListFragment, resetBackStackCounter);
-                        break;
-                    case 4:
-                        meetingsListFragment.getMeetingsRequest(MeetingsListFragment.PAST_MEETINGS);
-                        changeFragment(meetingsListFragment, resetBackStackCounter);
-                        break;
-                    case 5:
-                        meetingsListFragment.getMeetingsRequest(MeetingsListFragment.INVITATIONS);
-                        changeFragment(meetingsListFragment, resetBackStackCounter);
-                        break;
-                    default:
-                        changeFragment(new NewMeetingFragment(), resetBackStackCounter);
-                        break;
-                }
-            } else {
-                switch (position) {
-                    case 1:
-                        changeFragment(new LoginFragment(), resetBackStackCounter);
-                        break;
-                    case 2:
-                        changeFragment(new RegistrationFragment(), resetBackStackCounter);
-                        break;
-                    default:
-                        changeFragment(new LoginFragment(), resetBackStackCounter);
-                        break;
-                }
-            }
-            drawerLayout.closeDrawer(drawerListView);
-        } else {
+        if (position == currentDrawerItemPosition || position == 0) {
             setDrawerItem(currentDrawerItemPosition);
+            drawerLayout.closeDrawer(drawerListView);
+            return;
         }
+
+        if (isLoggedIn) {
+            MeetingsListFragment meetingsListFragment = null;
+            if (position >= 2 && position <= 5) {
+                meetingsListFragment = new MeetingsListFragment(this, drawerItems[position - 1]);
+            }
+            switch (position) {
+                case 1:
+                    changeFragment(new NewMeetingFragment(), resetBackStackCounter);
+                    break;
+                case 2:
+                    meetingsListFragment.getMeetingsRequest(MeetingsListFragment.ONGOING_MEETINGS);
+                    changeFragment(meetingsListFragment, resetBackStackCounter);
+                    break;
+                case 3:
+                    meetingsListFragment.getMeetingsRequest(MeetingsListFragment.FUTURE_MEETINGS);
+                    changeFragment(meetingsListFragment, resetBackStackCounter);
+                    break;
+                case 4:
+                    meetingsListFragment.getMeetingsRequest(MeetingsListFragment.PAST_MEETINGS);
+                    changeFragment(meetingsListFragment, resetBackStackCounter);
+                    break;
+                case 5:
+                    meetingsListFragment.getMeetingsRequest(MeetingsListFragment.INVITATIONS);
+                    changeFragment(meetingsListFragment, resetBackStackCounter);
+                    break;
+                default:
+                    changeFragment(new NewMeetingFragment(), resetBackStackCounter);
+                    break;
+            }
+        } else {
+            switch (position) {
+                case 1:
+                    changeFragment(new LoginFragment(), resetBackStackCounter);
+                    break;
+                case 2:
+                    changeFragment(new RegistrationFragment(), resetBackStackCounter);
+                    break;
+                default:
+                    changeFragment(new LoginFragment(), resetBackStackCounter);
+                    break;
+            }
+        }
+        drawerLayout.closeDrawer(drawerListView);
     }
 
     public void setDrawerItem(int position) {
@@ -222,7 +221,7 @@ public class MainActivity extends Activity {
     @Override
     public void setTitle(CharSequence title) {
         this.title = title;
-        getActionBar().setTitle(this.title);
+        getActionBar().setTitle(title);
     }
 
     @Override
@@ -249,17 +248,14 @@ public class MainActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
         if (id == R.id.action_logout) {
             logOut();
         } else {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -287,7 +283,7 @@ public class MainActivity extends Activity {
     /**
      * Displays a toast message with the given message.
      *
-     * @param message
+     * @param message message string
      */
 
     public void showToastMessage(final String message) {

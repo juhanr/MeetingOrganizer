@@ -63,10 +63,6 @@ public class RestClient {
         REST_CLIENT = restAdapter.create(RestService.class);
     }
 
-    public static String getSID() {
-        return sid;
-    }
-
     public static void setSID(String sid) {
         RestClient.sid = sid;
     }

@@ -3,29 +3,22 @@ package ee.juhan.meetingorganizer.util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class DateParserUtil {
 
-    private static final SimpleDateFormat URL_DATETIME_FORMAT = new SimpleDateFormat("dd-MM-yyyy-HH-mm");
-    private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
-    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
+    private static final SimpleDateFormat DATETIME_FORMAT =
+            new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+    private static final SimpleDateFormat DATE_FORMAT =
+            new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
+    private static final SimpleDateFormat TIME_FORMAT =
+            new SimpleDateFormat("HH:mm", Locale.getDefault());
 
     static {
         DATETIME_FORMAT.setTimeZone(TimeZone.getDefault());
         DATE_FORMAT.setTimeZone(TimeZone.getDefault());
         TIME_FORMAT.setTimeZone(TimeZone.getDefault());
-        URL_DATETIME_FORMAT.setTimeZone(TimeZone.getDefault());
-    }
-
-    public static Date parseUrlDateTime(String urlDateTime) {
-        try {
-            return URL_DATETIME_FORMAT.parse(urlDateTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public static Date parseDateTime(String dateTime) {
@@ -53,10 +46,6 @@ public class DateParserUtil {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public static String formatUrlDateTime(Date urlDateTime) {
-        return URL_DATETIME_FORMAT.format(urlDateTime);
     }
 
     public static String formatDateTime(Date dateTime) {

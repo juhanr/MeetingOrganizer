@@ -2,6 +2,7 @@ package ee.juhan.meetingorganizer.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +15,7 @@ import java.util.List;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.adapters.ParticipantsAdapter;
+import ee.juhan.meetingorganizer.adapters.GeneralAdapter;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 
 public class ParticipantsListFragment extends Fragment {
@@ -63,12 +64,39 @@ public class ParticipantsListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
-                ParticipantDTO participant = (ParticipantDTO) adapter.getItem(position);
+                ParticipantDTO participant = adapter.getItem(position);
                 activity.changeFragment(new ParticipantInfoFragment(participant));
             }
         });
         adapter = new ParticipantsAdapter(getActivity(), participantsList);
         listview.setAdapter(adapter);
+    }
+
+    private class ParticipantsAdapter extends GeneralAdapter<ParticipantDTO> {
+
+        public ParticipantsAdapter(Context context, List<ParticipantDTO> participantsList) {
+            super(context, R.layout.list_item_participants, participantsList);
+        }
+
+        @Override
+        protected void populateLayout() {
+            ParticipantDTO participant = super.getCurrentItem();
+            TextView participantNameView = (TextView) super.getLayout()
+                    .findViewById(R.id.participant_name);
+            participantNameView.setText(participant.getName());
+            switch (participant.getParticipationAnswer()) {
+                case PARTICIPATING:
+                    super.addIcon(R.drawable.ic_check_mark);
+                    break;
+                case NOT_ANSWERED:
+                    super.addIcon(R.drawable.ic_question_mark);
+                    break;
+            }
+            if (participant.getAccountId() != 0) {
+                super.addIcon(R.drawable.ic_account);
+            }
+        }
+
     }
 
 }

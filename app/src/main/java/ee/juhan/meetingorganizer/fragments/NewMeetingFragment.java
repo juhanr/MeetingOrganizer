@@ -70,76 +70,14 @@ public class NewMeetingFragment extends Fragment {
                 .findViewById(R.id.end_time_button);
         Button continueButton = (Button) newMeetingLayout
                 .findViewById(R.id.continue_button);
-        dateButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DatePickerDialog.OnDateSetListener onDateSetListener =
-                        new DatePickerDialog.OnDateSetListener() {
-
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                                String date = dayOfMonth + "." + formatString(monthOfYear + 1) + "." + year;
-                                setDate(date);
-                            }
-                        };
-                Calendar c = Calendar.getInstance();
-                if (!getViewText(R.id.date_button).equals(getString(R.string.textview_not_set_u))) {
-                    c.setTime(DateParserUtil.parseDate(getViewText(R.id.date_button)));
-                }
-                DatePickerDialog dialog = new DatePickerDialog(activity,
-                        DatePickerDialog.THEME_HOLO_DARK, onDateSetListener,
-                        c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-                dialog.show();
-            }
-        });
-        startTimeButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TimePickerDialog.OnTimeSetListener onTimeSetListener =
-                        new TimePickerDialog.OnTimeSetListener() {
-
-                            @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                String time = formatString(hourOfDay) + ":" + formatString(minute);
-                                setStartTime(time);
-                            }
-                        };
-                Calendar c = Calendar.getInstance();
-                if (!getViewText(R.id.start_time_button).equals(getString(R.string.textview_not_set_u))) {
-                    c.setTime(DateParserUtil.parseTime(getViewText(R.id.start_time_button)));
-                }
-                TimePickerDialog dialog = new TimePickerDialog(activity,
-                        TimePickerDialog.THEME_HOLO_DARK, onTimeSetListener,
-                        c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true);
-                dialog.show();
-            }
-        });
-        endTimeButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TimePickerDialog.OnTimeSetListener onTimeSetListener =
-                        new TimePickerDialog.OnTimeSetListener() {
-
-                            @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                String time = formatString(hourOfDay) + ":" + formatString(minute);
-                                setEndTime(time);
-                            }
-                        };
-                Calendar c = Calendar.getInstance();
-                if (!getViewText(R.id.end_time_button).equals(getString(R.string.textview_not_set_u))) {
-                    c.setTime(DateParserUtil.parseTime(getViewText(R.id.end_time_button)));
-                }
-                TimePickerDialog dialog = new TimePickerDialog(activity,
-                        TimePickerDialog.THEME_HOLO_DARK, onTimeSetListener,
-                        c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true);
-                dialog.show();
-            }
-        });
+        dateButton.setOnClickListener(new DateClickListener(R.id.date_button));
+        startTimeButton.setOnClickListener(new TimeClickListener(R.id.start_time_button));
+        endTimeButton.setOnClickListener(new TimeClickListener(R.id.end_time_button));
 
         continueButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                assert false;
                 saveData();
                 if (isValidData()) {
                     activity.changeFragment(new ChooseLocationFragment());
@@ -196,7 +134,7 @@ public class NewMeetingFragment extends Fragment {
         } else if (view instanceof TextView) {
             return ((TextView) view).getText().toString().trim();
         } else {
-            return null;
+            return "";
         }
     }
 
@@ -222,23 +160,68 @@ public class NewMeetingFragment extends Fragment {
                 getViewText(R.id.date_button) + " " + getViewText(R.id.end_time_button)));
     }
 
-    private void setDate(String date) {
-        TextView dateButton = (TextView) newMeetingLayout.findViewById(R.id.date_button);
-        dateButton.setText(underlineString(date));
-    }
-
-    private void setStartTime(String time) {
-        TextView startTimeButton = (TextView) newMeetingLayout.findViewById(R.id.start_time_button);
-        startTimeButton.setText(underlineString(time));
-    }
-
-    private void setEndTime(String time) {
-        TextView endTimeButton = (TextView) newMeetingLayout.findViewById(R.id.end_time_button);
-        endTimeButton.setText(underlineString(time));
-    }
-
     private Spanned underlineString(String s) {
         return Html.fromHtml("<u>" + s + "</u>");
     }
 
+    private class DateClickListener implements OnClickListener {
+
+        private int viewId;
+
+        public DateClickListener(int viewId) {
+            this.viewId = viewId;
+        }
+
+        @Override
+        public void onClick(View v) {
+            DatePickerDialog.OnDateSetListener onDateSetListener =
+                    new DatePickerDialog.OnDateSetListener() {
+
+                        @Override
+                        public void onDateSet(DatePicker view, int year,
+                                              int monthOfYear, int dayOfMonth) {
+                            String date = dayOfMonth + "." + formatString(monthOfYear + 1) + "." + year;
+                            setViewText(viewId, underlineString(date));
+                        }
+                    };
+            Calendar c = Calendar.getInstance();
+            if (!getViewText(viewId).equals(getString(R.string.textview_not_set_u))) {
+                c.setTime(DateParserUtil.parseDate(getViewText(viewId)));
+            }
+            DatePickerDialog dialog = new DatePickerDialog(activity,
+                    DatePickerDialog.THEME_HOLO_DARK, onDateSetListener,
+                    c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+            dialog.show();
+        }
+    }
+
+    private class TimeClickListener implements OnClickListener {
+
+        private int viewId;
+
+        public TimeClickListener(int viewId) {
+            this.viewId = viewId;
+        }
+
+        @Override
+        public void onClick(View v) {
+            TimePickerDialog.OnTimeSetListener onTimeSetListener =
+                    new TimePickerDialog.OnTimeSetListener() {
+
+                        @Override
+                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                            String time = formatString(hourOfDay) + ":" + formatString(minute);
+                            setViewText(viewId, underlineString(time));
+                        }
+                    };
+            Calendar c = Calendar.getInstance();
+            if (!getViewText(viewId).equals(getString(R.string.textview_not_set_u))) {
+                c.setTime(DateParserUtil.parseTime(getViewText(viewId)));
+            }
+            TimePickerDialog dialog = new TimePickerDialog(activity,
+                    TimePickerDialog.THEME_HOLO_DARK, onTimeSetListener,
+                    c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true);
+            dialog.show();
+        }
+    }
 }

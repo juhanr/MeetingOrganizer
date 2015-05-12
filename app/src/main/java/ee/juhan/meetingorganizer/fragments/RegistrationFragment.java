@@ -13,7 +13,6 @@ import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.models.server.AccountDTO;
 import ee.juhan.meetingorganizer.models.server.ServerResponse;
-import ee.juhan.meetingorganizer.models.server.ServerResult;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.PatternMatcherUtil;
 import retrofit.Callback;
@@ -92,7 +91,7 @@ public class RegistrationFragment extends Fragment {
         } else if (view instanceof TextView) {
             return ((TextView) view).getText().toString().trim();
         } else {
-            return null;
+            return "";
         }
     }
 
@@ -103,16 +102,20 @@ public class RegistrationFragment extends Fragment {
                     @Override
                     public void success(final ServerResponse serverResponse, Response response) {
                         activity.dismissLoadingFragment();
-                        ServerResult result = serverResponse.getResult();
-                        if (result == ServerResult.SUCCESS) {
-                            activity.showToastMessage(getString(R.string.toast_registration_successful));
-                            activity.logIn(email, serverResponse.getSid(), serverResponse.getUserId());
-                        } else if (result == ServerResult.EMAIL_IN_USE) {
-                            activity.showToastMessage(getString(R.string.toast_email_in_use));
-                        } else if (result == ServerResult.PHONE_NUMBER_IN_USE) {
-                            activity.showToastMessage(getString(R.string.toast_phone_number_in_use));
-                        } else {
-                            activity.showToastMessage(getString(R.string.toast_server_fail));
+                        switch (serverResponse.getResult()) {
+                            case SUCCESS:
+                                activity.showToastMessage(getString(R.string.toast_registration_successful));
+                                activity.logIn(email, serverResponse.getSid(), serverResponse.getUserId());
+                                break;
+                            case EMAIL_IN_USE:
+                                activity.showToastMessage(getString(R.string.toast_email_in_use));
+                                break;
+                            case PHONE_NUMBER_IN_USE:
+                                activity.showToastMessage(getString(R.string.toast_phone_number_in_use));
+                                break;
+                            case FAIL:
+                                activity.showToastMessage(getString(R.string.toast_server_fail));
+                                break;
                         }
                     }
 

@@ -6,6 +6,7 @@ import android.location.Geocoder;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,7 +16,6 @@ import android.widget.FrameLayout;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -30,7 +30,7 @@ import ee.juhan.meetingorganizer.models.server.LocationType;
 import ee.juhan.meetingorganizer.models.server.MapCoordinate;
 
 public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnCameraChangeListener {
+        GoogleMap.OnMapClickListener {
 
     private static int mapVisibility = View.VISIBLE;
     private MainActivity activity;
@@ -79,34 +79,21 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
 
     private void initializeMap() {
         map = this.getMap();
-        if (map != null) {
-            map.setMyLocationEnabled(true);
-            map.setOnMyLocationButtonClickListener(this);
-            map.setOnCameraChangeListener(this);
-            if (isClickableMap) {
-                map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                    @Override
-                    public void onMapClick(LatLng latLng) {
-                        if (NewMeetingFragment.getNewMeetingModel().getLocationType()
-                                == LocationType.SPECIFIC_LOCATION) {
-                            NewMeetingFragment.getNewMeetingModel()
-                                    .setLocation(new MapCoordinate(latLng.latitude, latLng.longitude));
-                        }
-                        if (locationMarker != null) {
-                            locationMarker.remove();
-                        }
-                        setLocationMarker(latLng);
-                    }
-                });
-            }
-            if (location == null) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        defaultCameraLatLng, defaultCameraZoom));
-            } else {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        location, defaultCameraZoom));
-                setLocationMarker(location);
-            }
+        if (map == null) {
+            return;
+        }
+        map.setMyLocationEnabled(true);
+        map.setOnMyLocationButtonClickListener(this);
+        if (isClickableMap) {
+            map.setOnMapClickListener(this);
+        }
+        if (location == null) {
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    defaultCameraLatLng, defaultCameraZoom));
+        } else {
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    location, defaultCameraZoom));
+            setLocationMarker(location);
         }
     }
 
@@ -192,37 +179,41 @@ public class CustomMapFragment extends MapFragment implements GoogleMap.OnMyLoca
     }
 
     @Override
-    public void onCameraChange(CameraPosition cameraPosition) {
-
-    }
-
-    @Override
     public boolean onMyLocationButtonClick() {
         LocationManager locationManager = (LocationManager) activity
                 .getSystemService(Context.LOCATION_SERVICE);
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            activity.showToastMessage("GPS is disabled!");
-        } else {
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             activity.showToastMessage("Waiting for location...");
+        } else {
+            activity.showToastMessage("GPS is disabled!");
         }
         return false;
     }
 
-    public class TouchableWrapper extends FrameLayout {
+    @Override
+    public void onMapClick(LatLng latLng) {
+        if (NewMeetingFragment.getNewMeetingModel().getLocationType()
+                == LocationType.SPECIFIC_LOCATION) {
+            NewMeetingFragment.getNewMeetingModel()
+                    .setLocation(new MapCoordinate(latLng.latitude, latLng.longitude));
+        }
+        if (locationMarker != null) {
+            locationMarker.remove();
+        }
+        setLocationMarker(latLng);
+    }
+
+    private class TouchableWrapper extends FrameLayout {
 
         public TouchableWrapper(Context context) {
             super(context);
         }
 
         @Override
-        public boolean dispatchTouchEvent(MotionEvent event) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    mapLayout.requestDisallowInterceptTouchEvent(true);
-                    break;
-                case MotionEvent.ACTION_UP:
-                    mapLayout.requestDisallowInterceptTouchEvent(true);
-                    break;
+        public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN
+                    || event.getAction() == MotionEvent.ACTION_UP) {
+                mapLayout.requestDisallowInterceptTouchEvent(true);
             }
             return super.dispatchTouchEvent(event);
         }

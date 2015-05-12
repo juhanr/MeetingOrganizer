@@ -5,6 +5,7 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
+import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -41,7 +43,7 @@ public class ChooseLocationFragment extends Fragment {
     private String title;
     private MainActivity activity;
     private ViewGroup chooseLocationLayout;
-    private CheckBoxAdapter adapter;
+    private LocationParametersAdapter adapter;
     private List<String> filtersList;
     private CustomMapFragment customMapFragment = new CustomMapFragment();
     private LinearLayout predefinedLocationsLayout;
@@ -133,7 +135,7 @@ public class ChooseLocationFragment extends Fragment {
                                 LocationType.GENERATED_FROM_PARAMETERS);
                         removeLocationViews();
                         ListView listView = new ListView(activity);
-                        adapter = new CheckBoxAdapter(getActivity(), filtersList);
+                        adapter = new LocationParametersAdapter(getActivity(), filtersList);
                         listView.setAdapter(adapter);
                         addLocationChild(listView);
                         break;
@@ -251,6 +253,28 @@ public class ChooseLocationFragment extends Fragment {
             });
         }
         return anim;
+    }
+
+    private class LocationParametersAdapter extends CheckBoxAdapter<String> {
+
+        public LocationParametersAdapter(Context context, List<String> objects) {
+            super(context, objects);
+        }
+
+        @Override
+        protected void setUpCheckBox() {
+            super.setCheckBoxText(getCurrentItem());
+        }
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            String item = buttonView.getText().toString();
+            if (isChecked) {
+                super.getCheckedItems().add(item);
+            } else {
+                super.getCheckedItems().remove(item);
+            }
+        }
     }
 
 }

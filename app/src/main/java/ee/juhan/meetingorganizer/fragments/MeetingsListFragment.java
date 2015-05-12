@@ -2,6 +2,7 @@ package ee.juhan.meetingorganizer.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,9 +15,10 @@ import java.util.List;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.adapters.MeetingsAdapter;
+import ee.juhan.meetingorganizer.adapters.GeneralAdapter;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.rest.RestClient;
+import ee.juhan.meetingorganizer.util.DateParserUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -93,6 +95,32 @@ public class MeetingsListFragment extends Fragment {
         });
         adapter = new MeetingsAdapter(getActivity(), meetingsList);
         listview.setAdapter(adapter);
+    }
+
+    private class MeetingsAdapter extends GeneralAdapter<MeetingDTO> {
+
+        public MeetingsAdapter(Context context, List<MeetingDTO> meetingsList) {
+            super(context, R.layout.list_item_meetings, meetingsList);
+        }
+
+        @Override
+        protected void populateLayout() {
+            MeetingDTO meeting = super.getCurrentItem();
+            TextView meetingTitleView = (TextView) super.getLayout()
+                    .findViewById(R.id.meeting_title);
+            TextView meetingDateView = (TextView) super.getLayout()
+                    .findViewById(R.id.meeting_date);
+            TextView meetingTimeView = (TextView) super.getLayout()
+                    .findViewById(R.id.meeting_time);
+            meetingTitleView.setText(getContext().getString(R.string.textview_title) + ": "
+                    + meeting.getTitle());
+            meetingDateView.setText(getContext().getString(R.string.textview_date) + ": "
+                    + DateParserUtil.formatDate(meeting.getStartDateTime()));
+            meetingTimeView.setText(getContext().getString(R.string.textview_time) + ": "
+                    + DateParserUtil.formatTime(meeting.getStartDateTime()) + " - "
+                    + DateParserUtil.formatTime(meeting.getEndDateTime()));
+        }
+
     }
 
 }
