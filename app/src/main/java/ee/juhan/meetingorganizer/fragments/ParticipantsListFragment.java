@@ -20,83 +20,84 @@ import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 
 public class ParticipantsListFragment extends Fragment {
 
-    private final List<ParticipantDTO> participantsList;
-    private String title;
-    private MainActivity activity;
-    private ViewGroup participantsListLayout;
-    private ParticipantsAdapter adapter;
+	private final List<ParticipantDTO> participantsList;
+	private String title;
+	private MainActivity activity;
+	private ViewGroup participantsListLayout;
+	private ParticipantsAdapter adapter;
 
-    public ParticipantsListFragment() {
-        this.participantsList = null;
-    }
+	public ParticipantsListFragment() {
+		this.participantsList = null;
+	}
 
-    @SuppressLint("ValidFragment")
-    public ParticipantsListFragment(List<ParticipantDTO> participantsList) {
-        this.participantsList = participantsList;
-    }
+	@SuppressLint("ValidFragment")
+	public ParticipantsListFragment(List<ParticipantDTO> participantsList) {
+		this.participantsList = participantsList;
+	}
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        activity = (MainActivity) getActivity();
-        title = getString(R.string.title_participants);
-    }
+	@Override
+	public final void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		activity = (MainActivity) getActivity();
+		title = getString(R.string.title_participants);
+	}
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        activity.setTitle(title);
-        if (participantsList == null || participantsList.size() == 0) {
-            participantsListLayout = (ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
-            TextView infoText = (TextView) participantsListLayout.findViewById(R.id.info_text);
-            infoText.setText(getString(R.string.textview_no_participants));
-        } else {
-            participantsListLayout = (ViewGroup) inflater.inflate(R.layout.layout_listview, container, false);
-            refreshListView();
-        }
-        return participantsListLayout;
-    }
+	@Override
+	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		activity.setTitle(title);
+		if (participantsList == null || participantsList.size() == 0) {
+			participantsListLayout =
+					(ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
+			TextView infoText = (TextView) participantsListLayout.findViewById(R.id.info_text);
+			infoText.setText(getString(R.string.textview_no_participants));
+		} else {
+			participantsListLayout =
+					(ViewGroup) inflater.inflate(R.layout.layout_listview, container, false);
+			refreshListView();
+		}
+		return participantsListLayout;
+	}
 
-    public void refreshListView() {
-        ListView listview = (ListView) participantsListLayout.findViewById(R.id.listView);
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+	private void refreshListView() {
+		ListView listview = (ListView) participantsListLayout.findViewById(R.id.listView);
+		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-            @Override
-            public void onItemClick(AdapterView<?> parent, final View view,
-                                    int position, long id) {
-                ParticipantDTO participant = adapter.getItem(position);
-                activity.changeFragment(new ParticipantInfoFragment(participant));
-            }
-        });
-        adapter = new ParticipantsAdapter(getActivity(), participantsList);
-        listview.setAdapter(adapter);
-    }
+			@Override
+			public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
+				ParticipantDTO participant = adapter.getItem(position);
+				activity.changeFragment(new ParticipantInfoFragment(participant));
+			}
+		});
+		adapter = new ParticipantsAdapter(getActivity(), participantsList);
+		listview.setAdapter(adapter);
+	}
 
-    private class ParticipantsAdapter extends GeneralAdapter<ParticipantDTO> {
+	private class ParticipantsAdapter extends GeneralAdapter<ParticipantDTO> {
 
-        public ParticipantsAdapter(Context context, List<ParticipantDTO> participantsList) {
-            super(context, R.layout.list_item_participants, participantsList);
-        }
+		public ParticipantsAdapter(Context context, List<ParticipantDTO> participantsList) {
+			super(context, R.layout.list_item_participants, participantsList);
+		}
 
-        @Override
-        protected void populateLayout() {
-            ParticipantDTO participant = super.getCurrentItem();
-            TextView participantNameView = (TextView) super.getLayout()
-                    .findViewById(R.id.participant_name);
-            participantNameView.setText(participant.getName());
-            switch (participant.getParticipationAnswer()) {
-                case PARTICIPATING:
-                    super.addIcon(R.drawable.ic_check_mark);
-                    break;
-                case NOT_ANSWERED:
-                    super.addIcon(R.drawable.ic_question_mark);
-                    break;
-            }
-            if (participant.getAccountId() != 0) {
-                super.addIcon(R.drawable.ic_account);
-            }
-        }
+		@Override
+		protected void populateLayout() {
+			ParticipantDTO participant = super.getCurrentItem();
+			TextView participantNameView =
+					(TextView) super.getLayout().findViewById(R.id.participant_name);
+			participantNameView.setText(participant.getName());
+			switch (participant.getParticipationAnswer()) {
+				case PARTICIPATING:
+					super.addIcon(R.drawable.ic_check_mark);
+					break;
+				case NOT_ANSWERED:
+					super.addIcon(R.drawable.ic_question_mark);
+					break;
+			}
+			if (participant.getAccountId() != 0) {
+				super.addIcon(R.drawable.ic_account);
+			}
+		}
 
-    }
+	}
 
 }

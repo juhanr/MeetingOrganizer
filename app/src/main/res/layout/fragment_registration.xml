@@ -1,110 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:fillViewport="true">
 
-    <LinearLayout
-        style="@style/FragmentLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+	<LinearLayout
+		style="@style/FragmentLayout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical">
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/textview_email" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/textview_email"/>
 
-        <EditText
-            android:id="@+id/email_textbox"
-            style="@style/TextBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:maxLength="40" />
+		<EditText
+			android:id="@+id/email_textbox"
+			style="@style/TextBox"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:inputType="textEmailAddress"
+			android:maxLength="40"/>
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/textview_password" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/textview_password"/>
 
-        <EditText
-            android:id="@+id/password_textbox"
-            style="@style/TextBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword" />
+		<EditText
+			android:id="@+id/password_textbox"
+			style="@style/TextBox"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:inputType="textPassword"/>
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/textview_password_confirm" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/textview_password_confirm"/>
 
-        <EditText
-            android:id="@+id/password_confirmation_textbox"
-            style="@style/TextBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword" />
+		<EditText
+			android:id="@+id/password_confirmation_textbox"
+			style="@style/TextBox"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:inputType="textPassword"/>
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/textview_full_name" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/textview_full_name"/>
 
-        <EditText
-            android:id="@+id/name_textbox"
-            style="@style/TextBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+		<EditText
+			android:id="@+id/name_textbox"
+			style="@style/TextBox"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/textview_phone_number" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/textview_phone_number"/>
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/fragment_margin"
-            android:paddingRight="@dimen/fragment_margin">
+		<RelativeLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:paddingLeft="@dimen/fragment_margin"
+			android:paddingRight="@dimen/fragment_margin">
 
-            <EditText
-                android:id="@+id/area_number_textbox"
-                style="@style/TextBox"
-                android:layout_width="55dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
-                android:digits="0123456789"
-                android:inputType="phone"
-                android:maxLength="3" />
+			<EditText
+				android:id="@+id/area_number_textbox"
+				style="@style/TextBox"
+				android:layout_width="55dp"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="3dp"
+				android:digits="0123456789"
+				android:inputType="phone"
+				android:maxLength="3"/>
 
-            <EditText
-                android:id="@+id/phone_number_textbox"
-                style="@style/TextBox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
-                android:layout_marginRight="3dp"
-                android:layout_toRightOf="@id/area_number_textbox"
-                android:digits="0123456789"
-                android:inputType="phone" />
-        </RelativeLayout>
+			<EditText
+				android:id="@+id/phone_number_textbox"
+				style="@style/TextBox"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="3dp"
+				android:layout_marginRight="3dp"
+				android:layout_toRightOf="@id/area_number_textbox"
+				android:digits="0123456789"
+				android:inputType="phone"/>
+		</RelativeLayout>
 
-        <include layout="@layout/view_empty_space" />
+		<include layout="@layout/view_empty_space"/>
 
-        <Button
-            android:id="@+id/register_button"
-            style="@style/Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/view_margin_large"
-            android:text="@string/button_create_account" />
+		<Button
+			android:id="@+id/register_button"
+			style="@style/Button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/view_margin_large"
+			android:text="@string/button_create_account"/>
 
-    </LinearLayout>
+	</LinearLayout>
 </ScrollView>

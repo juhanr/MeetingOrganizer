@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:fillViewport="true">
 
-    <LinearLayout
-        style="@style/FragmentLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+	<LinearLayout
+		style="@style/FragmentLayout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical">
 
-        <Spinner
-            android:id="@+id/location_spinner"
-            style="@style/Spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+		<Spinner
+			android:id="@+id/location_spinner"
+			style="@style/Spinner"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"/>
 
-        <FrameLayout
-            android:id="@+id/map_search_frame"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/view_margin_medium" />
+		<FrameLayout
+			android:id="@+id/map_search_frame"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/view_margin_medium"/>
 
-        <FrameLayout
-            android:id="@+id/location_frame"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_marginTop="@dimen/view_margin_medium" />
+		<FrameLayout
+			android:id="@+id/location_frame"
+			android:layout_width="match_parent"
+			android:layout_height="250dp"
+			android:layout_marginTop="@dimen/view_margin_medium"/>
 
-        <LinearLayout
-            android:id="@+id/predefined_locations_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/view_margin_medium"
-            android:orientation="vertical">
+		<LinearLayout
+			android:id="@+id/predefined_locations_layout"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/view_margin_medium"
+			android:orientation="vertical">
 
-        </LinearLayout>
+		</LinearLayout>
 
-        <include layout="@layout/view_empty_space" />
+		<include layout="@layout/view_empty_space"/>
 
-        <Button
-            android:id="@+id/continue_button"
-            style="@style/Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/view_margin_large"
-            android:text="@string/button_continue" />
+		<Button
+			android:id="@+id/continue_button"
+			style="@style/Button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/view_margin_large"
+			android:text="@string/button_continue"/>
 
-    </LinearLayout>
+	</LinearLayout>
 </ScrollView>

@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+			  android:layout_width="match_parent"
+			  android:layout_height="wrap_content"
+			  android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/email_textView"
-        style="?android:attr/listSeparatorTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:divider="@color/alice_blue"
-        android:dividerHeight="1dp"
-        android:minHeight="?android:attr/listPreferredItemHeightSmall"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:singleLine="true"
-        android:textColor="@color/alice_blue"
-        android:textSize="16sp" />
+	<TextView
+		android:id="@+id/email_textView"
+		style="?android:attr/listSeparatorTextViewStyle"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:divider="@color/alice_blue"
+		android:dividerHeight="1dp"
+		android:minHeight="?android:attr/listPreferredItemHeightSmall"
+		android:paddingLeft="16dp"
+		android:paddingRight="16dp"
+		android:singleLine="true"
+		android:textColor="@color/alice_blue"
+		android:textSize="16sp"/>
 
 </LinearLayout>

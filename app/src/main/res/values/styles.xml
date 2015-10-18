@@ -1,53 +1,53 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-    </style>
+	<!-- Base application theme. -->
+	<style name="AppTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
+		<!-- Customize your theme here. -->
+	</style>
 
-    <style name="CustomActionBarTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
-        <item name="android:actionBarStyle">@style/ActionBar</item>
-    </style>
+	<style name="CustomActionBarTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
+		<item name="android:actionBarStyle">@style/ActionBar</item>
+	</style>
 
-    <style name="ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@color/chambray_dark</item>
-    </style>
+	<style name="ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+		<item name="android:background">@color/chambray_dark</item>
+	</style>
 
-    <style name="FragmentLayout">
-        <item name="android:padding">@dimen/fragment_margin</item>
-        <item name="android:gravity">center_horizontal</item>
-    </style>
+	<style name="FragmentLayout">
+		<item name="android:padding">@dimen/fragment_margin</item>
+		<item name="android:gravity">center_horizontal</item>
+	</style>
 
-    <style name="Text">
-        <item name="android:textColor">@color/alice_blue</item>
-        <item name="android:textSize">18sp</item>
-    </style>
+	<style name="Text">
+		<item name="android:textColor">@color/alice_blue</item>
+		<item name="android:textSize">18sp</item>
+	</style>
 
-    <style name="TextBox" parent="Text">
-        <item name="android:layout_marginTop">@dimen/view_margin_small</item>
-        <item name="android:layout_marginBottom">@dimen/view_margin_medium</item>
-        <item name="android:background">@drawable/textbox</item>
-        <item name="android:ems">10</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:maxLength">20</item>
-        <item name="android:minHeight">50dp</item>
-        <item name="android:padding">10dp</item>
-        <item name="android:gravity">center|left</item>
-        <item name="android:textColor">@color/madison</item>
-    </style>
+	<style name="TextBox" parent="Text">
+		<item name="android:layout_marginTop">@dimen/view_margin_small</item>
+		<item name="android:layout_marginBottom">@dimen/view_margin_medium</item>
+		<item name="android:background">@drawable/textbox</item>
+		<item name="android:ems">10</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:maxLength">20</item>
+		<item name="android:minHeight">50dp</item>
+		<item name="android:padding">10dp</item>
+		<item name="android:gravity">center|left</item>
+		<item name="android:textColor">@color/madison</item>
+	</style>
 
-    <style name="Button" parent="Text">
-        <item name="android:background">@drawable/button</item>
-    </style>
+	<style name="Button" parent="Text">
+		<item name="android:background">@drawable/button</item>
+	</style>
 
-    <style name="Spinner" parent="Text">
-        <item name="android:background">@drawable/spinner_bg</item>
-    </style>
+	<style name="Spinner" parent="Text">
+		<item name="android:background">@drawable/spinner_bg</item>
+	</style>
 
-    <style name="CheckBox">
-        <item name="android:textColor">@color/alice_blue</item>
-        <item name="android:gravity">center|left</item>
-        <item name="android:button">@drawable/checkbox</item>
-    </style>
+	<style name="CheckBox">
+		<item name="android:textColor">@color/alice_blue</item>
+		<item name="android:gravity">center|left</item>
+		<item name="android:button">@drawable/checkbox</item>
+	</style>
 
 </resources>

@@ -17,119 +17,117 @@ import ee.juhan.meetingorganizer.R;
 
 public class YesNoFragment extends DialogFragment {
 
-    private LinearLayout dialogLayout;
-    private String messageText;
-    private String inputText;
-    private String inputHint;
-    private boolean hideInput;
-    private String positiveButtonText;
-    private String negativeButtonText;
-    private View.OnClickListener positiveButtonListener;
-    private View.OnClickListener negativeButtonListener;
+	private LinearLayout dialogLayout;
+	private String messageText;
+	private String inputText;
+	private String inputHint;
+	private boolean hideInput;
+	private String positiveButtonText;
+	private String negativeButtonText;
+	private View.OnClickListener positiveButtonListener;
+	private View.OnClickListener negativeButtonListener;
 
-    public YesNoFragment() {
+	public YesNoFragment() {}
 
-    }
+	@Override
+	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		dialogLayout = (LinearLayout) inflater.inflate(R.layout.fragment_yes_no, container, false);
+		refreshDialog();
+		return dialogLayout;
+	}
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        dialogLayout = (LinearLayout) inflater.inflate(R.layout.fragment_yes_no, container, false);
-        refreshDialog();
-        return dialogLayout;
-    }
+	public final void refreshDialog() {
+		if (dialogLayout != null) {
+			TextView messageTextView = (TextView) dialogLayout.findViewById(R.id.dialog_message);
+			EditText inputEditText = (EditText) dialogLayout.findViewById(R.id.dialog_input);
+			Button positiveButton = (Button) dialogLayout.findViewById(R.id.dialog_positive_button);
+			Button negativeButton = (Button) dialogLayout.findViewById(R.id.dialog_negative_button);
+			messageTextView.setText(messageText);
+			if (positiveButtonText != null) {
+				positiveButton.setText(positiveButtonText);
+			}
+			if (negativeButtonText != null) {
+				negativeButton.setText(negativeButtonText);
+			}
+			positiveButton.setOnClickListener(positiveButtonListener);
+			negativeButton.setOnClickListener(negativeButtonListener);
+			if (inputEditText != null) {
+				if (!hideInput) {
+					inputEditText.setText(inputText);
+					inputEditText.setHint(inputHint);
+				} else {
+					inputEditText.setVisibility(View.GONE);
+				}
+			}
+		}
+	}
 
-    public void refreshDialog() {
-        if (dialogLayout != null) {
-            TextView messageTextView = (TextView) dialogLayout.findViewById(R.id.dialog_message);
-            EditText inputEditText = (EditText) dialogLayout.findViewById(R.id.dialog_input);
-            Button positiveButton = (Button) dialogLayout.findViewById(R.id.dialog_positive_button);
-            Button negativeButton = (Button) dialogLayout.findViewById(R.id.dialog_negative_button);
-            messageTextView.setText(messageText);
-            if (positiveButtonText != null) {
-                positiveButton.setText(positiveButtonText);
-            }
-            if (negativeButtonText != null) {
-                negativeButton.setText(negativeButtonText);
-            }
-            positiveButton.setOnClickListener(positiveButtonListener);
-            negativeButton.setOnClickListener(negativeButtonListener);
-            if (inputEditText != null) {
-                if (!hideInput) {
-                    inputEditText.setText(inputText);
-                    inputEditText.setHint(inputHint);
-                } else
-                    inputEditText.setVisibility(View.GONE);
-            }
-        }
-    }
+	@Override
+	public final Dialog onCreateDialog(Bundle savedInstanceState) {
+		Dialog dialog = super.onCreateDialog(savedInstanceState);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.setCancelable(false);
+		return dialog;
+	}
 
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
-        return dialog;
-    }
+	public final YesNoFragment setMessage(String message) {
+		messageText = message;
+		return this;
+	}
 
-    public YesNoFragment setMessage(String message) {
-        messageText = message;
-        return this;
-    }
+	public final YesNoFragment setInputText(String text) {
+		inputText = text;
+		return this;
+	}
 
-    public YesNoFragment setInputText(String text) {
-        inputText = text;
-        return this;
-    }
+	public final YesNoFragment setInputHint(String hint) {
+		inputHint = hint;
+		return this;
+	}
 
-    public YesNoFragment setInputHint(String hint) {
-        inputHint = hint;
-        return this;
-    }
+	public final String getInputValue() {
+		EditText inputEditText = (EditText) dialogLayout.findViewById(R.id.dialog_input);
+		return inputEditText.getText().toString();
+	}
 
-    public String getInputValue() {
-        EditText inputEditText = (EditText) dialogLayout.findViewById(R.id.dialog_input);
-        return inputEditText.getText().toString();
-    }
+	public final YesNoFragment hideInput() {
+		hideInput = true;
+		return this;
+	}
 
-    public YesNoFragment hideInput() {
-        hideInput = true;
-        return this;
-    }
+	public final YesNoFragment setPositiveButton(String buttonText,
+			View.OnClickListener buttonClickListener) {
+		positiveButtonText = buttonText;
+		positiveButtonListener = buttonClickListener;
+		return this;
+	}
 
-    public YesNoFragment setPositiveButton(String buttonText,
-                                           android.view.View.OnClickListener buttonClickListener) {
-        positiveButtonText = buttonText;
-        positiveButtonListener = buttonClickListener;
-        return this;
-    }
+	public final YesNoFragment setPositiveButton(View.OnClickListener buttonClickListener) {
+		positiveButtonListener = buttonClickListener;
+		return this;
+	}
 
-    public YesNoFragment setPositiveButton(
-            android.view.View.OnClickListener buttonClickListener) {
-        positiveButtonListener = buttonClickListener;
-        return this;
-    }
+	public final YesNoFragment setPositiveButton(String buttonText) {
+		positiveButtonText = buttonText;
+		return this;
+	}
 
-    public YesNoFragment setPositiveButton(String buttonText) {
-        positiveButtonText = buttonText;
-        return this;
-    }
+	public final YesNoFragment setNegativeButton(String buttonText,
+			View.OnClickListener buttonClickListener) {
+		negativeButtonText = buttonText;
+		negativeButtonListener = buttonClickListener;
+		return this;
+	}
 
-    public YesNoFragment setNegativeButton(String buttonText,
-                                           android.view.View.OnClickListener buttonClickListener) {
-        negativeButtonText = buttonText;
-        negativeButtonListener = buttonClickListener;
-        return this;
-    }
+	public final YesNoFragment setNegativeButton(View.OnClickListener buttonClickListener) {
+		negativeButtonListener = buttonClickListener;
+		return this;
+	}
 
-    public YesNoFragment setNegativeButton(android.view.View.OnClickListener buttonClickListener) {
-        negativeButtonListener = buttonClickListener;
-        return this;
-    }
-
-    public YesNoFragment setNegativeButton(String buttonText) {
-        negativeButtonText = buttonText;
-        return this;
-    }
+	public final YesNoFragment setNegativeButton(String buttonText) {
+		negativeButtonText = buttonText;
+		return this;
+	}
 
 }

@@ -8,30 +8,30 @@ import ee.juhan.meetingorganizer.models.server.MapCoordinate;
 
 public class MyLocationListener implements LocationListener {
 
-    private static MapCoordinate myLocation;
+	private static MapCoordinate myLocation;
 
-    public static MapCoordinate getMyLocation() {
-        return MyLocationListener.myLocation;
-    }
+	public static MapCoordinate getMyLocation() {
+		return MyLocationListener.myLocation;
+	}
 
-    @Override
-    public void onLocationChanged(Location loc) {
-        MyLocationListener.myLocation = new MapCoordinate(loc.getLatitude(), loc.getLongitude());
-    }
+	@Override
+	public final void onLocationChanged(Location loc) {
+		MyLocationListener.myLocation = new MapCoordinate(loc.getLatitude(), loc.getLongitude());
+	}
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
 
-    }
+	}
 
-    @Override
-    public void onProviderEnabled(String provider) {
+	@Override
+	public void onProviderEnabled(String provider) {
 
-    }
+	}
 
-    @Override
-    public void onProviderDisabled(String provider) {
+	@Override
+	public void onProviderDisabled(String provider) {
 
-    }
+	}
 
 }

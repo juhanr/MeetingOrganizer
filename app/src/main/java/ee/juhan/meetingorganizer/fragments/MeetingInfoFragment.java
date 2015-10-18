@@ -3,7 +3,6 @@ package ee.juhan.meetingorganizer.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,179 +32,186 @@ import retrofit.client.Response;
 
 public class MeetingInfoFragment extends Fragment {
 
-    private String title;
-    private MainActivity activity;
-    private ViewGroup meetingInfoLayout;
-    private MeetingDTO meeting;
-    private CustomMapFragment customMapFragment = new CustomMapFragment();
+	private String title;
+	private MainActivity activity;
+	private ViewGroup meetingInfoLayout;
+	private MeetingDTO meeting;
+	private CustomMapFragment customMapFragment = new CustomMapFragment();
 
-    public MeetingInfoFragment() {
-        this.meeting = null;
-    }
+	public MeetingInfoFragment() {}
 
-    @SuppressLint("ValidFragment")
-    public MeetingInfoFragment(MeetingDTO meeting) {
-        this.meeting = meeting;
-    }
+	public static MeetingInfoFragment newInstance(MeetingDTO meeting) {
+		MeetingInfoFragment fragment = new MeetingInfoFragment();
+		fragment.setMeeting(meeting);
+		return fragment;
+	}
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        activity = (MainActivity) getActivity();
-        title = getString(R.string.title_meeting_info);
-    }
+	private void populateLayout() {
+		TextView title = (TextView) meetingInfoLayout.findViewById(R.id.meeting_title);
+		TextView description = (TextView) meetingInfoLayout.findViewById(R.id.meeting_description);
+		TextView date = (TextView) meetingInfoLayout.findViewById(R.id.meeting_date);
+		TextView time = (TextView) meetingInfoLayout.findViewById(R.id.meeting_time);
+		title.setText(getString(R.string.textview_title) + ": " + meeting.getTitle());
+		if (meeting.getDescription().trim().isEmpty()) {
+			description.setText(getString(R.string.textview_description) + ": None");
+		} else {
+			description.setText(
+					getString(R.string.textview_description) + ": " + meeting.getDescription());
+		}
+		date.setText(getString(R.string.textview_date) + ": " +
+				DateParserUtil.formatDate(meeting.getStartDateTime()));
+		time.setText(getString(R.string.textview_time) + ": " +
+				DateParserUtil.formatTime(meeting.getStartDateTime()) +
+				" - " + DateParserUtil.formatTime(meeting.getEndDateTime()));
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        activity.setTitle(title);
-        if (meeting == null) {
-            meetingInfoLayout = (ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
-            TextView infoText = (TextView) meetingInfoLayout.findViewById(R.id.info_text);
-            infoText.setText(getString(R.string.textview_no_info));
-        } else {
-            meetingInfoLayout = (ViewGroup) inflater.inflate(R.layout.fragment_meeting_info, container, false);
-            populateLayout();
-            setButtonListeners();
-        }
-        return meetingInfoLayout;
-    }
+		setUpMapFragment();
+		setAnswerButtons();
+	}
 
-    private void populateLayout() {
-        TextView title = (TextView) meetingInfoLayout.findViewById(R.id.meeting_title);
-        TextView description = (TextView) meetingInfoLayout.findViewById(R.id.meeting_description);
-        TextView date = (TextView) meetingInfoLayout.findViewById(R.id.meeting_date);
-        TextView time = (TextView) meetingInfoLayout.findViewById(R.id.meeting_time);
-        title.setText(getString(R.string.textview_title) + ": " + meeting.getTitle());
-        if (meeting.getDescription().trim().equals("")) {
-            description.setText(getString(R.string.textview_description) + ": None");
-        } else {
-            description.setText(getString(R.string.textview_description) + ": "
-                    + meeting.getDescription());
-        }
-        date.setText(getString(R.string.textview_date) + ": "
-                + DateParserUtil.formatDate(meeting.getStartDateTime()));
-        time.setText(getString(R.string.textview_time) + ": "
-                + DateParserUtil.formatTime(meeting.getStartDateTime()) + " - "
-                + DateParserUtil.formatTime(meeting.getEndDateTime()));
+	private void setUpMapFragment() {
+		customMapFragment = new CustomMapFragment();
+		if (meeting.getLocation() != null) {
+			customMapFragment.setLocation(new LatLng(meeting.getLocation().getLatitude(),
+					meeting.getLocation().getLongitude()));
+		}
+		getFragmentManager().beginTransaction().
+				replace(R.id.location_frame, customMapFragment).commit();
+		FrameLayout layout = (FrameLayout) meetingInfoLayout.findViewById(R.id.location_frame);
+		layout.setBackgroundResource(R.drawable.view_border);
+	}
 
-        setUpMapFragment();
-        setAnswerButtons();
-    }
+	private void setButtonListeners() {
+		Button showParticipants = (Button) meetingInfoLayout.findViewById(R.id.show_participants);
+		showParticipants.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				((MainActivity) getActivity())
+						.changeFragment(new ParticipantsListFragment(meeting.getParticipants()));
+			}
+		});
+	}
 
-    private void setUpMapFragment() {
-        customMapFragment = new CustomMapFragment();
-        if (meeting.getLocation() != null) {
-            customMapFragment.setLocation(new LatLng(
-                    meeting.getLocation().getLatitude(), meeting.getLocation().getLongitude()));
-        }
-        getFragmentManager().beginTransaction().
-                replace(R.id.location_frame, customMapFragment).commit();
-        FrameLayout layout = (FrameLayout) meetingInfoLayout.findViewById(R.id.location_frame);
-        layout.setBackgroundResource(R.drawable.view_border);
-    }
+	private void setAnswerButtons() {
+		final ParticipantDTO participantObject = getParticipantObject();
+		if (participantObject.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED &&
+				meeting.getEndDateTime().after(new Date())) {
+			Button acceptInvitation =
+					(Button) meetingInfoLayout.findViewById(R.id.accept_invitation);
+			Button denyInvitation = (Button) meetingInfoLayout.findViewById(R.id.deny_invitation);
+			acceptInvitation.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (meeting.getLocationType() ==
+							LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
+							MyLocationListener.getMyLocation() != null ||
+							meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
+						participantObject.setLocation(MyLocationListener.getMyLocation());
+						participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
+						sendUpdateParticipantRequest(participantObject);
+					} else {
+						activity.showToastMessage(
+								getString(R.string.toast_please_get_your_location));
+					}
+				}
+			});
+			denyInvitation.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (meeting.getLocationType() ==
+							LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
+							MyLocationListener.getMyLocation() != null ||
+							meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
+						participantObject.setLocation(MyLocationListener.getMyLocation());
+						participantObject
+								.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
+						sendUpdateParticipantRequest(participantObject);
+					} else {
+						activity.showToastMessage(
+								getString(R.string.toast_please_get_your_location));
+					}
+				}
+			});
+		} else {
+			ViewGroup answerButtons =
+					(ViewGroup) meetingInfoLayout.findViewById(R.id.invitation_answer_buttons);
+			answerButtons.setVisibility(View.GONE);
+		}
+	}
 
-    private void setButtonListeners() {
-        Button showParticipants = (Button) meetingInfoLayout
-                .findViewById(R.id.show_participants);
-        showParticipants.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((MainActivity) getActivity()).changeFragment(
-                        new ParticipantsListFragment(meeting.getParticipants()));
-            }
-        });
-    }
+	private void sendUpdateParticipantRequest(ParticipantDTO participantDTO) {
+		activity.showLoadingFragment();
+		RestClient.get().updateParticipantRequest(participantDTO, meeting.getId(),
+				new Callback<MeetingDTO>() {
+					@Override
+					public void success(MeetingDTO serverResponse, Response response) {
+						activity.dismissLoadingFragment();
+						meeting = serverResponse;
+						populateLayout();
+					}
 
-    private void setAnswerButtons() {
-        final ParticipantDTO participantObject = getParticipantObject();
-        if (participantObject.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED
-                && meeting.getEndDateTime().after(new Date())) {
-            Button acceptInvitation = (Button) meetingInfoLayout
-                    .findViewById(R.id.accept_invitation);
-            Button denyInvitation = (Button) meetingInfoLayout
-                    .findViewById(R.id.deny_invitation);
-            acceptInvitation.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS
-                            && MyLocationListener.getMyLocation() != null
-                            || meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
-                        participantObject.setLocation(MyLocationListener.getMyLocation());
-                        participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
-                        sendUpdateParticipantRequest(participantObject);
-                    } else {
-                        activity.showToastMessage(getString(R.string.toast_please_get_your_location));
-                    }
-                }
-            });
-            denyInvitation.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS
-                            && MyLocationListener.getMyLocation() != null
-                            || meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
-                        participantObject.setLocation(MyLocationListener.getMyLocation());
-                        participantObject.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
-                        sendUpdateParticipantRequest(participantObject);
-                    } else {
-                        activity.showToastMessage(getString(R.string.toast_please_get_your_location));
-                    }
-                }
-            });
-        } else {
-            ViewGroup answerButtons = (ViewGroup) meetingInfoLayout
-                    .findViewById(R.id.invitation_answer_buttons);
-            answerButtons.setVisibility(View.GONE);
-        }
-    }
+					@Override
+					public void failure(RetrofitError error) {
+						activity.dismissLoadingFragment();
+						activity.showToastMessage(getString(R.string.toast_server_fail));
+					}
+				});
+	}
 
-    private void sendUpdateParticipantRequest(ParticipantDTO participantDTO) {
-        activity.showLoadingFragment();
-        RestClient.get().updateParticipantRequest(participantDTO, meeting.getId(),
-                new Callback<MeetingDTO>() {
-                    @Override
-                    public void success(MeetingDTO serverResponse, Response response) {
-                        activity.dismissLoadingFragment();
-                        meeting = serverResponse;
-                        populateLayout();
-                    }
+	private ParticipantDTO getParticipantObject() {
+		int accountId = activity.getUserId();
+		for (ParticipantDTO participant : meeting.getParticipants()) {
+			if (participant.getAccountId() == accountId) {
+				return participant;
+			}
+		}
+		return null;
+	}
 
-                    @Override
-                    public void failure(RetrofitError error) {
-                        activity.dismissLoadingFragment();
-                        activity.showToastMessage(getString(R.string.toast_server_fail));
-                    }
-                });
-    }
+	@Override
+	public final Animator onCreateAnimator(int transit, boolean enter, int nextAnim) {
+		final Animator anim = AnimatorInflater.loadAnimator(getActivity(), nextAnim);
+		if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+			anim.addListener(new AnimatorListenerAdapter() {
+				@Override
+				public void onAnimationEnd(Animator animation) {
+					customMapFragment.setMapVisibility(View.VISIBLE);
+				}
 
-    private ParticipantDTO getParticipantObject() {
-        int accountId = activity.getUserId();
-        for (ParticipantDTO participant : meeting.getParticipants()) {
-            if (participant.getAccountId() == accountId) {
-                return participant;
-            }
-        }
-        return null;
-    }
+				@Override
+				public void onAnimationStart(Animator animation) {
+					customMapFragment.setMapVisibility(View.INVISIBLE);
+				}
+			});
+		}
+		return anim;
+	}
 
-    @Override
-    public Animator onCreateAnimator(int transit, boolean enter, int nextAnim) {
-        final Animator anim = AnimatorInflater.loadAnimator(getActivity(), nextAnim);
-        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            anim.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    customMapFragment.setMapVisibility(View.INVISIBLE);
-                }
+	@Override
+	public final void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		activity = (MainActivity) getActivity();
+		title = getString(R.string.title_meeting_info);
+	}
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    customMapFragment.setMapVisibility(View.VISIBLE);
-                }
-            });
-        }
-        return anim;
-    }
+	@Override
+	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		activity.setTitle(title);
+		if (meeting == null) {
+			meetingInfoLayout =
+					(ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
+			TextView infoText = (TextView) meetingInfoLayout.findViewById(R.id.info_text);
+			infoText.setText(getString(R.string.textview_no_info));
+		} else {
+			meetingInfoLayout =
+					(ViewGroup) inflater.inflate(R.layout.fragment_meeting_info, container, false);
+			populateLayout();
+			setButtonListeners();
+		}
+		return meetingInfoLayout;
+	}
 
+	public void setMeeting(MeetingDTO meeting) {
+		this.meeting = meeting;
+	}
 }

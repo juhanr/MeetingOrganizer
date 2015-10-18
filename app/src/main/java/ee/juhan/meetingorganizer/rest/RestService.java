@@ -15,41 +15,39 @@ import retrofit.http.Path;
 
 public interface RestService {
 
-    String MEETING = "/meeting";
-    String NEW_MEETING = MEETING + "/new";
-    String UPDATE_PARTICIPANT = "/update-participant";
+	String MEETING = "/meeting";
+	String NEW_MEETING = MEETING + "/new";
+	String UPDATE_PARTICIPANT = "/update-participant";
 
-    String REGISTER = "/register";
-    String LOGIN = "/login";
+	String REGISTER = "/register";
+	String LOGIN = "/login";
 
-    String ACCOUNT = "/account";
-    String CHECK_CONTACTS = "/check-contacts";
+	String ACCOUNT = "/account";
+	String CHECK_CONTACTS = "/check-contacts";
 
-    @POST(LOGIN)
-    void loginRequest(@Body AccountDTO accountDTO,
-                      Callback<ServerResponse> callback);
+	String ACCOUNT_ID = "accountId";
+	String MEETING_ID = "meetingId";
+	String MEETINGS_TYPE = "meetingsType";
 
-    @POST(REGISTER)
-    void registrationRequest(@Body AccountDTO accountDTO,
-                             Callback<ServerResponse> callback);
+	@POST(LOGIN)
+	void loginRequest(@Body AccountDTO accountDTO, Callback<ServerResponse> callback);
 
-    @POST(ACCOUNT + "/{id}" + CHECK_CONTACTS)
-    void checkContactsRequest(@Body List<ContactDTO> contactList,
-                              @Path("id") int accountId,
-                              Callback<List<ContactDTO>> callback);
+	@POST(REGISTER)
+	void registrationRequest(@Body AccountDTO accountDTO, Callback<ServerResponse> callback);
 
-    @POST(NEW_MEETING)
-    void newMeetingRequest(@Body MeetingDTO meetingDTO,
-                           Callback<MeetingDTO> callback);
+	@POST(ACCOUNT + "/{" + ACCOUNT_ID + "}" + CHECK_CONTACTS)
+	void checkContactsRequest(@Body List<ContactDTO> contactList, @Path(ACCOUNT_ID) int accountId,
+			Callback<List<ContactDTO>> callback);
 
-    @GET(MEETING + "/{meetingsType}" + ACCOUNT + "/{accountId}")
-    void getMeetingsRequest(@Path("meetingsType") String listType,
-                            @Path("accountId") int accountId,
-                            Callback<List<MeetingDTO>> callback);
+	@POST(NEW_MEETING)
+	void newMeetingRequest(@Body MeetingDTO meetingDTO, Callback<MeetingDTO> callback);
 
-    @POST(MEETING + "/{meetingId}" + UPDATE_PARTICIPANT)
-    void updateParticipantRequest(@Body ParticipantDTO participantDTO,
-                                  @Path("meetingId") int meetingId,
-                                  Callback<MeetingDTO> callback);
+	@GET(MEETING + "/{" + MEETINGS_TYPE + "}" + ACCOUNT + "/{" + ACCOUNT_ID + "}")
+	void getMeetingsRequest(@Path(MEETINGS_TYPE) String listType, @Path(ACCOUNT_ID) int accountId,
+			Callback<List<MeetingDTO>> callback);
+
+	@POST(MEETING + "/{" + MEETING_ID + "}" + UPDATE_PARTICIPANT)
+	void updateParticipantRequest(@Body ParticipantDTO participantDTO,
+			@Path(MEETING_ID) int meetingId, Callback<MeetingDTO> callback);
 
 }

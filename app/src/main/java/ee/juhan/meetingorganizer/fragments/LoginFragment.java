@@ -22,103 +22,110 @@ import retrofit.client.Response;
 
 public class LoginFragment extends Fragment {
 
-    private String title;
-    private MainActivity activity;
-    private ViewGroup loginLayout;
+	private static final int PASSWORD_MIN_LENGTH = 5;
+	private String title;
+	private MainActivity activity;
+	private ViewGroup loginLayout;
 
-    public LoginFragment() {
-    }
+	public LoginFragment() {}
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        activity = (MainActivity) getActivity();
-        title = getString(R.string.title_login);
-    }
+	public static LoginFragment newInstance() {
+		return new LoginFragment();
+	}
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        activity.setTitle(title);
-        activity.setDrawerItem(activity.getDrawerItemPosition(title));
-        loginLayout = (ViewGroup) inflater.inflate(R.layout.fragment_login, container, false);
-        setButtonListeners();
-        return loginLayout;
-    }
+	@Override
+	public final void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		activity = (MainActivity) getActivity();
+		title = getString(R.string.title_login);
+	}
 
-    private void setButtonListeners() {
-        Button loginButton = (Button) loginLayout
-                .findViewById(R.id.login_button);
-        TextView createAccountButton = (TextView) loginLayout
-                .findViewById(R.id.create_account_textbutton);
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isValidData()) {
-                    sendLoginRequest(getViewText(R.id.email_textbox),
-                            getViewText(R.id.password_textbox));
-                }
-            }
-        });
-        createAccountButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                activity.selectDrawerItem(2);
-            }
-        });
-    }
+	@Override
+	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		activity.setTitle(title);
+		activity.setDrawerItem(activity.getDrawerItemPosition(title));
+		loginLayout = (ViewGroup) inflater.inflate(R.layout.fragment_login, container, false);
+		setButtonListeners();
+		return loginLayout;
+	}
 
-    private boolean isValidData() {
-        if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.email_textbox))) {
-            activity.showToastMessage(getString(R.string.toast_invalid_email));
-        } else if (getViewText(R.id.password_textbox).length() < 5) {
-            activity.showToastMessage(getString(R.string.toast_short_password));
-        } else {
-            return true;
-        }
-        return false;
-    }
+	private void setButtonListeners() {
+		Button loginButton = (Button) loginLayout.findViewById(R.id.login_button);
+		TextView createAccountButton =
+				(TextView) loginLayout.findViewById(R.id.create_account_textbutton);
+		loginButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (isValidData()) {
+					sendLoginRequest(getViewText(R.id.email_textbox),
+							getViewText(R.id.password_textbox));
+				}
+			}
+		});
+		createAccountButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				activity.selectDrawerItem(2);
+			}
+		});
+	}
 
-    private String getViewText(int viewId) {
-        View view = loginLayout.findViewById(viewId);
-        if (view instanceof EditText) {
-            return ((EditText) view).getText().toString().trim();
-        } else if (view instanceof TextView) {
-            return ((TextView) view).getText().toString().trim();
-        } else {
-            return "";
-        }
-    }
+	private boolean isValidData() {
+		if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.email_textbox))) {
+			activity.showToastMessage(getString(R.string.toast_invalid_email));
+		} else if (getViewText(R.id.password_textbox).length() < PASSWORD_MIN_LENGTH) {
+			activity.showToastMessage(getString(R.string.toast_short_password1) +
+					PASSWORD_MIN_LENGTH + getString(R.string.toast_short_password2));
+		} else {
+			return true;
+		}
+		return false;
+	}
 
-    private void sendLoginRequest(final String email, String password) {
-        activity.showLoadingFragment();
-        RestClient.get().loginRequest(new AccountDTO(email, password), new Callback<ServerResponse>() {
-            @Override
-            public void success(final ServerResponse serverResponse, Response response) {
-                activity.dismissLoadingFragment();
-                switch (serverResponse.getResult()) {
-                    case SUCCESS:
-                        activity.showToastMessage(getString(R.string.toast_login_successful));
-                        activity.logIn(email, serverResponse.getSid(), serverResponse.getUserId());
-                        break;
-                    case WRONG_PASSWORD:
-                        activity.showToastMessage(getString(R.string.toast_wrong_password));
-                        break;
-                    case NO_ACCOUNT_FOUND:
-                        activity.showToastMessage(getString(R.string.toast_no_account));
-                        break;
-                    case FAIL:
-                        activity.showToastMessage(getString(R.string.toast_server_fail));
-                        break;
-                }
-            }
+	private String getViewText(int viewId) {
+		View view = loginLayout.findViewById(viewId);
+		if (view instanceof EditText) {
+			return ((EditText) view).getText().toString().trim();
+		} else if (view instanceof TextView) {
+			return ((TextView) view).getText().toString().trim();
+		} else {
+			return "";
+		}
+	}
 
-            @Override
-            public void failure(RetrofitError error) {
-                activity.dismissLoadingFragment();
-                activity.showToastMessage(getString(R.string.toast_server_fail));
-            }
-        });
-    }
+	private void sendLoginRequest(final String email, String password) {
+		activity.showLoadingFragment();
+		RestClient.get()
+				.loginRequest(new AccountDTO(email, password), new Callback<ServerResponse>() {
+					@Override
+					public void success(final ServerResponse serverResponse, Response response) {
+						activity.dismissLoadingFragment();
+						switch (serverResponse.getResult()) {
+							case SUCCESS:
+								activity.showToastMessage(
+										getString(R.string.toast_login_successful));
+								activity.logIn(email, serverResponse.getSid(),
+										serverResponse.getUserId());
+								break;
+							case WRONG_PASSWORD:
+								activity.showToastMessage(getString(R.string.toast_wrong_password));
+								break;
+							case NO_ACCOUNT_FOUND:
+								activity.showToastMessage(getString(R.string.toast_no_account));
+								break;
+							case FAIL:
+								activity.showToastMessage(getString(R.string.toast_server_fail));
+								break;
+						}
+					}
+
+					@Override
+					public void failure(RetrofitError error) {
+						activity.dismissLoadingFragment();
+						activity.showToastMessage(getString(R.string.toast_server_fail));
+					}
+				});
+	}
 
 }

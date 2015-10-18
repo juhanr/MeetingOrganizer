@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/san_marino"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="35dp">
+			  android:layout_width="match_parent"
+			  android:layout_height="match_parent"
+			  android:background="@color/san_marino"
+			  android:gravity="center"
+			  android:orientation="vertical"
+			  android:padding="35dp">
 
-    <TextView
-        android:id="@+id/dialog_message"
-        style="@style/Text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+	<TextView
+		android:id="@+id/dialog_message"
+		style="@style/Text"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"/>
 
-    <EditText
-        android:id="@+id/dialog_input"
-        style="@style/TextBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/view_margin_small"
-        android:inputType="textMultiLine"
-        android:maxLength="255">
+	<EditText
+		android:id="@+id/dialog_input"
+		style="@style/TextBox"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/view_margin_small"
+		android:inputType="textMultiLine"
+		android:maxLength="255">
 
-        <requestFocus />
-    </EditText>
+		<requestFocus/>
+	</EditText>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/view_margin_large"
-        android:orientation="horizontal">
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/view_margin_large"
+		android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/dialog_positive_button"
-            style="@style/Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/view_margin_small"
-            android:layout_weight="0.5"
-            android:text="@string/button_yes" />
+		<Button
+			android:id="@+id/dialog_positive_button"
+			style="@style/Button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="@dimen/view_margin_small"
+			android:layout_weight="0.5"
+			android:text="@string/button_yes"/>
 
-        <Button
-            android:id="@+id/dialog_negative_button"
-            style="@style/Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/view_margin_small"
-            android:layout_weight="0.5"
-            android:text="@string/button_no" />
-    </LinearLayout>
+		<Button
+			android:id="@+id/dialog_negative_button"
+			style="@style/Button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="@dimen/view_margin_small"
+			android:layout_weight="0.5"
+			android:text="@string/button_no"/>
+	</LinearLayout>
 </LinearLayout>

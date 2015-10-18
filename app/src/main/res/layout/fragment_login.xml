@@ -1,53 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/FragmentLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:focusableInTouchMode="true"
-    android:orientation="vertical">
+<LinearLayout
+	style="@style/FragmentLayout"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:focusableInTouchMode="true"
+	android:orientation="vertical">
 
-    <TextView
-        style="@style/Text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/textview_email" />
+	<TextView
+		style="@style/Text"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/textview_email"/>
 
-    <EditText
-        android:id="@+id/email_textbox"
-        style="@style/TextBox"
-        android:layout_width="@dimen/textbox_width_normal"
-        android:layout_height="wrap_content"
-        android:inputType="textEmailAddress"
-        android:maxLength="40" />
+	<EditText
+		android:id="@+id/email_textbox"
+		style="@style/TextBox"
+		android:layout_width="@dimen/textbox_width_normal"
+		android:layout_height="wrap_content"
+		android:inputType="textEmailAddress"
+		android:maxLength="40"/>
 
-    <TextView
-        style="@style/Text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/textview_password" />
+	<TextView
+		style="@style/Text"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/textview_password"/>
 
-    <EditText
-        android:id="@+id/password_textbox"
-        style="@style/TextBox"
-        android:layout_width="@dimen/textbox_width_normal"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/view_margin_large"
-        android:inputType="textPassword" />
+	<EditText
+		android:id="@+id/password_textbox"
+		style="@style/TextBox"
+		android:layout_width="@dimen/textbox_width_normal"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="@dimen/view_margin_large"
+		android:inputType="textPassword"/>
 
-    <TextView
-        android:id="@+id/create_account_textbutton"
-        style="@style/Text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/textview_create_account_u" />
+	<TextView
+		android:id="@+id/create_account_textbutton"
+		style="@style/Text"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/textview_create_account_u"/>
 
-    <include layout="@layout/view_empty_space" />
+	<include layout="@layout/view_empty_space"/>
 
-    <Button
-        android:id="@+id/login_button"
-        style="@style/Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_login" />
+	<Button
+		android:id="@+id/login_button"
+		style="@style/Button"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/button_login"/>
 
 </LinearLayout>

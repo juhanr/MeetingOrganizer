@@ -1,99 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:fillViewport="true">
 
-    <LinearLayout
-        style="@style/FragmentLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:focusableInTouchMode="true"
-        android:orientation="vertical">
+	<LinearLayout
+		style="@style/FragmentLayout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:focusableInTouchMode="true"
+		android:orientation="vertical">
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="@string/textview_title" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/view_margin_small"
+			android:text="@string/textview_title"/>
 
-        <EditText
-            android:id="@+id/title_textbox"
-            style="@style/TextBox"
-            android:layout_width="@dimen/textbox_width_normal"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_margin_large" />
+		<EditText
+			android:id="@+id/title_textbox"
+			style="@style/TextBox"
+			android:layout_width="@dimen/textbox_width_normal"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/view_margin_large"/>
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="@string/textview_description" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/view_margin_small"
+			android:text="@string/textview_description"/>
 
-        <EditText
-            android:id="@+id/description_textbox"
-            style="@style/TextBox"
-            android:layout_width="@dimen/textbox_width_normal"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_margin_large"
-            android:inputType="textMultiLine"
-            android:maxLength="255" />
+		<EditText
+			android:id="@+id/description_textbox"
+			style="@style/TextBox"
+			android:layout_width="@dimen/textbox_width_normal"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/view_margin_large"
+			android:inputType="textMultiLine"
+			android:maxLength="255"/>
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="@string/textview_date" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/view_margin_small"
+			android:text="@string/textview_date"/>
 
-        <TextView
-            android:id="@+id/date_button"
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_margin_large"
-            android:text="@string/textview_not_set_u" />
+		<TextView
+			android:id="@+id/date_button"
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/view_margin_large"
+			android:text="@string/textview_not_set_u"/>
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="@string/textview_start_time" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/view_margin_small"
+			android:text="@string/textview_start_time"/>
 
-        <TextView
-            android:id="@+id/start_time_button"
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_margin_large"
-            android:text="@string/textview_not_set_u" />
+		<TextView
+			android:id="@+id/start_time_button"
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/view_margin_large"
+			android:text="@string/textview_not_set_u"/>
 
-        <TextView
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_margin_small"
-            android:text="@string/textview_end_time" />
+		<TextView
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/view_margin_small"
+			android:text="@string/textview_end_time"/>
 
-        <TextView
-            android:id="@+id/end_time_button"
-            style="@style/Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/textview_not_set_u" />
+		<TextView
+			android:id="@+id/end_time_button"
+			style="@style/Text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/textview_not_set_u"/>
 
-        <include layout="@layout/view_empty_space" />
+		<include layout="@layout/view_empty_space"/>
 
-        <Button
-            android:id="@+id/continue_button"
-            style="@style/Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/view_margin_large"
-            android:text="@string/button_continue" />
+		<Button
+			android:id="@+id/continue_button"
+			style="@style/Button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/view_margin_large"
+			android:text="@string/button_continue"/>
 
-    </LinearLayout>
+	</LinearLayout>
 </ScrollView>

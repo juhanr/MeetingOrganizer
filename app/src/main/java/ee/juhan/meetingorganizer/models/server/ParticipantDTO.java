@@ -2,96 +2,85 @@ package ee.juhan.meetingorganizer.models.server;
 
 public class ParticipantDTO {
 
-    private int id;
-    private int accountId;
-    private String name;
-    private String email;
-    private String phoneNumber;
-    private ParticipationAnswer participationAnswer = ParticipationAnswer.NOT_ANSWERED;
-    private MapCoordinate location;
+	private int id;
+	private int accountId;
+	private String name;
+	private String email;
+	private String phoneNumber;
+	private ParticipationAnswer participationAnswer = ParticipationAnswer.NOT_ANSWERED;
+	private MapCoordinate location;
 
-    public ParticipantDTO() {
-    }
+	public ParticipantDTO() {
+	}
 
-    public ParticipantDTO(int id, int accountId, ParticipationAnswer participationAnswer,
-                          MapCoordinate location) {
-        this.accountId = accountId;
-        this.participationAnswer = participationAnswer;
-        this.location = location;
-    }
+	public ParticipantDTO(int accountId, ParticipationAnswer participationAnswer,
+			MapCoordinate location) {
+		this.accountId = accountId;
+		this.participationAnswer = participationAnswer;
+		this.location = location;
+	}
 
-    public ParticipantDTO(int accountId, ParticipationAnswer participationAnswer,
-                          MapCoordinate location) {
-        this.accountId = accountId;
-        this.participationAnswer = participationAnswer;
-        this.location = location;
-    }
+	public ParticipantDTO(int accountId, String name, String email, String phoneNumber) {
+		this.accountId = accountId;
+		this.name = name;
+		this.email = email;
+		this.phoneNumber = phoneNumber;
+	}
 
-    public ParticipantDTO(int accountId, String name, String email, String phoneNumber) {
-        this.accountId = accountId;
-        this.name = name;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-    }
+	public final int getId() {
+		return id;
+	}
 
-    public ParticipantDTO(String name) {
-        this.name = name;
-    }
+	public final void setId(int id) {
+		this.id = id;
+	}
 
-    public int getId() {
-        return id;
-    }
+	public final int getAccountId() {
+		return accountId;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public final void setAccountId(int accountId) {
+		this.accountId = accountId;
+	}
 
-    public int getAccountId() {
-        return accountId;
-    }
+	public final String getName() {
+		return name;
+	}
 
-    public void setAccountId(int accountId) {
-        this.accountId = accountId;
-    }
+	public final void setName(String name) {
+		this.name = name;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public final String getEmail() {
+		return email;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public final void setEmail(String email) {
+		this.email = email;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public final String getPhoneNumber() {
+		return phoneNumber;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public final void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
+	public final ParticipationAnswer getParticipationAnswer() {
+		return participationAnswer;
+	}
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
+	public final void setParticipationAnswer(ParticipationAnswer participationAnswer) {
+		this.participationAnswer = participationAnswer;
+	}
 
-    public ParticipationAnswer getParticipationAnswer() {
-        return participationAnswer;
-    }
+	public final MapCoordinate getLocation() {
+		return location;
+	}
 
-    public void setParticipationAnswer(ParticipationAnswer participationAnswer) {
-        this.participationAnswer = participationAnswer;
-    }
-
-    public MapCoordinate getLocation() {
-        return location;
-    }
-
-    public void setLocation(MapCoordinate location) {
-        this.location = location;
-    }
+	public final void setLocation(MapCoordinate location) {
+		this.location = location;
+	}
 
 }
