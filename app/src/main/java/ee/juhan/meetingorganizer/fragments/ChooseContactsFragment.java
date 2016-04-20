@@ -77,19 +77,19 @@ public class ChooseContactsFragment extends Fragment {
 	}
 
 	private void checkContactsFromServer() {
-		activity.showLoadingFragment();
+		activity.showProgress(true);
 		RestClient.get().checkContactsRequest(contactsList, activity.getUserId(),
 				new Callback<List<ContactDTO>>() {
 					@Override
 					public void success(final List<ContactDTO> serverResponse, Response response) {
-						activity.dismissLoadingFragment();
+						activity.showProgress(false);
 						updateContactsList(serverResponse);
 						refreshListView();
 					}
 
 					@Override
 					public void failure(RetrofitError error) {
-						activity.dismissLoadingFragment();
+						activity.showProgress(false);
 						activity.showToastMessage(getString(R.string.toast_server_fail));
 					}
 				});
@@ -213,21 +213,21 @@ public class ChooseContactsFragment extends Fragment {
 	}
 
 	private void sendNewMeetingRequest() {
-		activity.showLoadingFragment();
+		activity.showProgress(true);
 		RestClient.get().newMeetingRequest(NewMeetingFragment.getNewMeetingModel(),
 				new Callback<MeetingDTO>() {
 					@Override
-					public void success(MeetingDTO serverResponse, Response response) {
-						activity.dismissLoadingFragment();
+					public void success(MeetingDTO meeting, Response response) {
+						meeting.toUTCTimeZone();
+						activity.showProgress(false);
 						activity.showToastMessage(getString(R.string.toast_meeting_created));
-						activity.changeFragment(MeetingInfoFragment.newInstance(serverResponse),
-								false);
+						activity.changeFragmentToMeetingInfo(meeting);
 						NewMeetingFragment.setNewMeetingModel(new MeetingDTO());
 					}
 
 					@Override
 					public void failure(RetrofitError error) {
-						activity.dismissLoadingFragment();
+						activity.showProgress(false);
 						activity.showToastMessage(getString(R.string.toast_server_fail));
 					}
 				});
@@ -242,6 +242,7 @@ public class ChooseContactsFragment extends Fragment {
 		Cursor numbersCur = cr.query(uri, projection, null, null,
 				ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
 
+		assert numbersCur != null;
 		if (numbersCur.moveToFirst()) {
 			String name;
 			String phoneNumber;
@@ -274,6 +275,7 @@ public class ChooseContactsFragment extends Fragment {
 		Cursor cur =
 				cr.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, projection, filter,
 						null, order);
+		assert cur != null;
 		if (!cur.moveToFirst()) {
 			cur.close();
 			return;

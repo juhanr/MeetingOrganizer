@@ -7,10 +7,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
-public final class DateParserUtil {
+public final class DateUtil {
 
-	private static final String TAG = "DateParserUtil";
+	private static final String TAG = "DateUtil";
 
 	private static final SimpleDateFormat DATETIME_FORMAT =
 			new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
@@ -19,14 +20,12 @@ public final class DateParserUtil {
 	private static final SimpleDateFormat TIME_FORMAT =
 			new SimpleDateFormat("HH:mm", Locale.getDefault());
 
-	static {
-		DATETIME_FORMAT.setTimeZone(TimeZone.getDefault());
-		DATE_FORMAT.setTimeZone(TimeZone.getDefault());
-		TIME_FORMAT.setTimeZone(TimeZone.getDefault());
+	private DateUtil() {
+
 	}
 
-	private DateParserUtil() {
-
+	public static Date getCurrentTime(int offsetInMinutes) {
+		return new Date((new Date()).getTime() + TimeUnit.MINUTES.toMillis(offsetInMinutes));
 	}
 
 	public static Date parseDateTime(String dateTime) {
@@ -66,6 +65,31 @@ public final class DateParserUtil {
 
 	public static String formatTime(Date time) {
 		return TIME_FORMAT.format(time);
+	}
+
+	public static Date convertTimeZone(Date date, TimeZone fromTimeZone, TimeZone toTimeZone) {
+		if (date == null) {
+			return null;
+		}
+		long fromTimeZoneOffset = getTimeZoneUTCAndDSTOffset(date, fromTimeZone);
+		long toTimeZoneOffset = getTimeZoneUTCAndDSTOffset(date, toTimeZone);
+		return new Date(date.getTime() + (toTimeZoneOffset - fromTimeZoneOffset));
+	}
+
+	private static long getTimeZoneUTCAndDSTOffset(Date date, TimeZone timeZone) {
+		long timeZoneDSTOffset = 0;
+		if (timeZone.inDaylightTime(date)) {
+			timeZoneDSTOffset = timeZone.getDSTSavings();
+		}
+		return timeZone.getRawOffset() + timeZoneDSTOffset;
+	}
+
+	public static Date toUTCTimezone(Date date) {
+		return convertTimeZone(date, TimeZone.getDefault(), TimeZone.getTimeZone("UTC"));
+	}
+
+	public static Date toLocalTimezone(Date date) {
+		return convertTimeZone(date, TimeZone.getTimeZone("UTC"), TimeZone.getDefault());
 	}
 
 }

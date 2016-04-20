@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ public class ParticipantsListFragment extends Fragment {
 	@SuppressLint("ValidFragment")
 	public ParticipantsListFragment(List<ParticipantDTO> participantsList) {
 		this.participantsList = participantsList;
+		Log.d("DEBUG", String.valueOf(participantsList.size()));
 	}
 
 	@Override
@@ -66,7 +68,7 @@ public class ParticipantsListFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
 				ParticipantDTO participant = adapter.getItem(position);
-				activity.changeFragment(new ParticipantInfoFragment(participant));
+				activity.changeFragmentToParticipantInfo(participant);
 			}
 		});
 		adapter = new ParticipantsAdapter(getActivity(), participantsList);
@@ -84,7 +86,11 @@ public class ParticipantsListFragment extends Fragment {
 			ParticipantDTO participant = super.getCurrentItem();
 			TextView participantNameView =
 					(TextView) super.getLayout().findViewById(R.id.participant_name);
-			participantNameView.setText(participant.getName());
+			if (participant.getName() == null) {
+				participantNameView.setText("Unknown");
+			} else {
+				participantNameView.setText(participant.getName());
+			}
 			switch (participant.getParticipationAnswer()) {
 				case PARTICIPATING:
 					super.addIcon(R.drawable.ic_check_mark);

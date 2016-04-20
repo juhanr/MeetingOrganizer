@@ -44,7 +44,7 @@ public class LoginFragment extends Fragment {
 	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		activity.setTitle(title);
-		activity.setDrawerItem(activity.getDrawerItemPosition(title));
+		activity.checkDrawerItem(R.id.nav_log_in);
 		loginLayout = (ViewGroup) inflater.inflate(R.layout.fragment_login, container, false);
 		setButtonListeners();
 		return loginLayout;
@@ -66,9 +66,11 @@ public class LoginFragment extends Fragment {
 		createAccountButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				activity.selectDrawerItem(2);
+				activity.changeFragmentToRegistration();
 			}
 		});
+
+		activity.setupEditTextFocusListeners(loginLayout);
 	}
 
 	private boolean isValidData() {
@@ -95,12 +97,12 @@ public class LoginFragment extends Fragment {
 	}
 
 	private void sendLoginRequest(final String email, String password) {
-		activity.showLoadingFragment();
+		activity.showProgress(true);
 		RestClient.get()
 				.loginRequest(new AccountDTO(email, password), new Callback<ServerResponse>() {
 					@Override
 					public void success(final ServerResponse serverResponse, Response response) {
-						activity.dismissLoadingFragment();
+						activity.showProgress(false);
 						switch (serverResponse.getResult()) {
 							case SUCCESS:
 								activity.showToastMessage(
@@ -122,7 +124,7 @@ public class LoginFragment extends Fragment {
 
 					@Override
 					public void failure(RetrofitError error) {
-						activity.dismissLoadingFragment();
+						activity.showProgress(false);
 						activity.showToastMessage(getString(R.string.toast_server_fail));
 					}
 				});

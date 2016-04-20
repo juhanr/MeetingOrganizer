@@ -10,20 +10,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.rey.material.widget.Spinner;
+
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
-import ee.juhan.meetingorganizer.util.DateParserUtil;
+import ee.juhan.meetingorganizer.util.DateUtil;
 
 public class NewMeetingFragment extends Fragment {
 
@@ -53,50 +55,66 @@ public class NewMeetingFragment extends Fragment {
 	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		activity.setTitle(title);
-		activity.setDrawerItem(activity.getDrawerItemPosition(title));
 		newMeetingLayout =
 				(ViewGroup) inflater.inflate(R.layout.fragment_new_meeting, container, false);
 		setButtonListeners();
-		setSavedData();
+		setSavedDataViews();
 		return newMeetingLayout;
 	}
 
 	private void setButtonListeners() {
-		TextView dateButton = (TextView) newMeetingLayout.findViewById(R.id.date_button);
-		TextView startTimeButton = (TextView) newMeetingLayout.findViewById(R.id.start_time_button);
-		TextView endTimeButton = (TextView) newMeetingLayout.findViewById(R.id.end_time_button);
+		String[] items = new String[]{"Not set"};
+		ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.row_spn, items);
+		adapter.setDropDownViewResource(R.layout.row_spn_dropdown);
+
+		Spinner dateButton = (Spinner) newMeetingLayout.findViewById(R.id.date_button);
+		Spinner startTimeButton = (Spinner) newMeetingLayout.findViewById(R.id.start_time_button);
+		Spinner endTimeButton = (Spinner) newMeetingLayout.findViewById(R.id.end_time_button);
 		Button continueButton = (Button) newMeetingLayout.findViewById(R.id.continue_button);
+
+		dateButton.setAdapter(adapter);
+		dateButton.setClickable(false);
+		startTimeButton.setAdapter(adapter);
+		startTimeButton.setClickable(false);
+		endTimeButton.setAdapter(adapter);
+		endTimeButton.setClickable(false);
+
 		dateButton.setOnClickListener(new DateClickListener(R.id.date_button));
 		startTimeButton.setOnClickListener(new TimeClickListener(R.id.start_time_button));
 		endTimeButton.setOnClickListener(new TimeClickListener(R.id.end_time_button));
-
 		continueButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				saveData();
 				if (isValidData()) {
-					activity.changeFragment(new ChooseLocationFragment());
+					activity.changeFragmentToChooseLocation();
 				}
 			}
 		});
 
+		activity.setupEditTextFocusListeners(newMeetingLayout);
 	}
 
 	private String formatString(int n) {
 		return (String.valueOf(n).length() == 1) ? "0" + n : "" + n;
 	}
 
-	private void setSavedData() {
+	private void setSavedDataViews() {
 		if (newMeetingModel.getTitle() != null) {
 			setViewText(R.id.title_textbox, newMeetingModel.getTitle());
 			setViewText(R.id.description_textbox, newMeetingModel.getDescription());
-			setViewText(R.id.date_button,
-					underlineString(DateParserUtil.formatDate(newMeetingModel.getStartDateTime())));
-			setViewText(R.id.start_time_button,
-					underlineString(DateParserUtil.formatTime(newMeetingModel.getStartDateTime())));
-			setViewText(R.id.end_time_button,
-					underlineString(DateParserUtil.formatTime(newMeetingModel.getEndDateTime())));
 		}
+		if (newMeetingModel.getStartDateTime() != null) {
+			setViewText(R.id.date_button, DateUtil.formatDate(newMeetingModel.getStartDateTime()));
+			setViewText(R.id.start_time_button,
+					DateUtil.formatTime(newMeetingModel.getStartDateTime()));
+		}
+		if (newMeetingModel.getEndDateTime() != null) {
+			setViewText(R.id.date_button, DateUtil.formatDate(newMeetingModel.getStartDateTime()));
+			setViewText(R.id.end_time_button,
+					DateUtil.formatTime(newMeetingModel.getEndDateTime()));
+		}
+
 	}
 
 	private boolean isValidData() {
@@ -104,14 +122,12 @@ public class NewMeetingFragment extends Fragment {
 			activity.showToastMessage(getString(R.string.toast_please_enter_title));
 		} else if (getViewText(R.id.date_button).equals(getString(R.string.textview_not_set_u))) {
 			activity.showToastMessage(getString(R.string.toast_please_set_date));
-		} else if (getViewText(R.id.start_time_button)
-				.equals(getString(R.string.textview_not_set_u))) {
+		} else if (newMeetingModel.getStartDateTime() == null) {
 			activity.showToastMessage(getString(R.string.toast_please_set_start_time));
-		} else if (getViewText(R.id.end_time_button)
-				.equals(getString(R.string.textview_not_set_u))) {
-			activity.showToastMessage(getString(R.string.toast_please_set_end_time));
-		} else if (newMeetingModel.getStartDateTime().before(getCurrentTime(-1))) {
+		} else if (newMeetingModel.getStartDateTime().before(DateUtil.getCurrentTime(-1))) {
 			activity.showToastMessage(getString(R.string.toast_start_time_future));
+		} else if (newMeetingModel.getEndDateTime() == null) {
+			activity.showToastMessage(getString(R.string.toast_please_set_end_time));
 		} else if (newMeetingModel.getStartDateTime().after(newMeetingModel.getEndDateTime())) {
 			activity.showToastMessage(getString(R.string.toast_end_time_after_start));
 		} else {
@@ -120,16 +136,15 @@ public class NewMeetingFragment extends Fragment {
 		return false;
 	}
 
-	private Date getCurrentTime(int offsetInMinutes) {
-		return new Date((new Date()).getTime() + TimeUnit.MINUTES.toMillis(offsetInMinutes));
-	}
-
 	private String getViewText(int viewId) {
 		View view = newMeetingLayout.findViewById(viewId);
 		if (view instanceof EditText) {
 			return ((EditText) view).getText().toString().trim();
 		} else if (view instanceof TextView) {
 			return ((TextView) view).getText().toString().trim();
+		} else if (view instanceof Spinner) {
+			TextView textView = (TextView) ((Spinner) view).getChildAt(1);
+			return textView.getText().toString().trim();
 		} else {
 			return "";
 		}
@@ -141,6 +156,9 @@ public class NewMeetingFragment extends Fragment {
 			((EditText) view).setText(text);
 		} else if (view instanceof TextView) {
 			((TextView) view).setText(text);
+		} else if (view instanceof Spinner) {
+			TextView textView = (TextView) ((Spinner) view).getChildAt(1);
+			textView.setText(text);
 		}
 	}
 
@@ -151,9 +169,9 @@ public class NewMeetingFragment extends Fragment {
 	private void saveData() {
 		newMeetingModel.setTitle(getViewText(R.id.title_textbox));
 		newMeetingModel.setDescription(getViewText(R.id.description_textbox));
-		newMeetingModel.setStartDateTime(DateParserUtil.parseDateTime(
+		newMeetingModel.setStartDateTime(DateUtil.parseDateTime(
 				getViewText(R.id.date_button) + " " + getViewText(R.id.start_time_button)));
-		newMeetingModel.setEndDateTime(DateParserUtil.parseDateTime(
+		newMeetingModel.setEndDateTime(DateUtil.parseDateTime(
 				getViewText(R.id.date_button) + " " + getViewText(R.id.end_time_button)));
 	}
 
@@ -179,17 +197,18 @@ public class NewMeetingFragment extends Fragment {
 								int dayOfMonth) {
 							String date =
 									dayOfMonth + "." + formatString(monthOfYear + 1) + "." + year;
-							setViewText(viewId, underlineString(date));
+							setViewText(viewId, date);
 						}
 					};
 			Calendar c = Calendar.getInstance();
 			if (!getViewText(viewId).equals(getString(R.string.textview_not_set_u))) {
-				c.setTime(DateParserUtil.parseDate(getViewText(viewId)));
+				Date viewDate = DateUtil.parseDate(getViewText(viewId));
+				assert viewDate != null;
+				c.setTime(viewDate);
 			}
 			DatePickerDialog dialog =
-					new DatePickerDialog(activity, DatePickerDialog.THEME_HOLO_DARK,
-							onDateSetListener, c.get(Calendar.YEAR), c.get(Calendar.MONTH),
-							c.get(Calendar.DAY_OF_MONTH));
+					new DatePickerDialog(activity, onDateSetListener, c.get(Calendar.YEAR),
+							c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 			dialog.show();
 		}
 	}
@@ -210,17 +229,18 @@ public class NewMeetingFragment extends Fragment {
 						@Override
 						public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 							String time = formatString(hourOfDay) + ":" + formatString(minute);
-							setViewText(viewId, underlineString(time));
+							setViewText(viewId, time);
 						}
 					};
 			Calendar c = Calendar.getInstance();
 			if (!getViewText(viewId).equals(getString(R.string.textview_not_set_u))) {
-				c.setTime(DateParserUtil.parseTime(getViewText(viewId)));
+				Date viewDate = DateUtil.parseTime(getViewText(viewId));
+				assert viewDate != null;
+				c.setTime(viewDate);
 			}
 			TimePickerDialog dialog =
-					new TimePickerDialog(activity, TimePickerDialog.THEME_HOLO_DARK,
-							onTimeSetListener, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE),
-							true);
+					new TimePickerDialog(activity, onTimeSetListener, c.get(Calendar.HOUR_OF_DAY),
+							c.get(Calendar.MINUTE), true);
 			dialog.show();
 		}
 	}

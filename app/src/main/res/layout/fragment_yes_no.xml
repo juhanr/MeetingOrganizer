@@ -2,14 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 			  android:layout_width="match_parent"
 			  android:layout_height="match_parent"
-			  android:background="@color/san_marino"
 			  android:gravity="center"
 			  android:orientation="vertical"
 			  android:padding="35dp">
 
 	<TextView
 		android:id="@+id/dialog_message"
-		style="@style/Text"
+		style="@style/TextPrimary"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"/>
 
@@ -33,7 +32,7 @@
 
 		<Button
 			android:id="@+id/dialog_positive_button"
-			style="@style/Button"
+			style="@style/RaisedButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginRight="@dimen/view_margin_small"
@@ -42,7 +41,7 @@
 
 		<Button
 			android:id="@+id/dialog_negative_button"
-			style="@style/Button"
+			style="@style/RaisedButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="@dimen/view_margin_small"

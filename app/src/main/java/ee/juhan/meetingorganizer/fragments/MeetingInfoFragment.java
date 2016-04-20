@@ -25,7 +25,7 @@ import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
 import ee.juhan.meetingorganizer.rest.RestClient;
-import ee.juhan.meetingorganizer.util.DateParserUtil;
+import ee.juhan.meetingorganizer.util.DateUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -38,7 +38,8 @@ public class MeetingInfoFragment extends Fragment {
 	private MeetingDTO meeting;
 	private CustomMapFragment customMapFragment = new CustomMapFragment();
 
-	public MeetingInfoFragment() {}
+	public MeetingInfoFragment() {
+	}
 
 	public static MeetingInfoFragment newInstance(MeetingDTO meeting) {
 		MeetingInfoFragment fragment = new MeetingInfoFragment();
@@ -59,10 +60,10 @@ public class MeetingInfoFragment extends Fragment {
 					getString(R.string.textview_description) + ": " + meeting.getDescription());
 		}
 		date.setText(getString(R.string.textview_date) + ": " +
-				DateParserUtil.formatDate(meeting.getStartDateTime()));
+				DateUtil.formatDate(meeting.getStartDateTime()));
 		time.setText(getString(R.string.textview_time) + ": " +
-				DateParserUtil.formatTime(meeting.getStartDateTime()) +
-				" - " + DateParserUtil.formatTime(meeting.getEndDateTime()));
+				DateUtil.formatTime(meeting.getStartDateTime()) +
+				" - " + DateUtil.formatTime(meeting.getEndDateTime()));
 
 		setUpMapFragment();
 		setAnswerButtons();
@@ -86,13 +87,14 @@ public class MeetingInfoFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				((MainActivity) getActivity())
-						.changeFragment(new ParticipantsListFragment(meeting.getParticipants()));
+						.changeFragmentToParticipantsList(meeting.getParticipants());
 			}
 		});
 	}
 
 	private void setAnswerButtons() {
 		final ParticipantDTO participantObject = getParticipantObject();
+		assert participantObject != null;
 		if (participantObject.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED &&
 				meeting.getEndDateTime().after(new Date())) {
 			Button acceptInvitation =
@@ -139,19 +141,20 @@ public class MeetingInfoFragment extends Fragment {
 	}
 
 	private void sendUpdateParticipantRequest(ParticipantDTO participantDTO) {
-		activity.showLoadingFragment();
+		activity.showProgress(true);
 		RestClient.get().updateParticipantRequest(participantDTO, meeting.getId(),
 				new Callback<MeetingDTO>() {
 					@Override
-					public void success(MeetingDTO serverResponse, Response response) {
-						activity.dismissLoadingFragment();
-						meeting = serverResponse;
+					public void success(MeetingDTO meetingDTO, Response response) {
+						activity.showProgress(false);
+						meeting = meetingDTO;
+						meeting.toUTCTimeZone();
 						populateLayout();
 					}
 
 					@Override
 					public void failure(RetrofitError error) {
-						activity.dismissLoadingFragment();
+						activity.showProgress(false);
 						activity.showToastMessage(getString(R.string.toast_server_fail));
 					}
 				});

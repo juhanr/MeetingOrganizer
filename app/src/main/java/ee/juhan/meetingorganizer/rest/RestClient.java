@@ -9,7 +9,6 @@ import com.squareup.okhttp.OkHttpClient;
 
 import java.lang.reflect.Type;
 import java.util.Date;
-import java.util.TimeZone;
 
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
@@ -26,7 +25,6 @@ public final class RestClient {
 		@Override
 		public void intercept(RequestFacade request) {
 			request.addHeader("Cookie", "sid=" + sid);
-			request.addHeader("Client-Time-Zone", TimeZone.getDefault().getID());
 		}
 	};
 

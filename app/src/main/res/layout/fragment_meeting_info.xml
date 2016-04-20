@@ -13,25 +13,21 @@
 
 		<TextView
 			android:id="@+id/meeting_title"
-			style="@style/Text"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"/>
 
 		<TextView
 			android:id="@+id/meeting_description"
-			style="@style/Text"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"/>
 
 		<TextView
 			android:id="@+id/meeting_date"
-			style="@style/Text"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"/>
 
 		<TextView
 			android:id="@+id/meeting_time"
-			style="@style/Text"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"/>
 
@@ -49,8 +45,8 @@
 			android:orientation="horizontal">
 
 			<Button
+				style="@style/RaisedButton"
 				android:id="@+id/accept_invitation"
-				style="@style/Button"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center_horizontal"
@@ -59,8 +55,8 @@
 				android:text="@string/button_accept"/>
 
 			<Button
+				style="@style/RaisedButton"
 				android:id="@+id/deny_invitation"
-				style="@style/Button"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center_horizontal"
@@ -72,8 +68,8 @@
 		<include layout="@layout/view_empty_space"/>
 
 		<Button
+			style="@style/RaisedButton"
 			android:id="@+id/show_participants"
-			style="@style/Button"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"

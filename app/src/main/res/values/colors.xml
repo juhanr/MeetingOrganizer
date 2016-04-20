@@ -15,4 +15,37 @@
 	<item name="picton_blue" type="color">#59ABE3</item>
 	<item name="chambray_dark" type="color">#ff222244</item>
 
+	<!-- material design colors -->
+	<item name="indigo_50" type="color">#E8EAF6</item>
+	<item name="indigo_100" type="color">#C5CAE9</item>
+	<item name="indigo_200" type="color">#9FA8DA</item>
+	<item name="indigo_300" type="color">#7986CB</item>
+	//
+	<item name="indigo_400" type="color">#5C6BC0</item>
+	<item name="indigo_500" type="color">#3F51B5</item>
+	//
+	<item name="indigo_600" type="color">#3949AB</item>
+	<item name="indigo_700" type="color">#303F9F</item>
+	//
+	<item name="indigo_800" type="color">#283593</item>
+	<item name="indigo_900" type="color">#1A237E</item>
+	<item name="indigo_A200" type="color">#536DFE</item>
+
+	<item name="accent" type="color">#FF00B0FF</item>
+	<item name="accent_quarter" type="color">#3300B0FF</item>
+
+	<item name="primary" type="color">#FF3F51B5</item>
+	<item name="primary_quarter" type="color">#333F51B5</item>
+
+	<item name="text_primary" type="color">#DE000000</item>
+	<item name="text_secondary" type="color">#8A000000</item>
+	<item name="text_hint" type="color">#61000000</item>
+
+	<item name="text_primary_white" type="color">#FFFFFFFF</item>
+	<item name="text_secondary_white" type="color">#B3FFFFFF</item>
+	<item name="text_hint_white" type="color">#80FFFFFF</item>
+
+	<item name="edittext_divider" type="color">#e5e5e5</item>
+	<item name="edittext_hint" type="color">#999999</item>
+
 </resources>

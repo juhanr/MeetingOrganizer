@@ -6,13 +6,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ee.juhan.meetingorganizer.util.DateUtil;
+
 public class MeetingDTO {
 
 	private int id;
 	private int leaderId;
 	private String title;
 	private String description;
-	private Date startDateTime;
+	public Date startDateTime;
 	private Date endDateTime;
 	private MapCoordinate location;
 	private LocationType locationType;
@@ -29,8 +31,8 @@ public class MeetingDTO {
 		this.leaderId = leaderId;
 		this.title = title;
 		this.description = description;
-		this.startDateTime = startDateTime;
-		this.endDateTime = endDateTime;
+		this.setStartDateTime(startDateTime);
+		this.setEndDateTime(endDateTime);
 		this.location = location;
 		this.locationType = locationType;
 	}
@@ -40,8 +42,8 @@ public class MeetingDTO {
 		this.leaderId = leaderId;
 		this.title = title;
 		this.description = description;
-		this.startDateTime = startDateTime;
-		this.endDateTime = endDateTime;
+		this.setStartDateTime(startDateTime);
+		this.setEndDateTime(endDateTime);
 		this.locationType = locationType;
 	}
 
@@ -87,19 +89,19 @@ public class MeetingDTO {
 	}
 
 	public final Date getStartDateTime() {
-		return startDateTime;
+		return DateUtil.toLocalTimezone(startDateTime);
 	}
 
 	public final void setStartDateTime(Date startTime) {
-		this.startDateTime = startTime;
+		this.startDateTime = DateUtil.toUTCTimezone(startTime);
 	}
 
 	public final Date getEndDateTime() {
-		return endDateTime;
+		return DateUtil.toLocalTimezone(endDateTime);
 	}
 
 	public final void setEndDateTime(Date endTime) {
-		this.endDateTime = endTime;
+		this.endDateTime = DateUtil.toUTCTimezone(endTime);
 	}
 
 	public final MapCoordinate getLocation() {
@@ -144,6 +146,24 @@ public class MeetingDTO {
 
 	public final void removePredefinedLocation(MapCoordinate predefinedLocation) {
 		this.predefinedLocations.remove(predefinedLocation);
+	}
+
+	public final void toUTCTimeZone() {
+		if (startDateTime != null) {
+			this.startDateTime = DateUtil.toUTCTimezone(this.startDateTime);
+		}
+		if (endDateTime != null) {
+			this.endDateTime = DateUtil.toUTCTimezone(this.endDateTime);
+		}
+	}
+
+	public final void toLocalTimeZone() {
+		if (startDateTime != null) {
+			this.startDateTime = DateUtil.toLocalTimezone(this.startDateTime);
+		}
+		if (endDateTime != null) {
+			this.endDateTime = DateUtil.toLocalTimezone(this.endDateTime);
+		}
 	}
 
 }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<group
+		android:checkableBehavior="single"
+		android:id="@+id/nav_menu_logged_in"
+		android:visible="false">
+		<item
+			android:id="@+id/nav_meetings"
+			android:title="Meetings"/>
+		<item
+			android:id="@+id/nav_invitations"
+			android:title="Invitations"/>
+		<item
+			android:id="@+id/nav_history"
+			android:title="History"/>
+		<item android:title="Settings">
+			<menu>
+				<item
+					android:id="@+id/nav_settings"
+					android:title="Profile"/>
+				<item
+					android:id="@+id/nav_log_out"
+					android:title="Log out"/>
+			</menu>
+		</item>
+	</group>
+
+	<group
+		android:checkableBehavior="single"
+		android:id="@+id/nav_menu_logged_out"
+		android:visible="false">
+		<item
+			android:id="@+id/nav_log_in"
+			android:title="Log in"/>
+		<item
+			android:id="@+id/nav_registration"
+			android:title="Registration"/>
+	</group>
+
+</menu>

@@ -10,6 +10,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -111,13 +112,13 @@ public class ChooseLocationFragment extends Fragment {
 				if (NewMeetingFragment.getNewMeetingModel().getLocationType() ==
 						LocationType.SPECIFIC_LOCATION &&
 						NewMeetingFragment.getNewMeetingModel().getLocation() != null) {
-					activity.changeFragment(new ChooseContactsFragment());
+					activity.changeFragmentToChooseContacts();
 				} else if (NewMeetingFragment.getNewMeetingModel().getLocationType() ==
 						LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
 						NewMeetingFragment.getNewMeetingModel().getPredefinedLocations().size() >
 								0) {
 					if (MyLocationListener.getMyLocation() != null) {
-						activity.changeFragment(new ChooseContactsFragment());
+						activity.changeFragmentToChooseContacts();
 					} else {
 						activity.showToastMessage(
 								getString(R.string.toast_please_get_your_location));
@@ -212,7 +213,7 @@ public class ChooseLocationFragment extends Fragment {
 	private void removeLocationViews() {
 		FrameLayout mapLayout =
 				(FrameLayout) chooseLocationLayout.findViewById(R.id.location_frame);
-		mapLayout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+		mapLayout.setBackgroundColor(ContextCompat.getColor(activity, android.R.color.transparent));
 		mapLayout.removeAllViews();
 		FrameLayout searchLayout =
 				(FrameLayout) chooseLocationLayout.findViewById(R.id.map_search_frame);

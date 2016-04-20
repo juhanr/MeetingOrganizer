@@ -18,7 +18,7 @@ import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.GeneralAdapter;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.rest.RestClient;
-import ee.juhan.meetingorganizer.util.DateParserUtil;
+import ee.juhan.meetingorganizer.util.DateUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -26,16 +26,18 @@ import retrofit.client.Response;
 @SuppressLint("ValidFragment")
 public class MeetingsListFragment extends Fragment {
 
-	public static final String ONGOING_MEETINGS = "ongoing-meetings";
-	public static final String FUTURE_MEETINGS = "future-meetings";
-	public static final String PAST_MEETINGS = "past-meetings";
-	public static final String INVITATIONS = "invitations";
+	public static final String ACTIVE_MEETINGS = "active-meetings";
 	private final String title;
 	private final String meetingsType;
 	private MainActivity activity;
 	private ViewGroup meetingsListLayout;
 	private MeetingsAdapter adapter;
 	private List<MeetingDTO> meetingsList;
+
+	public MeetingsListFragment() {
+		this.title = "Meetings";
+		this.meetingsType = ACTIVE_MEETINGS;
+	}
 
 	public MeetingsListFragment(String title, String meetingsType) {
 		this.title = title;
@@ -53,7 +55,7 @@ public class MeetingsListFragment extends Fragment {
 	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		activity.setTitle(title);
-		activity.setDrawerItem(activity.getDrawerItemPosition(title));
+		checkDrawerItem();
 		if (meetingsList == null || meetingsList.size() == 0) {
 			meetingsListLayout =
 					(ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
@@ -67,21 +69,28 @@ public class MeetingsListFragment extends Fragment {
 		return meetingsListLayout;
 	}
 
+	public void checkDrawerItem() {
+		activity.checkDrawerItem(R.id.nav_meetings);
+	}
+
 	private void getMeetingsRequest() {
 		final Fragment fragment = this;
-		activity.showLoadingFragment();
+		activity.showProgress(true);
 		RestClient.get().getMeetingsRequest(meetingsType, activity.getUserId(),
 				new Callback<List<MeetingDTO>>() {
 					@Override
-					public void success(final List<MeetingDTO> serverResponse, Response response) {
-						activity.dismissLoadingFragment();
-						meetingsList = serverResponse;
+					public void success(final List<MeetingDTO> meetingDTOList, Response response) {
+						activity.showProgress(false);
+						meetingsList = meetingDTOList;
+						for (MeetingDTO meeting : meetingsList) {
+							meeting.toUTCTimeZone();
+						}
 						activity.refreshFragment(fragment);
 					}
 
 					@Override
 					public void failure(RetrofitError error) {
-						activity.dismissLoadingFragment();
+						activity.showProgress(false);
 						activity.showToastMessage(getString(R.string.toast_server_fail));
 					}
 				});
@@ -94,8 +103,7 @@ public class MeetingsListFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
 				MeetingDTO meeting = adapter.getItem(position);
-				((MainActivity) getActivity())
-						.changeFragment(MeetingInfoFragment.newInstance(meeting));
+				((MainActivity) getActivity()).changeFragmentToMeetingInfo(meeting);
 			}
 		});
 		adapter = new MeetingsAdapter(getActivity(), meetingsList);
@@ -118,10 +126,10 @@ public class MeetingsListFragment extends Fragment {
 			meetingTitleView.setText(
 					getContext().getString(R.string.textview_title) + ": " + meeting.getTitle());
 			meetingDateView.setText(getContext().getString(R.string.textview_date) + ": " +
-					DateParserUtil.formatDate(meeting.getStartDateTime()));
+					DateUtil.formatDate(meeting.getStartDateTime()));
 			meetingTimeView.setText(getContext().getString(R.string.textview_time) + ": " +
-					DateParserUtil.formatTime(meeting.getStartDateTime()) + " - " +
-					DateParserUtil.formatTime(meeting.getEndDateTime()));
+					DateUtil.formatTime(meeting.getStartDateTime()) + " - " +
+					DateUtil.formatTime(meeting.getEndDateTime()));
 		}
 
 	}

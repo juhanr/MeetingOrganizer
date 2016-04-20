@@ -13,8 +13,8 @@
 		android:layout_weight="1"/>
 
 	<Button
+		style="@style/RaisedButton"
 		android:id="@+id/continue_button"
-		style="@style/Button"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="@dimen/view_margin_large"

@@ -1,97 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-			android:layout_width="match_parent"
+			xmlns:app="http://schemas.android.com/apk/res-auto"
+			android:fillViewport="true"
 			android:layout_height="match_parent"
-			android:fillViewport="true">
+			android:layout_width="match_parent">
 
 	<LinearLayout
 		style="@style/FragmentLayout"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:clickable="true"
 		android:focusableInTouchMode="true"
-		android:orientation="vertical">
+		android:gravity="center"
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:orientation="vertical"
+		android:weightSum="1.0">
 
-		<TextView
-			style="@style/Text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="@dimen/view_margin_small"
-			android:text="@string/textview_title"/>
+		<com.rey.material.widget.EditText
+			style="@style/LightEditText"
+			android:hint="@string/textview_title"
+			android:inputType="textCapSentences"
+			android:layout_marginBottom="@dimen/view_margin_medium"
+			android:layout_marginTop="0dp"
+			app:et_inputId="@+id/title_textbox"
+			app:et_supportMaxChars="20"
+			app:et_supportMode="charCounter"/>
 
-		<EditText
-			android:id="@+id/title_textbox"
-			style="@style/TextBox"
-			android:layout_width="@dimen/textbox_width_normal"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="@dimen/view_margin_large"/>
-
-		<TextView
-			style="@style/Text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="@dimen/view_margin_small"
-			android:text="@string/textview_description"/>
-
-		<EditText
-			android:id="@+id/description_textbox"
-			style="@style/TextBox"
-			android:layout_width="@dimen/textbox_width_normal"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="@dimen/view_margin_large"
+		<com.rey.material.widget.EditText
+			style="@style/LightEditText"
+			android:hint="@string/textview_description"
 			android:inputType="textMultiLine"
-			android:maxLength="255"/>
+			android:layout_marginBottom="@dimen/view_margin_large"
+			app:et_inputId="@+id/description_textbox"
+			app:et_supportMaxChars="255"
+			app:et_supportMode="charCounter"/>
 
-		<TextView
-			style="@style/Text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="@dimen/view_margin_small"
-			android:text="@string/textview_date"/>
-
-		<TextView
+		<com.rey.material.widget.Spinner
+			style="@style/LightSpinnerNoArrow"
 			android:id="@+id/date_button"
-			style="@style/Text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="@dimen/view_margin_large"
-			android:text="@string/textview_not_set_u"/>
-
-		<TextView
-			style="@style/Text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
 			android:layout_marginBottom="@dimen/view_margin_small"
-			android:text="@string/textview_start_time"/>
+			app:spn_label="@string/textview_date"/>
 
-		<TextView
+		<com.rey.material.widget.Spinner
+			style="@style/LightSpinnerNoArrow"
 			android:id="@+id/start_time_button"
-			style="@style/Text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="@dimen/view_margin_large"
-			android:text="@string/textview_not_set_u"/>
-
-		<TextView
-			style="@style/Text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
 			android:layout_marginBottom="@dimen/view_margin_small"
-			android:text="@string/textview_end_time"/>
+			app:spn_label="@string/textview_start_time"/>
 
-		<TextView
+		<com.rey.material.widget.Spinner
+			style="@style/LightSpinnerNoArrow"
 			android:id="@+id/end_time_button"
-			style="@style/Text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/textview_not_set_u"/>
+			android:layout_marginBottom="@dimen/view_margin_small"
+			app:spn_label="@string/textview_end_time"/>
 
 		<include layout="@layout/view_empty_space"/>
 
-		<Button
+		<com.rey.material.widget.Button
+			style="@style/RaisedButtonColored"
 			android:id="@+id/continue_button"
-			style="@style/Button"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
 			android:layout_marginTop="@dimen/view_margin_large"
 			android:text="@string/button_continue"/>
 

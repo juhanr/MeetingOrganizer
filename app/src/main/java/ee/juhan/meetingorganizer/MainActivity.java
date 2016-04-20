@@ -1,83 +1,109 @@
 package ee.juhan.meetingorganizer;
 
-import android.app.Activity;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.Menu;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+import ee.juhan.meetingorganizer.fragments.ChooseContactsFragment;
+import ee.juhan.meetingorganizer.fragments.ChooseLocationFragment;
+import ee.juhan.meetingorganizer.fragments.HistoryFragment;
+import ee.juhan.meetingorganizer.fragments.InvitationsFragment;
 import ee.juhan.meetingorganizer.fragments.LoginFragment;
+import ee.juhan.meetingorganizer.fragments.MeetingInfoFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
 import ee.juhan.meetingorganizer.fragments.NewMeetingFragment;
+import ee.juhan.meetingorganizer.fragments.ParticipantInfoFragment;
+import ee.juhan.meetingorganizer.fragments.ParticipantsListFragment;
 import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
-import ee.juhan.meetingorganizer.fragments.dialogs.LoadingFragment;
+import ee.juhan.meetingorganizer.fragments.listeners.EditTextFocusListener;
+import ee.juhan.meetingorganizer.models.server.MeetingDTO;
+import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 import ee.juhan.meetingorganizer.rest.RestClient;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity
+		implements NavigationView.OnNavigationItemSelectedListener {
 
-	private static final int NEW_MEETING_DRAWER_INDEX = 1;
-	private static final int ONGOING_MEETINGS_DRAWER_INDEX = 2;
-	private static final int FUTURE_MEETINGS_DRAWER_INDEX = 3;
-	private static final int PAST_MEETINGS_DRAWER_INDEX = 4;
-	private static final int INVITATIONS_DRAWER_INDEX = 5;
-	private static final int LOGIN_DRAWER_INDEX = 1;
-	private static final int REGISTRATION_DRAWER_INDEX = 2;
-	private Map<String, Integer> drawerItemsHashMap = new HashMap<>();
-	private DrawerLayout drawerLayout;
-	private ListView drawerListView;
-	private ActionBarDrawerToggle drawerToggle;
-	private String[] drawerItems;
-	private int currentDrawerItemPosition;
-	private TextView emailTextView;
+	private DrawerLayout drawer;
+	private TextView drawerEmailView;
+	private TextView drawerNameView;
 	private SharedPreferences sharedPref;
 	private Toast toast;
 	private boolean isLoggedIn;
-	private LoadingFragment loadingFragment;
 	private int backStackCounter = 0;
+	private boolean resetBackStackCounter;
+	private ActionBar actionBar;
+	private Class currentFragmentClass;
+	private NavigationView navigationView;
+	private View progressView;
+	private View fragmentContainer;
+	private FloatingActionButton newMeetingButton;
 
 	@Override
 	protected final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		progressView = findViewById(R.id.progress_bar);
+		fragmentContainer = findViewById(R.id.fragment_container);
+		setupListeners();
 		checkIfLoggedIn();
 	}
 
-	@Override
-	protected final void onPostCreate(Bundle savedInstanceState) {
-		super.onPostCreate(savedInstanceState);
-		drawerToggle.syncState();
-	}
+	private void setupListeners() {
+		// set up floating action button listener
+		newMeetingButton = (FloatingActionButton) findViewById(R.id.fab);
+		if (newMeetingButton != null) {
+			newMeetingButton.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					changeFragmentToNewMeeting();
+				}
+			});
+		}
 
-	@Override
-	public final void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-		drawerToggle.onConfigurationChanged(newConfig);
+		// set up fragment manager listener
+		final FragmentManager fragmentManager = getFragmentManager();
+		fragmentManager
+				.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+					@Override
+					public void onBackStackChanged() {
+						Fragment fragment =
+								fragmentManager.findFragmentById(R.id.fragment_container);
+						if (fragment != null) {
+							currentFragmentClass = fragment.getClass();
+						}
+					}
+				});
 	}
 
 	@Override
 	public final void onBackPressed() {
-		if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-			drawerLayout.closeDrawers();
+		if (drawer.isDrawerOpen(GravityCompat.START)) {
+			drawer.closeDrawer(GravityCompat.START);
 		} else if (getFragmentManager().getBackStackEntryCount() - backStackCounter > 0) {
 			getFragmentManager().popBackStack();
 		} else {
@@ -86,59 +112,25 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
-	public final boolean onPrepareOptionsMenu(Menu menu) {
-		menu.clear();
-		if (isLoggedIn) {
-			getMenuInflater().inflate(R.menu.menu_main, menu);
-		}
-		return super.onPrepareOptionsMenu(menu);
-	}
-
-	@Override
-	public final boolean onOptionsItemSelected(MenuItem item) {
-		int id = item.getItemId();
-		if (drawerToggle.onOptionsItemSelected(item)) {
-			return true;
-		}
-		if (id == R.id.action_logout) {
-			logOut();
-		} else {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
 	public final void setTitle(CharSequence title) {
-		getActionBar().setTitle(title);
+		actionBar.setTitle(title);
 	}
 
 	private void checkIfLoggedIn() {
-		if (getSID() == null) {
+		resetBackStack();
+		if (getSID() == null) { // logged out
 			setUpDrawer();
 			setEmail(getString(R.string.textview_not_logged_in));
-		} else {
+			changeFragmentToLogIn();
+			showNewMeetingButton(false);
+		} else { // logged in
 			RestClient.setSID(getSID());
 			isLoggedIn = true;
 			setUpDrawer();
 			setEmail(sharedPref.getString("email", ""));
+			changeFragmentToMeetings();
+			showNewMeetingButton(true);
 		}
-	}
-
-	private void createDrawerItemsHashMap() {
-		drawerItemsHashMap.clear();
-		drawerItems =
-				isLoggedIn ? getResources().getStringArray(R.array.array_drawer_items_online) :
-						getResources().getStringArray(R.array.array_drawer_items_offline);
-		Integer position = 1;
-		for (String item : drawerItems) {
-			drawerItemsHashMap.put(item, position);
-			position++;
-		}
-	}
-
-	public final Integer getDrawerItemPosition(String item) {
-		return drawerItemsHashMap.get(item);
 	}
 
 	public final String getSID() {
@@ -156,6 +148,9 @@ public class MainActivity extends Activity {
 		setEmail(email);
 		isLoggedIn = true;
 		setUpDrawer();
+		resetBackStack();
+		changeFragmentToMeetings();
+		showNewMeetingButton(true);
 	}
 
 	private void logOut() {
@@ -165,134 +160,157 @@ public class MainActivity extends Activity {
 		setEmail(getString(R.string.textview_not_logged_in));
 		isLoggedIn = false;
 		setUpDrawer();
+		resetBackStack();
+		changeFragmentToLogIn();
+		showNewMeetingButton(false);
 	}
 
 	private void setEmail(String email) {
-		if (emailTextView != null) {
-			emailTextView.setText(email);
+		if (drawerEmailView != null) {
+			drawerEmailView.setText(email);
+		}
+	}
+
+	private void setName(String name) {
+		if (drawerNameView != null) {
+			drawerNameView.setText(name);
 		}
 	}
 
 	private void setUpDrawer() {
-		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-		drawerListView = (ListView) findViewById(R.id.left_drawer);
-		createDrawerItemsHashMap();
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+		actionBar = getSupportActionBar();
+		assert actionBar != null;
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setHomeButtonEnabled(true);
+		drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+		ActionBarDrawerToggle toggle =
+				new ActionBarDrawerToggle(this, drawer, toolbar, R.string.drawer_open,
+						R.string.drawer_close);
+		drawer.addDrawerListener(toggle);
+		toggle.syncState();
 
-		drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-		drawerListView.setOnItemClickListener(new DrawerItemClickListener());
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		getActionBar().setHomeButtonEnabled(true);
-
-		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, new Toolbar(this),
-				R.string.drawer_open, R.string.drawer_close) {
-
-			public void onDrawerOpened(View drawerView) {
-				invalidateOptionsMenu();
-			}
-
-			public void onDrawerClosed(View view) {
-				invalidateOptionsMenu();
-			}
-		};
-
-		if (emailTextView == null) {
-			LayoutInflater inflater = getLayoutInflater();
-			ViewGroup mTop = (ViewGroup) inflater
-					.inflate(R.layout.drawer_list_header, drawerListView, false);
-			emailTextView = (TextView) mTop.findViewById(R.id.email_textView);
-			drawerListView.addHeaderView(mTop);
-		}
-
-		drawerLayout.setDrawerListener(drawerToggle);
-		drawerListView.setAdapter(new ArrayAdapter<>(this, R.layout.drawer_list_item, drawerItems));
-
-		currentDrawerItemPosition = 0;
-		selectDrawerItem(1, true);
-	}
-
-	public final void selectDrawerItem(int position) {
-		selectDrawerItem(position, false);
-	}
-
-	public final void selectDrawerItem(int position, boolean resetBackStackCounter) {
-		if (position == currentDrawerItemPosition || position == 0) {
-			setDrawerItem(currentDrawerItemPosition);
-			drawerLayout.closeDrawer(drawerListView);
-			return;
-		}
+		navigationView = (NavigationView) findViewById(R.id.nav_view);
+		assert navigationView != null;
+		navigationView.setNavigationItemSelectedListener(this);
 
 		if (isLoggedIn) {
-			selectOnlineDrawerItem(position, resetBackStackCounter);
+			navigationView.getMenu().setGroupVisible(R.id.nav_menu_logged_in, true);
+			navigationView.getMenu().setGroupVisible(R.id.nav_menu_logged_out, false);
 		} else {
-			selectOfflineDrawerItem(position, resetBackStackCounter);
+			navigationView.getMenu().setGroupVisible(R.id.nav_menu_logged_out, true);
+			navigationView.getMenu().setGroupVisible(R.id.nav_menu_logged_in, false);
 		}
-		drawerLayout.closeDrawer(drawerListView);
+
+		LinearLayout headerView = (LinearLayout) navigationView.getHeaderView(0);
+		drawerEmailView = (TextView) headerView.findViewById(R.id.nav_email);
+		drawerNameView = (TextView) headerView.findViewById(R.id.nav_name);
+
 	}
 
-	private void selectOnlineDrawerItem(int position, boolean resetBackStackCounter) {
-		String title = drawerItems[position - 1];
-		switch (position) {
-			case NEW_MEETING_DRAWER_INDEX:
-				changeFragment(new NewMeetingFragment(), resetBackStackCounter);
-				break;
-			case ONGOING_MEETINGS_DRAWER_INDEX:
-				MeetingsListFragment meetingsListFragment =
-						new MeetingsListFragment(title, MeetingsListFragment.ONGOING_MEETINGS);
-				changeFragment(meetingsListFragment, resetBackStackCounter);
-				break;
-			case FUTURE_MEETINGS_DRAWER_INDEX:
-				meetingsListFragment =
-						new MeetingsListFragment(title, MeetingsListFragment.FUTURE_MEETINGS);
-				changeFragment(meetingsListFragment, resetBackStackCounter);
-				break;
-			case PAST_MEETINGS_DRAWER_INDEX:
-				meetingsListFragment =
-						new MeetingsListFragment(title, MeetingsListFragment.PAST_MEETINGS);
-				changeFragment(meetingsListFragment, resetBackStackCounter);
-				break;
-			case INVITATIONS_DRAWER_INDEX:
-				meetingsListFragment =
-						new MeetingsListFragment(title, MeetingsListFragment.INVITATIONS);
-				changeFragment(meetingsListFragment, resetBackStackCounter);
-				break;
+	public final void checkDrawerItem(int drawerItemId) {
+		MenuItem item = navigationView.getMenu().findItem(drawerItemId);
+		item.setCheckable(true);
+		item.setChecked(true);
+	}
+
+	@SuppressWarnings("StatementWithEmptyBody")
+	@Override
+	public boolean onNavigationItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.nav_meetings) {
+			changeFragmentToMeetings();
+		} else if (id == R.id.nav_invitations) {
+			changeFragmentToInvitations();
+		} else if (id == R.id.nav_history) {
+			changeFragmentToHistory();
+		} else if (id == R.id.nav_settings) {
+
+		} else if (id == R.id.nav_log_out) {
+			logOut();
+		} else if (id == R.id.nav_log_in) {
+			changeFragmentToLogIn();
+		} else if (id == R.id.nav_registration) {
+			changeFragmentToRegistration();
 		}
+		drawer.closeDrawer(GravityCompat.START);
+		return true;
 	}
 
-	private void selectOfflineDrawerItem(int position, boolean resetBackStackCounter) {
-		switch (position) {
-			case LOGIN_DRAWER_INDEX:
-				changeFragment(new LoginFragment(), resetBackStackCounter);
-				break;
-			case REGISTRATION_DRAWER_INDEX:
-				changeFragment(new RegistrationFragment(), resetBackStackCounter);
-				break;
+	public final void resetBackStack() {
+		backStackCounter = getFragmentManager().getBackStackEntryCount();
+	}
+
+	private void changeFragment(Fragment fragment) {
+		if (fragment.getClass().equals(currentFragmentClass)) {
+			return;
 		}
-	}
-
-	public final void setDrawerItem(int position) {
-		currentDrawerItemPosition = position;
-		drawerListView.setItemChecked(position, true);
-	}
-
-	public final void changeFragment(Fragment fragment) {
-		changeFragment(fragment, false);
-	}
-
-	public final void changeFragment(Fragment fragment, boolean resetBackStackCounter) {
+		currentFragmentClass = fragment.getClass();
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
 		ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_right,
 				R.anim.slide_out_left);
 		ft.replace(R.id.fragment_container, fragment);
 		if (resetBackStackCounter) {
 			backStackCounter = getFragmentManager().getBackStackEntryCount();
+			resetBackStackCounter = false;
 		} else {
 			ft.addToBackStack(null);
 		}
 		ft.commit();
 	}
 
+	public final void changeFragmentToMeetings() {
+		changeFragment(new MeetingsListFragment());
+	}
+
+	public final void changeFragmentToInvitations() {
+		changeFragment(new InvitationsFragment());
+	}
+
+	public final void changeFragmentToHistory() {
+		changeFragment(new HistoryFragment());
+	}
+
+	public final void changeFragmentToLogIn() {
+		changeFragment(new LoginFragment());
+	}
+
+	public final void changeFragmentToRegistration() {
+		changeFragment(new RegistrationFragment());
+	}
+
+	public final void changeFragmentToNewMeeting() {
+		changeFragment(new NewMeetingFragment());
+	}
+
+	public final void changeFragmentToMeetingInfo(MeetingDTO meeting) {
+		changeFragment(MeetingInfoFragment.newInstance(meeting));
+	}
+
+	public final void changeFragmentToParticipantInfo(ParticipantDTO participant) {
+		changeFragment(new ParticipantInfoFragment(participant));
+	}
+
+	public final void changeFragmentToChooseContacts() {
+		changeFragment(new ChooseContactsFragment());
+	}
+
+	public final void changeFragmentToChooseLocation() {
+		changeFragment(new ChooseLocationFragment());
+	}
+
+	public final void changeFragmentToParticipantsList(List<ParticipantDTO> participantList) {
+		changeFragment(new ParticipantsListFragment(participantList));
+	}
+
+
 	public final void refreshFragment(Fragment fragment) {
-		getFragmentManager().beginTransaction().detach(fragment).attach(fragment).commit();
+		try {
+			getFragmentManager().beginTransaction().detach(fragment).attach(fragment).commit();
+		} catch (IllegalStateException e) {
+			Log.e("ERROR", "refreshFragment() called in illegal state.");
+		}
 	}
 
 	/**
@@ -316,22 +334,55 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	public final void showLoadingFragment() {
-		loadingFragment = new LoadingFragment();
-		loadingFragment.show(getFragmentManager(), "LoaderFragment");
-	}
+	public void showProgress(final boolean show) {
+		// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+		// for very easy animations. If available, use these APIs to fade-in
+		// the progress spinner.
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+			int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-	public final void dismissLoadingFragment() {
-		if (loadingFragment != null) {
-			loadingFragment.dismiss();
+			fragmentContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+			fragmentContainer.animate().setDuration(shortAnimTime).alpha(show ? 0 : 1)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							fragmentContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+						}
+					});
+
+			progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+			progressView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+						}
+					});
+		} else {
+			// The ViewPropertyAnimator APIs are not available, so simply show
+			// and hide the relevant UI components.
+			progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+			fragmentContainer.setVisibility(show ? View.GONE : View.VISIBLE);
 		}
 	}
 
-	private class DrawerItemClickListener implements ListView.OnItemClickListener {
+	private void showNewMeetingButton(boolean show) {
+		if (show) {
+			newMeetingButton.setVisibility(View.VISIBLE);
+		} else {
+			newMeetingButton.setVisibility(View.GONE);
+		}
+	}
 
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			selectDrawerItem(position);
+	public final void setupEditTextFocusListeners(View view) {
+		if (view instanceof EditText) {
+			view.setOnFocusChangeListener(new EditTextFocusListener(this));
+		}
+		if (view instanceof ViewGroup) {
+			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+				View innerView = ((ViewGroup) view).getChildAt(i);
+				setupEditTextFocusListeners(innerView);
+			}
 		}
 	}
 

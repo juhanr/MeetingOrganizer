@@ -39,7 +39,7 @@ public class RegistrationFragment extends Fragment {
 	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		activity.setTitle(title);
-		activity.setDrawerItem(activity.getDrawerItemPosition(title));
+		activity.checkDrawerItem(R.id.nav_registration);
 		registrationLayout =
 				(ViewGroup) inflater.inflate(R.layout.fragment_registration, container, false);
 		setButtonListeners();
@@ -60,6 +60,7 @@ public class RegistrationFragment extends Fragment {
 			}
 		});
 
+		activity.setupEditTextFocusListeners(registrationLayout);
 	}
 
 	private boolean isValidData() {
@@ -96,12 +97,12 @@ public class RegistrationFragment extends Fragment {
 
 	private void sendRegistrationRequest(String name, final String email, String password,
 			String phoneNr) {
-		activity.showLoadingFragment();
+		activity.showProgress(true);
 		RestClient.get().registrationRequest(new AccountDTO(name, email, password, phoneNr),
 				new Callback<ServerResponse>() {
 					@Override
 					public void success(final ServerResponse serverResponse, Response response) {
-						activity.dismissLoadingFragment();
+						activity.showProgress(false);
 						switch (serverResponse.getResult()) {
 							case SUCCESS:
 								activity.showToastMessage(
@@ -124,7 +125,7 @@ public class RegistrationFragment extends Fragment {
 
 					@Override
 					public void failure(RetrofitError error) {
-						activity.dismissLoadingFragment();
+						activity.showProgress(false);
 						activity.showToastMessage(getString(R.string.toast_server_fail));
 					}
 				});
