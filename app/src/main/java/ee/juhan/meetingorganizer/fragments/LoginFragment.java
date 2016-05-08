@@ -10,12 +10,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
+import ee.juhan.meetingorganizer.activities.MainActivity;
 import ee.juhan.meetingorganizer.models.server.AccountDTO;
 import ee.juhan.meetingorganizer.models.server.ServerResponse;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.PatternMatcherUtil;
+import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -70,14 +71,14 @@ public class LoginFragment extends Fragment {
 			}
 		});
 
-		activity.setupEditTextFocusListeners(loginLayout);
+		UIUtil.setupEditTextFocusListeners(activity, loginLayout);
 	}
 
 	private boolean isValidData() {
 		if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.email_textbox))) {
-			activity.showToastMessage(getString(R.string.toast_invalid_email));
+			UIUtil.showToastMessage(activity, getString(R.string.toast_invalid_email));
 		} else if (getViewText(R.id.password_textbox).length() < PASSWORD_MIN_LENGTH) {
-			activity.showToastMessage(getString(R.string.toast_short_password1) +
+			UIUtil.showToastMessage(activity, getString(R.string.toast_short_password1) +
 					PASSWORD_MIN_LENGTH + getString(R.string.toast_short_password2));
 		} else {
 			return true;
@@ -105,19 +106,22 @@ public class LoginFragment extends Fragment {
 						activity.showProgress(false);
 						switch (serverResponse.getResult()) {
 							case SUCCESS:
-								activity.showToastMessage(
-										getString(R.string.toast_login_successful));
+								UIUtil.showToastMessage(activity,
+										(getString(R.string.toast_login_successful)));
 								activity.logIn(email, serverResponse.getSid(),
 										serverResponse.getUserId());
 								break;
 							case WRONG_PASSWORD:
-								activity.showToastMessage(getString(R.string.toast_wrong_password));
+								UIUtil.showToastMessage(activity,
+										getString(R.string.toast_wrong_password));
 								break;
 							case NO_ACCOUNT_FOUND:
-								activity.showToastMessage(getString(R.string.toast_no_account));
+								UIUtil.showToastMessage(activity,
+										getString(R.string.toast_no_account));
 								break;
 							case FAIL:
-								activity.showToastMessage(getString(R.string.toast_server_fail));
+								UIUtil.showToastMessage(activity,
+										getString(R.string.toast_server_fail));
 								break;
 						}
 					}
@@ -125,7 +129,7 @@ public class LoginFragment extends Fragment {
 					@Override
 					public void failure(RetrofitError error) {
 						activity.showProgress(false);
-						activity.showToastMessage(getString(R.string.toast_server_fail));
+						UIUtil.showToastMessage(activity, getString(R.string.toast_server_fail));
 					}
 				});
 	}

@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import ee.juhan.meetingorganizer.MainActivity;
-
 public class EditTextFocusListener implements View.OnFocusChangeListener {
 
-	private MainActivity activity;
+	private Activity activity;
 
-	public EditTextFocusListener(MainActivity activity) {
+	public EditTextFocusListener(Activity activity) {
 		this.activity = activity;
 	}
 

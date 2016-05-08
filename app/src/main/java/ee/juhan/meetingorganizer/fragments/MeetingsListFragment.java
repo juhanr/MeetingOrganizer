@@ -13,12 +13,13 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
+import ee.juhan.meetingorganizer.activities.MainActivity;
 import ee.juhan.meetingorganizer.adapters.GeneralAdapter;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
+import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -91,7 +92,7 @@ public class MeetingsListFragment extends Fragment {
 					@Override
 					public void failure(RetrofitError error) {
 						activity.showProgress(false);
-						activity.showToastMessage(getString(R.string.toast_server_fail));
+						UIUtil.showToastMessage(activity, getString(R.string.toast_server_fail));
 					}
 				});
 	}

@@ -56,7 +56,7 @@ public abstract class GeneralAdapter<T> extends ArrayAdapter<T> {
 		return inflater;
 	}
 
-	protected final List<T> getObjects() {
+	public final List<T> getObjects() {
 		return objects;
 	}
 

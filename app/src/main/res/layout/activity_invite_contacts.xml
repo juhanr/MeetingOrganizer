@@ -1,24 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:fitsSystemWindows="true"
+	android:id="@+id/activity_invite_contacts"
 	android:layout_height="match_parent"
 	android:layout_width="match_parent">
-
-	<android.support.design.widget.AppBarLayout
-		android:layout_height="wrap_content"
-		android:layout_width="match_parent"
-		android:theme="@style/AppTheme.AppBarOverlay">
-
-		<android.support.v7.widget.Toolbar
-			android:background="?attr/colorPrimary"
-			android:id="@+id/toolbar"
-			android:layout_height="?attr/actionBarSize"
-			android:layout_width="match_parent"
-			app:popupTheme="@style/AppTheme.PopupOverlay"/>
-
-	</android.support.design.widget.AppBarLayout>
 
 	<RelativeLayout
 		android:layout_height="match_parent"
@@ -31,23 +17,23 @@
 			android:layout_centerInParent="true"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="8dp"
+			android:layout_marginTop="?attr/actionBarSize"
 			android:layout_width="wrap_content"
 			android:visibility="gone"/>
 
 	</RelativeLayout>
 
-	<FrameLayout
-		android:id="@+id/fragment_container"
+	<com.rey.material.widget.ListView
+		android:id="@+id/contacts_list"
 		android:layout_height="match_parent"
-		android:layout_marginTop="?attr/actionBarSize"
 		android:layout_width="match_parent"/>
 
 	<android.support.design.widget.FloatingActionButton
-		android:id="@+id/fab_new_meeting"
+		android:id="@+id/fab_confirm"
 		android:layout_gravity="bottom|end"
 		android:layout_height="wrap_content"
 		android:layout_margin="@dimen/fab_margin"
 		android:layout_width="wrap_content"
-		android:src="@drawable/ic_create_white"/>
+		android:src="@drawable/ic_check_mark"/>
 
 </android.support.design.widget.CoordinatorLayout>

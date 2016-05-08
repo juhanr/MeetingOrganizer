@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:fitsSystemWindows="true"
+	android:id="@+id/activity_location"
+	android:layout_height="match_parent"
+	android:layout_width="match_parent">
+
+	<FrameLayout
+		android:focusable="true"
+		android:focusableInTouchMode="true"
+		android:id="@+id/location_frame"
+		android:layout_height="match_parent"
+		android:layout_width="match_parent"/>
+
+	<android.support.v4.widget.NestedScrollView
+		android:background="@android:color/white"
+		android:clipToPadding="true"
+		android:id="@+id/bottom_sheet"
+		android:layout_height="350dp"
+		android:layout_width="match_parent"
+		app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+		>
+
+		<LinearLayout
+			android:layout_height="match_parent"
+			android:layout_width="match_parent"
+			android:orientation="vertical">
+
+			<com.rey.material.widget.Spinner
+				style="@style/LightSpinner"
+				android:id="@+id/location_spinner"
+				android:layout_marginLeft="@dimen/view_margin_large"
+				android:layout_marginRight="@dimen/view_margin_large"
+				android:layout_marginTop="@dimen/view_margin_large"
+				app:spn_label="Location type"/>
+
+			<TextView
+				style="@style/TextHint"
+				android:id="@+id/location_type_info"
+				android:layout_height="60dp"
+				android:layout_marginLeft="@dimen/view_margin_large"
+				android:layout_marginRight="@dimen/view_margin_large"
+				android:layout_marginTop="@dimen/view_margin_medium"
+				android:layout_width="match_parent"
+				android:text="@string/info_specific_location"/>
+
+			<TextView
+				style="@style/TextHint"
+				android:id="@+id/slide_up_info"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="@dimen/view_margin_large"
+				android:layout_marginRight="@dimen/view_margin_large"
+				android:layout_width="match_parent"
+				android:text="@string/textview_slide_up"
+				android:textColor="@color/accent"/>
+		</LinearLayout>
+
+	</android.support.v4.widget.NestedScrollView>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab_confirm_marker"
+		android:layout_height="wrap_content"
+		android:layout_marginEnd="88dp"
+		android:layout_marginRight="88dp"
+		android:layout_width="wrap_content"
+		android:src="@drawable/ic_room_white_48dp"
+		app:layout_anchor="@id/bottom_sheet"
+		app:layout_anchorGravity="top|end"/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab_delete_marker"
+		android:layout_height="wrap_content"
+		android:layout_marginEnd="88dp"
+		android:layout_marginRight="88dp"
+		android:layout_width="wrap_content"
+		android:src="@drawable/ic_clear_white_24dp"
+		app:layout_anchor="@id/bottom_sheet"
+		app:layout_anchorGravity="top|end"/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab_confirm"
+		android:layout_height="wrap_content"
+		android:layout_margin="@dimen/fab_margin"
+		android:layout_width="wrap_content"
+		android:src="@drawable/ic_check_mark"
+		app:layout_anchor="@id/bottom_sheet"
+		app:layout_anchorGravity="top|end"/>
+
+	<android.support.design.widget.AppBarLayout
+		android:layout_height="wrap_content"
+		android:layout_margin="10dp"
+		android:layout_width="match_parent"
+		android:theme="@style/AppTheme.AppBarOverlay">
+
+		<android.support.v7.widget.Toolbar
+			style="@style/SearchToolbar"
+			android:background="@color/white"
+			android:id="@+id/toolbar"
+			android:layout_height="?attr/actionBarSize"
+			android:layout_width="match_parent"
+			app:popupTheme="@style/AppTheme.PopupOverlay"/>
+
+	</android.support.design.widget.AppBarLayout>
+
+</android.support.design.widget.CoordinatorLayout>

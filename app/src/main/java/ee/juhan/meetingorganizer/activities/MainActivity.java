@@ -1,12 +1,10 @@
-package ee.juhan.meetingorganizer;
+package ee.juhan.meetingorganizer.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -20,29 +18,25 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
 
-import ee.juhan.meetingorganizer.fragments.ChooseContactsFragment;
-import ee.juhan.meetingorganizer.fragments.ChooseLocationFragment;
+import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.fragments.HistoryFragment;
 import ee.juhan.meetingorganizer.fragments.InvitationsFragment;
 import ee.juhan.meetingorganizer.fragments.LoginFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingInfoFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
-import ee.juhan.meetingorganizer.fragments.NewMeetingFragment;
 import ee.juhan.meetingorganizer.fragments.ParticipantInfoFragment;
 import ee.juhan.meetingorganizer.fragments.ParticipantsListFragment;
 import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
-import ee.juhan.meetingorganizer.fragments.listeners.EditTextFocusListener;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 import ee.juhan.meetingorganizer.rest.RestClient;
+import ee.juhan.meetingorganizer.util.UIUtil;
 
 public class MainActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener {
@@ -60,7 +54,6 @@ public class MainActivity extends AppCompatActivity
 	private NavigationView navigationView;
 	private View progressView;
 	private View fragmentContainer;
-	private FloatingActionButton newMeetingButton;
 
 	@Override
 	protected final void onCreate(Bundle savedInstanceState) {
@@ -75,12 +68,15 @@ public class MainActivity extends AppCompatActivity
 
 	private void setupListeners() {
 		// set up floating action button listener
-		newMeetingButton = (FloatingActionButton) findViewById(R.id.fab);
-		if (newMeetingButton != null) {
-			newMeetingButton.setOnClickListener(new View.OnClickListener() {
+		FloatingActionButton newMeetingFAB =
+				(FloatingActionButton) findViewById(R.id.fab_new_meeting);
+		if (newMeetingFAB != null) {
+			newMeetingFAB.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
-					changeFragmentToNewMeeting();
+					Intent myIntent = new Intent(getBaseContext(), NewMeetingActivity.class);
+					//					myIntent.putExtra("key", value); //Optional parameters
+					startActivityForResult(myIntent, 1);
 				}
 			});
 		}
@@ -116,20 +112,30 @@ public class MainActivity extends AppCompatActivity
 		actionBar.setTitle(title);
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case 1:
+				if (resultCode == RESULT_OK) {
+					Bundle res = data.getExtras();
+					String result = res.getString("param_result");
+				}
+				break;
+		}
+	}
+
 	private void checkIfLoggedIn() {
 		resetBackStack();
 		if (getSID() == null) { // logged out
 			setUpDrawer();
 			setEmail(getString(R.string.textview_not_logged_in));
 			changeFragmentToLogIn();
-			showNewMeetingButton(false);
 		} else { // logged in
 			RestClient.setSID(getSID());
 			isLoggedIn = true;
 			setUpDrawer();
 			setEmail(sharedPref.getString("email", ""));
 			changeFragmentToMeetings();
-			showNewMeetingButton(true);
 		}
 	}
 
@@ -150,7 +156,6 @@ public class MainActivity extends AppCompatActivity
 		setUpDrawer();
 		resetBackStack();
 		changeFragmentToMeetings();
-		showNewMeetingButton(true);
 	}
 
 	private void logOut() {
@@ -162,7 +167,6 @@ public class MainActivity extends AppCompatActivity
 		setUpDrawer();
 		resetBackStack();
 		changeFragmentToLogIn();
-		showNewMeetingButton(false);
 	}
 
 	private void setEmail(String email) {
@@ -239,7 +243,7 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	public final void resetBackStack() {
-		backStackCounter = getFragmentManager().getBackStackEntryCount();
+		resetBackStackCounter = true;
 	}
 
 	private void changeFragment(Fragment fragment) {
@@ -280,10 +284,6 @@ public class MainActivity extends AppCompatActivity
 		changeFragment(new RegistrationFragment());
 	}
 
-	public final void changeFragmentToNewMeeting() {
-		changeFragment(new NewMeetingFragment());
-	}
-
 	public final void changeFragmentToMeetingInfo(MeetingDTO meeting) {
 		changeFragment(MeetingInfoFragment.newInstance(meeting));
 	}
@@ -292,20 +292,15 @@ public class MainActivity extends AppCompatActivity
 		changeFragment(new ParticipantInfoFragment(participant));
 	}
 
-	public final void changeFragmentToChooseContacts() {
-		changeFragment(new ChooseContactsFragment());
-	}
-
-	public final void changeFragmentToChooseLocation() {
-		changeFragment(new ChooseLocationFragment());
-	}
-
 	public final void changeFragmentToParticipantsList(List<ParticipantDTO> participantList) {
 		changeFragment(new ParticipantsListFragment(participantList));
 	}
 
 
 	public final void refreshFragment(Fragment fragment) {
+		if (!fragment.getClass().equals(currentFragmentClass)) {
+			return;
+		}
 		try {
 			getFragmentManager().beginTransaction().detach(fragment).attach(fragment).commit();
 		} catch (IllegalStateException e) {
@@ -313,77 +308,8 @@ public class MainActivity extends AppCompatActivity
 		}
 	}
 
-	/**
-	 * Displays a toast message with the given message.
-	 *
-	 * @param message
-	 * 		message string
-	 */
-	public final void showToastMessage(final String message) {
-		cancelToastMessage();
-		toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
-		toast.show();
-	}
-
-	/**
-	 * Cancels the currently displayed toast message.
-	 */
-	public final void cancelToastMessage() {
-		if (toast != null) {
-			toast.cancel();
-		}
-	}
-
 	public void showProgress(final boolean show) {
-		// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-		// for very easy animations. If available, use these APIs to fade-in
-		// the progress spinner.
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-			int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-			fragmentContainer.setVisibility(show ? View.GONE : View.VISIBLE);
-			fragmentContainer.animate().setDuration(shortAnimTime).alpha(show ? 0 : 1)
-					.setListener(new AnimatorListenerAdapter() {
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							fragmentContainer.setVisibility(show ? View.GONE : View.VISIBLE);
-						}
-					});
-
-			progressView.setVisibility(show ? View.VISIBLE : View.GONE);
-			progressView.animate().setDuration(shortAnimTime).alpha(show ? 1 : 0)
-					.setListener(new AnimatorListenerAdapter() {
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							progressView.setVisibility(show ? View.VISIBLE : View.GONE);
-						}
-					});
-		} else {
-			// The ViewPropertyAnimator APIs are not available, so simply show
-			// and hide the relevant UI components.
-			progressView.setVisibility(show ? View.VISIBLE : View.GONE);
-			fragmentContainer.setVisibility(show ? View.GONE : View.VISIBLE);
-		}
-	}
-
-	private void showNewMeetingButton(boolean show) {
-		if (show) {
-			newMeetingButton.setVisibility(View.VISIBLE);
-		} else {
-			newMeetingButton.setVisibility(View.GONE);
-		}
-	}
-
-	public final void setupEditTextFocusListeners(View view) {
-		if (view instanceof EditText) {
-			view.setOnFocusChangeListener(new EditTextFocusListener(this));
-		}
-		if (view instanceof ViewGroup) {
-			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-				View innerView = ((ViewGroup) view).getChildAt(i);
-				setupEditTextFocusListeners(innerView);
-			}
-		}
+		UIUtil.showProgress(this, progressView, fragmentContainer, show);
 	}
 
 }

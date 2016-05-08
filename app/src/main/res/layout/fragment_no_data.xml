@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
 	style="@style/FragmentLayout"
+	android:id="@+id/layout_no_data"
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:gravity="center"
 	android:layout_height="match_parent"

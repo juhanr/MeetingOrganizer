@@ -17,7 +17,7 @@ public class MeetingDTO {
 	public Date startDateTime;
 	private Date endDateTime;
 	private MapCoordinate location;
-	private LocationType locationType;
+	private LocationType locationType = LocationType.SPECIFIC_LOCATION;
 	private List<ParticipantDTO> participants = new ArrayList<>();
 	private Set<MapCoordinate> predefinedLocations = new HashSet<>();
 

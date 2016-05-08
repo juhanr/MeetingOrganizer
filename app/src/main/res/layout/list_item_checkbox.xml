@@ -5,9 +5,8 @@
 			  android:gravity="center|left"
 			  android:orientation="horizontal">
 
-	<CheckBox
+	<com.rey.material.widget.CheckBox
 		android:id="@+id/checkbox"
-		style="@style/CheckBox"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"/>
 

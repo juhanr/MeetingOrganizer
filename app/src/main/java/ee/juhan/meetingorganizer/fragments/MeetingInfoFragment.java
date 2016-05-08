@@ -13,12 +13,10 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.Date;
 
-import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
+import ee.juhan.meetingorganizer.activities.MainActivity;
 import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
 import ee.juhan.meetingorganizer.models.server.LocationType;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
@@ -26,6 +24,7 @@ import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
+import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -71,14 +70,14 @@ public class MeetingInfoFragment extends Fragment {
 
 	private void setUpMapFragment() {
 		customMapFragment = new CustomMapFragment();
-		if (meeting.getLocation() != null) {
-			customMapFragment.setLocation(new LatLng(meeting.getLocation().getLatitude(),
-					meeting.getLocation().getLongitude()));
-		}
 		getFragmentManager().beginTransaction().
 				replace(R.id.location_frame, customMapFragment).commit();
 		FrameLayout layout = (FrameLayout) meetingInfoLayout.findViewById(R.id.location_frame);
 		layout.setBackgroundResource(R.drawable.view_border);
+		if (meeting.getLocation() != null) {
+			//			customMapFragment.setLocationMarker(new LatLng(meeting.getLocation().getLatitude(),
+			//							meeting.getLocation().getLongitude()));
+		}
 	}
 
 	private void setButtonListeners() {
@@ -111,7 +110,7 @@ public class MeetingInfoFragment extends Fragment {
 						participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
 						sendUpdateParticipantRequest(participantObject);
 					} else {
-						activity.showToastMessage(
+						UIUtil.showToastMessage(activity,
 								getString(R.string.toast_please_get_your_location));
 					}
 				}
@@ -128,7 +127,7 @@ public class MeetingInfoFragment extends Fragment {
 								.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
 						sendUpdateParticipantRequest(participantObject);
 					} else {
-						activity.showToastMessage(
+						UIUtil.showToastMessage(activity,
 								getString(R.string.toast_please_get_your_location));
 					}
 				}
@@ -155,7 +154,7 @@ public class MeetingInfoFragment extends Fragment {
 					@Override
 					public void failure(RetrofitError error) {
 						activity.showProgress(false);
-						activity.showToastMessage(getString(R.string.toast_server_fail));
+						UIUtil.showToastMessage(activity, getString(R.string.toast_server_fail));
 					}
 				});
 	}

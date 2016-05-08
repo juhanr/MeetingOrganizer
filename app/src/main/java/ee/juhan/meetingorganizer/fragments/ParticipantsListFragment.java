@@ -14,8 +14,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
+import ee.juhan.meetingorganizer.activities.MainActivity;
 import ee.juhan.meetingorganizer.adapters.GeneralAdapter;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 

@@ -1,8 +1,9 @@
 package ee.juhan.meetingorganizer.adapters;
 
 import android.content.Context;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
+
+import com.rey.material.widget.CheckBox;
 
 import java.util.HashSet;
 import java.util.List;
@@ -42,4 +43,5 @@ public abstract class CheckBoxAdapter<T> extends GeneralAdapter<T>
 	protected final CheckBox getCheckBox() {
 		return checkBox;
 	}
+
 }

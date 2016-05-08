@@ -1,7 +1,7 @@
 package ee.juhan.meetingorganizer.fragments;
 
-import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
+import ee.juhan.meetingorganizer.activities.MainActivity;
 
 public class InvitationsFragment extends MeetingsListFragment {
 

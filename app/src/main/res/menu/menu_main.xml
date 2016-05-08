@@ -1,6 +1,6 @@
 <menu
 	xmlns:tools="http://schemas.android.com/tools"
-	tools:context=".MainActivity">
+	tools:context=".activities.MainActivity">
 	<!--<item-->
 	<!--android:id="@+id/action_logout"-->
 	<!--android:orderInCategory="100"-->

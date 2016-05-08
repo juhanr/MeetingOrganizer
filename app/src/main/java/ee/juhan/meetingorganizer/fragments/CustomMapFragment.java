@@ -1,15 +1,17 @@
 package ee.juhan.meetingorganizer.fragments;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -17,18 +19,19 @@ import android.widget.FrameLayout;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import ee.juhan.meetingorganizer.MainActivity;
 import ee.juhan.meetingorganizer.R;
+import ee.juhan.meetingorganizer.activities.LocationActivity;
 import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
-import ee.juhan.meetingorganizer.models.server.LocationType;
-import ee.juhan.meetingorganizer.models.server.MapCoordinate;
+import ee.juhan.meetingorganizer.util.UIUtil;
 
 public class CustomMapFragment extends MapFragment
 		implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMapClickListener {
@@ -39,15 +42,18 @@ public class CustomMapFragment extends MapFragment
 	private static final float GPS_MIN_DISTANCE = 10;
 	private static final String TAG = "CustomMapFragment";
 	private static int mapVisibility = View.VISIBLE;
-	private MainActivity activity;
+	private Activity activity;
 	private GoogleMap map;
-	private Marker locationMarker;
-	private LatLng location;
+	private Marker temporaryMarker;
+	private Marker focusedMarker;
+	private List<Marker> locationMarkers = new ArrayList<>();
+	private int maxLocationMarkers = 1;
 	private boolean isClickableMap;
 	private ViewGroup mapLayout;
-	private String markerAddress = "";
+	private String temporaryMarkerAddress = "";
 
-	public CustomMapFragment() {}
+	private List<LatLng> markerLocationsToBeAdded = new ArrayList<>();
+	private boolean isMapInitialized;
 
 	public static CustomMapFragment newInstance() {
 		return new CustomMapFragment();
@@ -56,7 +62,7 @@ public class CustomMapFragment extends MapFragment
 	@Override
 	public final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		activity = (MainActivity) getActivity();
+		activity = getActivity();
 	}
 
 	@Override
@@ -66,11 +72,6 @@ public class CustomMapFragment extends MapFragment
 		checkAndroidVersion();
 		initializeMap();
 		setUpLocationListener();
-		TouchableWrapper frameLayout = new TouchableWrapper(getActivity());
-		frameLayout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-		mapLayout.addView(frameLayout,
-				new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-						ViewGroup.LayoutParams.MATCH_PARENT));
 		return mapLayout;
 	}
 
@@ -90,56 +91,140 @@ public class CustomMapFragment extends MapFragment
 		if (map == null) {
 			return;
 		}
+		if (ActivityCompat
+				.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) !=
+				PackageManager.PERMISSION_GRANTED && ActivityCompat
+				.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) !=
+				PackageManager.PERMISSION_GRANTED) {
+			return;
+		}
 		map.setMyLocationEnabled(true);
 		map.setOnMyLocationButtonClickListener(this);
 		if (isClickableMap) {
 			map.setOnMapClickListener(this);
 		}
-		if (location == null) {
+
+		for (LatLng latLng : markerLocationsToBeAdded) {
+			setLocationMarker(latLng);
+			((LocationActivity) activity).refreshConfirmMarkerFABState();
+		}
+		markerLocationsToBeAdded = null;
+
+		if (temporaryMarker == null) {
 			map.moveCamera(CameraUpdateFactory
 					.newLatLngZoom(DEFAULT_CAMERA_LOCATION, DEFAULT_CAMERA_ZOOM));
 		} else {
-			map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_CAMERA_ZOOM));
-			setLocationMarker(location);
+			map.moveCamera(CameraUpdateFactory
+					.newLatLngZoom(temporaryMarker.getPosition(), DEFAULT_CAMERA_ZOOM));
 		}
+
+		map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+			@Override
+			public boolean onMarkerClick(Marker marker) {
+				setFocus(marker, true);
+				return false;
+			}
+		});
+
+		isMapInitialized = true;
 	}
 
 	private void setUpLocationListener() {
 		LocationManager locationManager =
 				(LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+		if (ActivityCompat
+				.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) !=
+				PackageManager.PERMISSION_GRANTED && ActivityCompat
+				.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) !=
+				PackageManager.PERMISSION_GRANTED) {
+			return;
+		}
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME,
 				GPS_MIN_DISTANCE, new MyLocationListener());
 	}
 
+	private void setFocus(Marker marker, boolean focused) {
+		if (focused) {
+			focusedMarker = marker;
+			if (activity instanceof LocationActivity) {
+				((LocationActivity) activity).showDeleteMarkerFAB(true);
+			}
+		} else {
+			if (activity instanceof LocationActivity) {
+				((LocationActivity) activity).showDeleteMarkerFAB(false);
+			}
+		}
+	}
+
 	private void setLocationMarker(LatLng latLng) {
+		setTemporaryMarker(latLng);
+		confirmTemporaryMarker();
+		if (activity instanceof LocationActivity) {
+			((LocationActivity) activity).refreshConfirmMarkerFABState();
+		}
+	}
+
+	public void setMarkerLocations(List<LatLng> locations) {
+		markerLocationsToBeAdded = locations;
+	}
+
+	public void removeLocationMarker(Marker marker) {
+		marker.remove();
+		locationMarkers.remove(marker);
+	}
+
+	private void setTemporaryMarker(LatLng latLng) {
 		try {
-			Geocoder geocoder = new Geocoder(activity.getBaseContext());
+			Geocoder geocoder = new Geocoder(activity);
 			List<Address> addresses =
 					geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-			setLocationMarker(latLng, addresses.get(0).getAddressLine(0));
+			setTemporaryMarker(latLng, addresses.get(0).getAddressLine(0));
 		} catch (IOException e) {
 			Log.e(TAG, "Could not get location from address string.");
-			setLocationMarker(latLng, "");
+			setTemporaryMarker(latLng, "");
 		}
 	}
 
-	private void setLocationMarker(LatLng latLng, String address) {
-		this.location = latLng;
-		this.markerAddress = address;
-		if (locationMarker != null) {
-			locationMarker.remove();
+	private void setTemporaryMarker(LatLng latLng, String address) {
+		this.temporaryMarkerAddress = address;
+		if (temporaryMarker != null) {
+			temporaryMarker.remove();
 		}
-		locationMarker = map.addMarker(new MarkerOptions().position(latLng)
-				.title(getString(R.string.textview_meeting_location)).snippet(address));
-		locationMarker.showInfoWindow();
+		setFocus(null, false);
+		temporaryMarker =
+				map.addMarker(new MarkerOptions().position(latLng).title(address).draggable(true));
+		temporaryMarker.showInfoWindow();
+		if (activity instanceof LocationActivity) {
+			((LocationActivity) activity).refreshConfirmMarkerFABState();
+		}
 	}
 
-	public final LatLng getLocation() {
-		return location;
+	public Marker confirmTemporaryMarker() {
+		temporaryMarker
+				.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+		locationMarkers.add(temporaryMarker);
+		temporaryMarker = null;
+		return locationMarkers.get(locationMarkers.size() - 1);
 	}
 
-	public final void setLocation(LatLng latLng) {
-		location = latLng;
+	public Marker getFocusedMarker() {
+		return focusedMarker;
+	}
+
+	public boolean isLocationMarkerAvailable() {
+		return locationMarkers.size() < maxLocationMarkers;
+	}
+
+	public void clearLocationMarkers() {
+		locationMarkers.clear();
+	}
+
+	public void setMaxLocationMarkers(int max) {
+		maxLocationMarkers = max;
+	}
+
+	public final Marker getTemporaryMarker() {
+		return temporaryMarker;
 	}
 
 	public final void setIsClickableMap(boolean isClickableMap) {
@@ -153,15 +238,15 @@ public class CustomMapFragment extends MapFragment
 		}
 	}
 
-	public final String getMarkerAddress() {
-		return markerAddress;
+	public final String getTemporaryMarkerAddress() {
+		return temporaryMarkerAddress;
 	}
 
 	public final void clearMap() {
 		if (map != null) {
 			map.clear();
-			location = null;
-			markerAddress = "";
+			temporaryMarker = null;
+			temporaryMarkerAddress = "";
 		}
 	}
 
@@ -173,14 +258,18 @@ public class CustomMapFragment extends MapFragment
 				LatLng latLng =
 						new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
 				map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_CAMERA_ZOOM));
-				setLocationMarker(latLng, addresses.get(0).getAddressLine(0));
+				setTemporaryMarker(latLng, addresses.get(0).getAddressLine(0));
 			} else {
-				activity.showToastMessage(getString(R.string.toast_location_not_found));
+				UIUtil.showToastMessage(activity, getString(R.string.toast_location_not_found));
 			}
 		} catch (IOException e) {
 			Log.e(TAG, "Could not get location from address string.");
-			activity.showToastMessage(getString(R.string.toast_geocoder_service_error));
+			UIUtil.showToastMessage(activity, getString(R.string.toast_geocoder_service_error));
 		}
+	}
+
+	public final boolean isMapInitialized() {
+		return isMapInitialized;
 	}
 
 	@Override
@@ -188,40 +277,19 @@ public class CustomMapFragment extends MapFragment
 		LocationManager locationManager =
 				(LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
 		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			activity.showToastMessage("Waiting for location...");
+			UIUtil.showToastMessage(activity, "Waiting for location...");
 		} else {
-			activity.showToastMessage("GPS is disabled!");
+			UIUtil.showToastMessage(activity, "GPS is disabled!");
 		}
 		return false;
 	}
 
 	@Override
 	public final void onMapClick(LatLng latLng) {
-		if (NewMeetingFragment.getNewMeetingModel().getLocationType() ==
-				LocationType.SPECIFIC_LOCATION) {
-			NewMeetingFragment.getNewMeetingModel()
-					.setLocation(new MapCoordinate(latLng.latitude, latLng.longitude));
+		if (temporaryMarker != null) {
+			temporaryMarker.remove();
 		}
-		if (locationMarker != null) {
-			locationMarker.remove();
-		}
-		setLocationMarker(latLng);
-	}
-
-	private class TouchableWrapper extends FrameLayout {
-
-		public TouchableWrapper(Context context) {
-			super(context);
-		}
-
-		@Override
-		public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
-			if (event.getAction() == MotionEvent.ACTION_DOWN ||
-					event.getAction() == MotionEvent.ACTION_UP) {
-				mapLayout.requestDisallowInterceptTouchEvent(true);
-			}
-			return super.dispatchTouchEvent(event);
-		}
+		setTemporaryMarker(latLng);
 	}
 
 }

@@ -13,11 +13,11 @@ public final class DateUtil {
 
 	private static final String TAG = "DateUtil";
 
-	private static final SimpleDateFormat DATETIME_FORMAT =
+	public static final SimpleDateFormat DATETIME_FORMAT =
 			new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
-	private static final SimpleDateFormat DATE_FORMAT =
+	public static final SimpleDateFormat DATE_FORMAT =
 			new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
-	private static final SimpleDateFormat TIME_FORMAT =
+	public static final SimpleDateFormat TIME_FORMAT =
 			new SimpleDateFormat("HH:mm", Locale.getDefault());
 
 	private DateUtil() {
