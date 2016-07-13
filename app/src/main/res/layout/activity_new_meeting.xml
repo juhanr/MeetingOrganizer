@@ -7,79 +7,8 @@
 	android:layout_height="match_parent"
 	android:layout_width="match_parent">
 
-	<LinearLayout
-		style="@style/FragmentLayout"
-		android:id="@+id/layout_content"
-		android:clickable="true"
-		android:focusableInTouchMode="true"
-		android:gravity="center"
-		android:layout_height="wrap_content"
-		android:layout_width="match_parent"
-		android:orientation="vertical"
-		android:weightSum="1.0">
-
-		<com.rey.material.widget.EditText
-			style="@style/LightEditText"
-			android:hint="@string/textview_title"
-			android:inputType="textCapSentences"
-			android:layout_marginBottom="@dimen/view_margin_small"
-			android:layout_marginTop="0dp"
-			app:et_inputId="@+id/title_textbox"
-			app:et_supportMaxChars="20"
-			app:et_supportMode="charCounter"/>
-
-		<com.rey.material.widget.EditText
-			style="@style/LightEditText"
-			android:hint="@string/textview_description"
-			android:inputType="textMultiLine"
-			android:layout_marginBottom="@dimen/view_margin_medium"
-			app:et_inputId="@+id/description_textbox"
-			app:et_supportMaxChars="255"
-			app:et_supportMode="charCounter"/>
-
-		<com.rey.material.widget.Spinner
-			style="@style/LightSpinnerNoArrow"
-			android:id="@+id/date_button"
-			android:layout_marginBottom="@dimen/view_margin_small"
-			app:spn_label="@string/textview_date"/>
-
-		<com.rey.material.widget.Spinner
-			style="@style/LightSpinnerNoArrow"
-			android:id="@+id/start_time_button"
-			android:layout_marginBottom="@dimen/view_margin_small"
-			app:spn_label="@string/textview_start_time"/>
-
-		<com.rey.material.widget.Spinner
-			style="@style/LightSpinnerNoArrow"
-			android:id="@+id/end_time_button"
-			android:layout_marginBottom="@dimen/view_margin_small"
-			app:spn_label="@string/textview_end_time"/>
-
-		<com.rey.material.widget.Spinner
-			style="@style/LightSpinnerNoArrow"
-			android:id="@+id/location_info"
-			android:layout_marginBottom="@dimen/view_margin_small"
-			app:spn_label="Location"/>
-
-		<com.rey.material.widget.Spinner
-			style="@style/LightSpinnerNoArrow"
-			android:id="@+id/participants_info"
-			android:layout_marginBottom="@dimen/view_margin_small"
-			app:spn_label="Participants"/>
-
-		<include layout="@layout/view_empty_space"/>
-
-		<com.rey.material.widget.Button
-			style="@style/RaisedButtonColored"
-			android:id="@+id/create_button"
-			android:layout_marginTop="@dimen/view_margin_large"
-			android:text="@string/button_create"/>
-
-	</LinearLayout>
-
 	<RelativeLayout
-		android:layout_height="match_parent"
-		android:layout_marginTop="?attr/actionBarSize"
+		android:layout_height="wrap_content"
 		android:layout_width="match_parent">
 
 		<ProgressBar
@@ -91,6 +20,76 @@
 			android:layout_marginTop="?attr/actionBarSize"
 			android:layout_width="wrap_content"
 			android:visibility="gone"/>
+
+		<LinearLayout
+			style="@style/FragmentLayout"
+			android:clickable="true"
+			android:focusableInTouchMode="true"
+			android:gravity="center"
+			android:id="@+id/layout_content"
+			android:layout_height="wrap_content"
+			android:layout_width="match_parent"
+			android:orientation="vertical"
+			android:weightSum="1.0">
+
+			<com.rey.material.widget.EditText
+				style="@style/LightEditText"
+				android:hint="@string/textview_title"
+				android:inputType="textCapSentences"
+				android:layout_marginBottom="@dimen/view_margin_small"
+				android:layout_marginTop="0dp"
+				app:et_inputId="@+id/title_textbox"
+				app:et_supportMaxChars="20"
+				app:et_supportMode="charCounter"/>
+
+			<com.rey.material.widget.EditText
+				style="@style/LightEditText"
+				android:hint="@string/textview_description"
+				android:inputType="textMultiLine"
+				android:layout_marginBottom="@dimen/view_margin_medium"
+				app:et_inputId="@+id/description_textbox"
+				app:et_supportMaxChars="255"
+				app:et_supportMode="charCounter"/>
+
+			<com.rey.material.widget.Spinner
+				style="@style/LightSpinnerNoArrow"
+				android:id="@+id/date_button"
+				android:layout_marginBottom="@dimen/view_margin_small"
+				app:spn_label="@string/textview_date"/>
+
+			<com.rey.material.widget.Spinner
+				style="@style/LightSpinnerNoArrow"
+				android:id="@+id/start_time_button"
+				android:layout_marginBottom="@dimen/view_margin_small"
+				app:spn_label="@string/textview_start_time"/>
+
+			<com.rey.material.widget.Spinner
+				style="@style/LightSpinnerNoArrow"
+				android:id="@+id/end_time_button"
+				android:layout_marginBottom="@dimen/view_margin_small"
+				app:spn_label="@string/textview_end_time"/>
+
+			<com.rey.material.widget.Spinner
+				style="@style/LightSpinnerNoArrow"
+				android:id="@+id/location_info"
+				android:layout_marginBottom="@dimen/view_margin_small"
+				app:spn_label="Location"/>
+
+			<com.rey.material.widget.Spinner
+				style="@style/LightSpinnerNoArrow"
+				android:id="@+id/participants_info"
+				android:layout_marginBottom="@dimen/view_margin_small"
+				app:spn_label="Participants"/>
+
+			<include layout="@layout/view_empty_space"/>
+
+			<com.rey.material.widget.Button
+				style="@style/RaisedButtonColored"
+				android:id="@+id/create_button"
+				android:layout_marginTop="@dimen/view_margin_large"
+				android:text="@string/button_create"/>
+
+		</LinearLayout>
 
 	</RelativeLayout>
 
