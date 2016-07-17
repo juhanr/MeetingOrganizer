@@ -65,7 +65,6 @@ public class NewMeetingActivity extends AppCompatActivity {
 		newMeetingLayout = (ViewGroup) findViewById(R.id.layout_content);
 		progressView = findViewById(R.id.progress_bar);
 		setButtonListeners();
-		addLeaderInfo();
 	}
 
 	@Override
@@ -91,7 +90,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 	}
 
 	private void setButtonListeners() {
-		String[] items = new String[]{"Not set."};
+		String[] items = new String[]{getString(R.string.textview_touch_to_set)};
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.row_spn, items);
 		adapter.setDropDownViewResource(R.layout.row_spn_dropdown);
 
@@ -116,27 +115,18 @@ public class NewMeetingActivity extends AppCompatActivity {
 		dateButton.setOnClickListener(new DateClickListener());
 		startTimeButton.setOnClickListener(new TimeClickListener());
 		endTimeButton.setOnClickListener(new TimeClickListener());
-		locationInfo.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent myIntent = new Intent(getBaseContext(), LocationActivity.class);
-				startActivity(myIntent);
-			}
+		locationInfo.setOnClickListener(view -> {
+			Intent myIntent = new Intent(getBaseContext(), LocationActivity.class);
+			startActivity(myIntent);
 		});
-		participantsInfo.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent myIntent = new Intent(getBaseContext(), InviteContactsActivity.class);
-				startActivity(myIntent);
-			}
+		participantsInfo.setOnClickListener(view -> {
+			Intent myIntent = new Intent(getBaseContext(), InviteContactsActivity.class);
+			startActivity(myIntent);
 		});
 
-		createButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (isValidData()) {
-					sendNewMeetingRequest();
-				}
+		createButton.setOnClickListener(view -> {
+			if (isValidData()) {
+				sendNewMeetingRequest();
 			}
 		});
 
@@ -162,15 +152,16 @@ public class NewMeetingActivity extends AppCompatActivity {
 				newMeetingModel.getLocation() != null || newMeetingModel.getLocationType() ==
 				LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
 				!newMeetingModel.getPredefinedLocations().isEmpty()) {
-			setViewText(R.id.location_info, "Click to show.");
+			setViewText(R.id.location_info, getString(R.string.textview_touch_to_view));
 		} else {
-			setViewText(R.id.location_info, "Not set.");
+			setViewText(R.id.location_info, getString(R.string.textview_touch_to_set));
 		}
 		if (newMeetingModel.getParticipants().isEmpty()) {
-			setViewText(R.id.participants_info, "Not set.");
+			setViewText(R.id.participants_info, getString(R.string.textview_touch_to_set));
 		} else {
 			setViewText(R.id.participants_info,
-					newMeetingModel.getParticipants().size() + " contacts invited. Click to show.");
+					newMeetingModel.getParticipants().size() + " contacts invited. " +
+							getString(R.string.textview_touch_to_view));
 		}
 
 	}
@@ -178,7 +169,8 @@ public class NewMeetingActivity extends AppCompatActivity {
 	private boolean isValidData() {
 		if (getViewText(R.id.title_textbox).length() == 0) {
 			UIUtil.showToastMessage(this, getString(R.string.toast_please_enter_title));
-		} else if (getViewText(R.id.date_button).equals(getString(R.string.textview_not_set_u))) {
+		} else if (getViewText(R.id.date_button)
+				.equals(getString(R.string.textview_touch_to_set))) {
 			UIUtil.showToastMessage(this, getString(R.string.toast_please_set_date));
 		} else if (newMeetingModel.getStartDateTime() == null) {
 			UIUtil.showToastMessage(this, getString(R.string.toast_please_set_start_time));
@@ -264,19 +256,13 @@ public class NewMeetingActivity extends AppCompatActivity {
 		final YesNoFragment dialog = new YesNoFragment();
 		//		dialog.setMessage(
 		//				participantsWithoutAccount + getString(R.string.textview_info_invite_via_sms));
-		dialog.setPositiveButton(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showWriteSMSDialog();
-				dialog.dismiss();
-			}
+		dialog.setPositiveButton(view -> {
+			showWriteSMSDialog();
+			dialog.dismiss();
 		});
-		dialog.setNegativeButton(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				sendNewMeetingRequest();
-				dialog.dismiss();
-			}
+		dialog.setNegativeButton(view -> {
+			sendNewMeetingRequest();
+			dialog.dismiss();
 		});
 		dialog.hideInput();
 		dialog.show(getFragmentManager(), "YesNoFragment");
@@ -286,20 +272,12 @@ public class NewMeetingActivity extends AppCompatActivity {
 		final YesNoFragment dialog = new YesNoFragment();
 		dialog.setMessage(getString(R.string.textview_please_write_sms));
 		dialog.setInputText(getString(R.string.message_invite_via_sms));
-		dialog.setPositiveButton(getString(R.string.button_send_sms), new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				sendInvitationSMS(dialog.getInputValue());
-				sendNewMeetingRequest();
-				dialog.dismiss();
-			}
+		dialog.setPositiveButton(getString(R.string.button_send_sms), view -> {
+			sendInvitationSMS(dialog.getInputValue());
+			sendNewMeetingRequest();
+			dialog.dismiss();
 		});
-		dialog.setNegativeButton(getString(R.string.button_cancel), new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
+		dialog.setNegativeButton(getString(R.string.button_cancel), view -> dialog.dismiss());
 		dialog.show(getFragmentManager(), "YesNoFragment");
 	}
 
@@ -315,6 +293,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 	}
 
 	private void sendNewMeetingRequest() {
+		addLeaderInfo();
 		showProgress(true);
 		RestClient.get().newMeetingRequest(NewMeetingActivity.getNewMeetingModel(),
 				new Callback<MeetingDTO>() {
@@ -354,7 +333,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 			int current_day = c.get(Calendar.DAY_OF_MONTH);
 			int current_month = c.get(Calendar.MONTH);
 			int current_year = c.get(Calendar.YEAR);
-			if (!getViewText(view).equals(getString(R.string.textview_not_set_u))) {
+			if (!getViewText(view).equals(getString(R.string.textview_touch_to_set))) {
 				Date viewDate = DateUtil.parseDate(getViewText(view));
 				if (viewDate != null) {
 					c.setTime(viewDate);
@@ -389,7 +368,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 		@Override
 		public void onClick(final View view) {
 			Calendar c = Calendar.getInstance();
-			if (!getViewText(view).equals(getString(R.string.textview_not_set_u))) {
+			if (!getViewText(view).equals(getString(R.string.textview_touch_to_set))) {
 				Date viewDate = DateUtil.parseTime(getViewText(view));
 				assert viewDate != null;
 				c.setTime(viewDate);

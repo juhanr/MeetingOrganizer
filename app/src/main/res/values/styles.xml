@@ -14,6 +14,10 @@
 		<item name="windowNoTitle">true</item>
 	</style>
 
+	<style name="ToolbarColoredBackArrow" parent="AppTheme">
+		<item name="android:textColorSecondary">@color/dark_gray</item>
+	</style>
+
 	<style name="SearchToolbar" parent="AppTheme">
 		<item name="drawerArrowStyle">@style/SearchToolbarArrowToggle</item>
 		<item name="background">@color/white</item>

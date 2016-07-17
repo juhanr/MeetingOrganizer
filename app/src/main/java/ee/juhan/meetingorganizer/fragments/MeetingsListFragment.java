@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -99,13 +98,9 @@ public class MeetingsListFragment extends Fragment {
 
 	private void refreshListView() {
 		ListView listview = (ListView) meetingsListLayout.findViewById(R.id.listView);
-		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
-				MeetingDTO meeting = adapter.getItem(position);
-				((MainActivity) getActivity()).changeFragmentToMeetingInfo(meeting);
-			}
+		listview.setOnItemClickListener((parent, view, position, id) -> {
+			MeetingDTO meeting = adapter.getItem(position);
+			((MainActivity) getActivity()).changeFragmentToMeetingInfo(meeting);
 		});
 		adapter = new MeetingsAdapter(getActivity(), meetingsList);
 		listview.setAdapter(adapter);
@@ -125,12 +120,15 @@ public class MeetingsListFragment extends Fragment {
 			TextView meetingDateView = (TextView) super.getLayout().findViewById(R.id.meeting_date);
 			TextView meetingTimeView = (TextView) super.getLayout().findViewById(R.id.meeting_time);
 			meetingTitleView.setText(
-					getContext().getString(R.string.textview_title) + ": " + meeting.getTitle());
-			meetingDateView.setText(getContext().getString(R.string.textview_date) + ": " +
-					DateUtil.formatDate(meeting.getStartDateTime()));
-			meetingTimeView.setText(getContext().getString(R.string.textview_time) + ": " +
-					DateUtil.formatTime(meeting.getStartDateTime()) + " - " +
-					DateUtil.formatTime(meeting.getEndDateTime()));
+					String.format("%s: %s", getContext().getString(R.string.textview_title),
+							meeting.getTitle()));
+			meetingDateView.setText(
+					String.format("%s: %s", getContext().getString(R.string.textview_date),
+							DateUtil.formatDate(meeting.getStartDateTime())));
+			meetingTimeView.setText(
+					String.format("%s: %s - %s", getContext().getString(R.string.textview_time),
+							DateUtil.formatTime(meeting.getStartDateTime()),
+							DateUtil.formatTime(meeting.getEndDateTime())));
 		}
 
 	}

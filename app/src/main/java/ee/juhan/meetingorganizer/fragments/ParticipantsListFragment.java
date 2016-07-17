@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -63,13 +62,9 @@ public class ParticipantsListFragment extends Fragment {
 
 	private void refreshListView() {
 		ListView listview = (ListView) participantsListLayout.findViewById(R.id.listView);
-		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
-				ParticipantDTO participant = adapter.getItem(position);
-				activity.changeFragmentToParticipantInfo(participant);
-			}
+		listview.setOnItemClickListener((parent, view, position, id) -> {
+			ParticipantDTO participant = adapter.getItem(position);
+			activity.changeFragmentToParticipantInfo(participant);
 		});
 		adapter = new ParticipantsAdapter(getActivity(), participantsList);
 		listview.setAdapter(adapter);
@@ -87,7 +82,7 @@ public class ParticipantsListFragment extends Fragment {
 			TextView participantNameView =
 					(TextView) super.getLayout().findViewById(R.id.participant_name);
 			if (participant.getName() == null) {
-				participantNameView.setText("Unknown");
+				participantNameView.setText(getString(R.string.unknown));
 			} else {
 				participantNameView.setText(participant.getName());
 			}

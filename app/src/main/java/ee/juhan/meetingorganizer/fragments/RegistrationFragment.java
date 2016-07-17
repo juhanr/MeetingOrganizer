@@ -49,15 +49,12 @@ public class RegistrationFragment extends Fragment {
 
 	private void setButtonListeners() {
 		Button registerButton = (Button) registrationLayout.findViewById(R.id.register_button);
-		registerButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (isValidData()) {
-					sendRegistrationRequest(getViewText(R.id.name_textbox),
-							getViewText(R.id.email_textbox), getViewText(R.id.password_textbox),
-							"+" + getViewText(R.id.area_number_textbox) +
-									getViewText(R.id.phone_number_textbox));
-				}
+		registerButton.setOnClickListener(view -> {
+			if (isValidData()) {
+				sendRegistrationRequest(getViewText(R.id.name_textbox),
+						getViewText(R.id.email_textbox), getViewText(R.id.password_textbox),
+						"+" + getViewText(R.id.area_number_textbox) +
+								getViewText(R.id.phone_number_textbox));
 			}
 		});
 

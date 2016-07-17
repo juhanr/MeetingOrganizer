@@ -129,12 +129,7 @@ public class InviteContactsActivity extends AppCompatActivity {
 	private void setButtonListeners() {
 		FloatingActionButton confirmFAB = (FloatingActionButton) findViewById(R.id.fab_confirm);
 		if (confirmFAB != null) {
-			confirmFAB.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					finish();
-				}
-			});
+			confirmFAB.setOnClickListener(view -> finish());
 		}
 	}
 

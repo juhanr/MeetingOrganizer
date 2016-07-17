@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -34,7 +35,8 @@ import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
 import ee.juhan.meetingorganizer.util.UIUtil;
 
 public class CustomMapFragment extends MapFragment
-		implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMapClickListener {
+		implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMapClickListener,
+		OnMapReadyCallback {
 
 	private static final LatLng DEFAULT_CAMERA_LOCATION = new LatLng(59.437046, 24.753742);
 	private static final float DEFAULT_CAMERA_ZOOM = 10;
@@ -63,6 +65,7 @@ public class CustomMapFragment extends MapFragment
 	public final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		activity = getActivity();
+		this.getMapAsync(this);
 	}
 
 	@Override
@@ -70,7 +73,6 @@ public class CustomMapFragment extends MapFragment
 			Bundle savedInstanceState) {
 		mapLayout = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
 		checkAndroidVersion();
-		initializeMap();
 		setUpLocationListener();
 		return mapLayout;
 	}
@@ -87,7 +89,6 @@ public class CustomMapFragment extends MapFragment
 	}
 
 	private void initializeMap() {
-		map = this.getMap();
 		if (map == null) {
 			return;
 		}
@@ -118,12 +119,9 @@ public class CustomMapFragment extends MapFragment
 					.newLatLngZoom(temporaryMarker.getPosition(), DEFAULT_CAMERA_ZOOM));
 		}
 
-		map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-			@Override
-			public boolean onMarkerClick(Marker marker) {
-				setFocus(marker, true);
-				return false;
-			}
+		map.setOnMarkerClickListener(marker -> {
+			setFocus(marker, true);
+			return false;
 		});
 
 		isMapInitialized = true;
@@ -292,4 +290,9 @@ public class CustomMapFragment extends MapFragment
 		setTemporaryMarker(latLng);
 	}
 
+	@Override
+	public void onMapReady(GoogleMap googleMap) {
+		this.map = googleMap;
+		initializeMap();
+	}
 }

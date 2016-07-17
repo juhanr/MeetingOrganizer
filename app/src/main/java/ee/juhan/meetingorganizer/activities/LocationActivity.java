@@ -1,15 +1,13 @@
 package ee.juhan.meetingorganizer.activities;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,24 +70,16 @@ public class LocationActivity extends AppCompatActivity {
 		actionBar.setDisplayShowCustomEnabled(true);
 		actionBar.setCustomView(R.layout.search_bar);
 		actionBar.setDisplayShowTitleEnabled(false);
-		EditText edtSeach = (EditText) actionBar.getCustomView().findViewById(R.id.search_edittext);
-		edtSeach.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-					customMapFragment.searchMap(v.getText().toString());
-					return true;
-				}
-				return false;
+		EditText editSearch =
+				(EditText) actionBar.getCustomView().findViewById(R.id.search_edittext);
+		editSearch.setOnEditorActionListener((v, actionId, event) -> {
+			if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+				customMapFragment.searchMap(v.getText().toString());
+				return true;
 			}
+			return false;
 		});
-		final Drawable upArrow =
-				getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-		if (upArrow != null) {
-			upArrow.setColorFilter(getResources().getColor(R.color.black),
-					PorterDuff.Mode.SRC_ATOP);
-		}
-		actionBar.setHomeAsUpIndicator(upArrow);
+		actionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
 	@Override
@@ -135,61 +125,49 @@ public class LocationActivity extends AppCompatActivity {
 	private void setButtonListeners() {
 		FloatingActionButton confirmFAB = (FloatingActionButton) findViewById(R.id.fab_confirm);
 		if (confirmFAB != null) {
-			confirmFAB.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					finish();
-				}
-			});
+			confirmFAB.setOnClickListener(view -> finish());
 		}
 
 		confirmMarkerFAB = (FloatingActionButton) findViewById(R.id.fab_confirm_marker);
 		if (confirmMarkerFAB != null) {
-			confirmMarkerFAB.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					Marker locationMarker = customMapFragment.confirmTemporaryMarker();
-					refreshConfirmMarkerFABState();
+			confirmMarkerFAB.setOnClickListener(view -> {
+				Marker locationMarker = customMapFragment.confirmTemporaryMarker();
+				refreshConfirmMarkerFABState();
 
-					if (NewMeetingActivity.getNewMeetingModel().getLocationType() ==
-							LocationType.SPECIFIC_LOCATION) {
-						NewMeetingActivity.getNewMeetingModel().setLocation(
-								new MapCoordinate(locationMarker.getPosition().latitude,
-										locationMarker.getPosition().longitude));
-					} else if (NewMeetingActivity.getNewMeetingModel().getLocationType() ==
-							LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS) {
-						NewMeetingActivity.getNewMeetingModel().addPredefinedLocation(
-								new MapCoordinate(locationMarker.getPosition().latitude,
-										locationMarker.getPosition().longitude));
-					}
+				if (NewMeetingActivity.getNewMeetingModel().getLocationType() ==
+						LocationType.SPECIFIC_LOCATION) {
+					NewMeetingActivity.getNewMeetingModel().setLocation(
+							new MapCoordinate(locationMarker.getPosition().latitude,
+									locationMarker.getPosition().longitude));
+				} else if (NewMeetingActivity.getNewMeetingModel().getLocationType() ==
+						LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS) {
+					NewMeetingActivity.getNewMeetingModel().addPredefinedLocation(
+							new MapCoordinate(locationMarker.getPosition().latitude,
+									locationMarker.getPosition().longitude));
 				}
 			});
 		}
 
 		deleteMarkerFAB = (FloatingActionButton) findViewById(R.id.fab_delete_marker);
 		if (deleteMarkerFAB != null) {
-			deleteMarkerFAB.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					Marker focusedMarker = customMapFragment.getFocusedMarker();
-					if (focusedMarker != null) {
-						customMapFragment.removeLocationMarker(focusedMarker);
-						MapCoordinate newMeetingLocation =
-								NewMeetingActivity.getNewMeetingModel().getLocation();
-						Set<MapCoordinate> newMeetingPredefinedLocations =
-								NewMeetingActivity.getNewMeetingModel().getPredefinedLocations();
-						MapCoordinate focusedMarkerMapCoordinate =
-								new MapCoordinate(focusedMarker.getPosition());
-						if (newMeetingLocation
-								.equals(new MapCoordinate(focusedMarker.getPosition()))) {
-							NewMeetingActivity.getNewMeetingModel().setLocation(null);
-						} else if (newMeetingPredefinedLocations
-								.contains(focusedMarkerMapCoordinate)) {
-							newMeetingPredefinedLocations.remove(focusedMarkerMapCoordinate);
-						}
+			deleteMarkerFAB.setOnClickListener(view -> {
+				Marker focusedMarker = customMapFragment.getFocusedMarker();
+				if (focusedMarker != null) {
+					customMapFragment.removeLocationMarker(focusedMarker);
+					MapCoordinate newMeetingLocation =
+							NewMeetingActivity.getNewMeetingModel().getLocation();
+					Set<MapCoordinate> newMeetingPredefinedLocations =
+							NewMeetingActivity.getNewMeetingModel().getPredefinedLocations();
+					MapCoordinate focusedMarkerMapCoordinate =
+							new MapCoordinate(focusedMarker.getPosition());
+					if (newMeetingLocation != null && newMeetingLocation
+							.equals(new MapCoordinate(focusedMarker.getPosition()))) {
+						NewMeetingActivity.getNewMeetingModel().setLocation(null);
+					} else if (newMeetingPredefinedLocations.contains(focusedMarkerMapCoordinate)) {
+						newMeetingPredefinedLocations.remove(focusedMarkerMapCoordinate);
 					}
-					showDeleteMarkerFAB(false);
 				}
+				showDeleteMarkerFAB(false);
 			});
 		}
 		showDeleteMarkerFAB(false);
@@ -198,20 +176,15 @@ public class LocationActivity extends AppCompatActivity {
 		View bottomSheet = findViewById(R.id.bottom_sheet);
 		final BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 		bottomSheetBehavior.setPeekHeight(450);
-		bottomSheet.post(new Runnable() {
-			@Override
-			public void run() {
-				bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-			}
-		});
+		bottomSheet.post(() -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED));
 		bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
 			@Override
-			public void onStateChanged(View bottomSheet, int newState) {
+			public void onStateChanged(@NonNull View bottomSheet, int newState) {
 
 			}
 
 			@Override
-			public void onSlide(View bottomSheet, float slideOffset) {
+			public void onSlide(@NonNull View bottomSheet, float slideOffset) {
 				TextView slideUpInfo = (TextView) findViewById(R.id.slide_up_info);
 				if (slideUpInfo != null) {
 					slideUpInfo.setAlpha(1 - slideOffset);

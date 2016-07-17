@@ -2,12 +2,9 @@ package ee.juhan.meetingorganizer.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
 import com.squareup.okhttp.OkHttpClient;
 
-import java.lang.reflect.Type;
 import java.util.Date;
 
 import retrofit.RequestInterceptor;
@@ -40,12 +37,9 @@ public final class RestClient {
 	}
 
 	private static void setupRestClient() {
-		Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-			public Date deserialize(JsonElement json, Type type,
-					JsonDeserializationContext context) {
-				return new Date(json.getAsJsonPrimitive().getAsLong());
-			}
-		}).create();
+		Gson gson = new GsonBuilder().registerTypeAdapter(Date.class,
+				(JsonDeserializer<Date>) (json, type, context) -> new Date(
+						json.getAsJsonPrimitive().getAsLong())).create();
 
 		RestAdapter.Builder builder =
 				new RestAdapter.Builder().setEndpoint(ROOT).setConverter(new GsonConverter(gson))

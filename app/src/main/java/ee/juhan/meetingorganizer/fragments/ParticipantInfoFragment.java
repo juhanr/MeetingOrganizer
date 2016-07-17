@@ -50,19 +50,21 @@ public class ParticipantInfoFragment extends Fragment {
 				(TextView) participantInfoLayout.findViewById(R.id.participant_phone_number);
 		TextView email = (TextView) participantInfoLayout.findViewById(R.id.participant_email);
 		TextView answer = (TextView) participantInfoLayout.findViewById(R.id.participant_answer);
-		name.setText(getString(R.string.textview_name) + ": " + participant.getName());
-		phoneNumber.setText(
-				getString(R.string.textview_phone_number) + ": " + participant.getPhoneNumber());
-		email.setText(getString(R.string.textview_email) + ": " + participant.getEmail());
+		name.setText(
+				String.format("%s: %s", getString(R.string.textview_name), participant.getName()));
+		phoneNumber.setText(String.format("%s: %s", getString(R.string.textview_phone_number),
+				participant.getPhoneNumber()));
+		email.setText(String.format("%s: %s", getString(R.string.textview_email),
+				participant.getEmail()));
 		if (participant.getParticipationAnswer() == ParticipationAnswer.PARTICIPATING) {
-			answer.setText(getString(R.string.textview_participating) + ": " +
-					getString(R.string.textview_yes));
+			answer.setText(String.format("%s: %s", getString(R.string.textview_participating),
+					getString(R.string.textview_yes)));
 		} else if (participant.getParticipationAnswer() == ParticipationAnswer.NOT_PARTICIPATING) {
-			answer.setText(getString(R.string.textview_participating) + ": " +
-					getString(R.string.textview_no));
+			answer.setText(String.format("%s: %s", getString(R.string.textview_participating),
+					getString(R.string.textview_no)));
 		} else if (participant.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED) {
-			answer.setText(getString(R.string.textview_participating) + ": " +
-					getString(R.string.textview_not_answered));
+			answer.setText(String.format("%s: %s", getString(R.string.textview_participating),
+					getString(R.string.textview_not_answered)));
 		}
 	}
 

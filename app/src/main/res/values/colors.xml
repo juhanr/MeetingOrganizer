@@ -3,6 +3,7 @@
 
 	<item name="black" type="color">#000000</item>
 	<item name="white" type="color">#FFFFFF</item>
+	<item name="dark_gray" type="color">#707070</item>
 	<item name="san_marino" type="color">#446CB3</item>
 	<item name="jacksons_purple" type="color">#1F3A93</item>
 	<item name="chambray" type="color">#3A539B</item>

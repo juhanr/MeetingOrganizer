@@ -51,18 +51,20 @@ public class MeetingInfoFragment extends Fragment {
 		TextView description = (TextView) meetingInfoLayout.findViewById(R.id.meeting_description);
 		TextView date = (TextView) meetingInfoLayout.findViewById(R.id.meeting_date);
 		TextView time = (TextView) meetingInfoLayout.findViewById(R.id.meeting_time);
-		title.setText(getString(R.string.textview_title) + ": " + meeting.getTitle());
+		title.setText(
+				String.format("%s: %s", getString(R.string.textview_title), meeting.getTitle()));
 		if (meeting.getDescription().trim().isEmpty()) {
-			description.setText(getString(R.string.textview_description) + ": None");
+			description
+					.setText(String.format("%s: None", getString(R.string.textview_description)));
 		} else {
-			description.setText(
-					getString(R.string.textview_description) + ": " + meeting.getDescription());
+			description.setText(String.format("%s: %s", getString(R.string.textview_description),
+					meeting.getDescription()));
 		}
-		date.setText(getString(R.string.textview_date) + ": " +
-				DateUtil.formatDate(meeting.getStartDateTime()));
-		time.setText(getString(R.string.textview_time) + ": " +
-				DateUtil.formatTime(meeting.getStartDateTime()) +
-				" - " + DateUtil.formatTime(meeting.getEndDateTime()));
+		date.setText(String.format("%s: %s", getString(R.string.textview_date),
+				DateUtil.formatDate(meeting.getStartDateTime())));
+		time.setText(String.format("%s: %s - %s", getString(R.string.textview_time),
+				DateUtil.formatTime(meeting.getStartDateTime()),
+				DateUtil.formatTime(meeting.getEndDateTime())));
 
 		setUpMapFragment();
 		setAnswerButtons();
@@ -74,21 +76,16 @@ public class MeetingInfoFragment extends Fragment {
 				replace(R.id.location_frame, customMapFragment).commit();
 		FrameLayout layout = (FrameLayout) meetingInfoLayout.findViewById(R.id.location_frame);
 		layout.setBackgroundResource(R.drawable.view_border);
-		if (meeting.getLocation() != null) {
-			//			customMapFragment.setLocationMarker(new LatLng(meeting.getLocation().getLatitude(),
-			//							meeting.getLocation().getLongitude()));
-		}
+		//		if (meeting.getLocation() != null) {
+		//			customMapFragment.setLocationMarker(new LatLng(meeting.getLocation().getLatitude(),
+		//							meeting.getLocation().getLongitude()));
+		//		}
 	}
 
 	private void setButtonListeners() {
 		Button showParticipants = (Button) meetingInfoLayout.findViewById(R.id.show_participants);
-		showParticipants.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				((MainActivity) getActivity())
-						.changeFragmentToParticipantsList(meeting.getParticipants());
-			}
-		});
+		showParticipants.setOnClickListener(view -> ((MainActivity) getActivity())
+				.changeFragmentToParticipantsList(meeting.getParticipants()));
 	}
 
 	private void setAnswerButtons() {
@@ -99,37 +96,28 @@ public class MeetingInfoFragment extends Fragment {
 			Button acceptInvitation =
 					(Button) meetingInfoLayout.findViewById(R.id.accept_invitation);
 			Button denyInvitation = (Button) meetingInfoLayout.findViewById(R.id.deny_invitation);
-			acceptInvitation.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (meeting.getLocationType() ==
-							LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
-							MyLocationListener.getMyLocation() != null ||
-							meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
-						participantObject.setLocation(MyLocationListener.getMyLocation());
-						participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
-						sendUpdateParticipantRequest(participantObject);
-					} else {
-						UIUtil.showToastMessage(activity,
-								getString(R.string.toast_please_get_your_location));
-					}
+			acceptInvitation.setOnClickListener(view -> {
+				if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
+						MyLocationListener.getMyLocation() != null ||
+						meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
+					participantObject.setLocation(MyLocationListener.getMyLocation());
+					participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
+					sendUpdateParticipantRequest(participantObject);
+				} else {
+					UIUtil.showToastMessage(activity,
+							getString(R.string.toast_please_get_your_location));
 				}
 			});
-			denyInvitation.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (meeting.getLocationType() ==
-							LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
-							MyLocationListener.getMyLocation() != null ||
-							meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
-						participantObject.setLocation(MyLocationListener.getMyLocation());
-						participantObject
-								.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
-						sendUpdateParticipantRequest(participantObject);
-					} else {
-						UIUtil.showToastMessage(activity,
-								getString(R.string.toast_please_get_your_location));
-					}
+			denyInvitation.setOnClickListener(view -> {
+				if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
+						MyLocationListener.getMyLocation() != null ||
+						meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
+					participantObject.setLocation(MyLocationListener.getMyLocation());
+					participantObject.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
+					sendUpdateParticipantRequest(participantObject);
+				} else {
+					UIUtil.showToastMessage(activity,
+							getString(R.string.toast_please_get_your_location));
 				}
 			});
 		} else {

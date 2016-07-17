@@ -71,29 +71,21 @@ public class MainActivity extends AppCompatActivity
 		FloatingActionButton newMeetingFAB =
 				(FloatingActionButton) findViewById(R.id.fab_new_meeting);
 		if (newMeetingFAB != null) {
-			newMeetingFAB.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					Intent myIntent = new Intent(getBaseContext(), NewMeetingActivity.class);
-					//					myIntent.putExtra("key", value); //Optional parameters
-					startActivityForResult(myIntent, 1);
-				}
+			newMeetingFAB.setOnClickListener(view -> {
+				Intent myIntent = new Intent(getBaseContext(), NewMeetingActivity.class);
+				//					myIntent.putExtra("key", value); //Optional parameters
+				startActivityForResult(myIntent, 1);
 			});
 		}
 
 		// set up fragment manager listener
 		final FragmentManager fragmentManager = getFragmentManager();
-		fragmentManager
-				.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-					@Override
-					public void onBackStackChanged() {
-						Fragment fragment =
-								fragmentManager.findFragmentById(R.id.fragment_container);
-						if (fragment != null) {
-							currentFragmentClass = fragment.getClass();
-						}
-					}
-				});
+		fragmentManager.addOnBackStackChangedListener(() -> {
+			Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+			if (fragment != null) {
+				currentFragmentClass = fragment.getClass();
+			}
+		});
 	}
 
 	@Override
@@ -252,8 +244,8 @@ public class MainActivity extends AppCompatActivity
 		}
 		currentFragmentClass = fragment.getClass();
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
-		ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right, R.anim.slide_in_right,
-				R.anim.slide_out_left);
+		ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_right,
+				R.animator.slide_in_right, R.animator.slide_out_left);
 		ft.replace(R.id.fragment_container, fragment);
 		if (resetBackStackCounter) {
 			backStackCounter = getFragmentManager().getBackStackEntryCount();

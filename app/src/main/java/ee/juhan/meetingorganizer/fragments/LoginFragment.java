@@ -55,21 +55,13 @@ public class LoginFragment extends Fragment {
 		Button loginButton = (Button) loginLayout.findViewById(R.id.login_button);
 		TextView createAccountButton =
 				(TextView) loginLayout.findViewById(R.id.create_account_textbutton);
-		loginButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (isValidData()) {
-					sendLoginRequest(getViewText(R.id.email_textbox),
-							getViewText(R.id.password_textbox));
-				}
+		loginButton.setOnClickListener(view -> {
+			if (isValidData()) {
+				sendLoginRequest(getViewText(R.id.email_textbox),
+						getViewText(R.id.password_textbox));
 			}
 		});
-		createAccountButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				activity.changeFragmentToRegistration();
-			}
-		});
+		createAccountButton.setOnClickListener(view -> activity.changeFragmentToRegistration());
 
 		UIUtil.setupEditTextFocusListeners(activity, loginLayout);
 	}
