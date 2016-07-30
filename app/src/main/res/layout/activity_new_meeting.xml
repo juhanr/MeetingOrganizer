@@ -3,7 +3,6 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:fillViewport="true"
-	android:id="@+id/activity_new_meeting"
 	android:layout_height="match_parent"
 	android:layout_width="match_parent">
 
@@ -34,50 +33,50 @@
 
 			<com.rey.material.widget.EditText
 				style="@style/LightEditText"
-				android:hint="@string/textview_title"
+				android:hint="@string/msg_title"
 				android:inputType="textCapSentences"
 				android:layout_marginBottom="@dimen/view_margin_small"
 				android:layout_marginTop="0dp"
-				app:et_inputId="@+id/title_textbox"
+				app:et_inputId="@+id/edt_new_title"
 				app:et_supportMaxChars="20"
 				app:et_supportMode="charCounter"/>
 
 			<com.rey.material.widget.EditText
 				style="@style/LightEditText"
-				android:hint="@string/textview_description"
+				android:hint="@string/msg_description"
 				android:inputType="textMultiLine"
 				android:layout_marginBottom="@dimen/view_margin_medium"
-				app:et_inputId="@+id/description_textbox"
+				app:et_inputId="@+id/edt_new_description"
 				app:et_supportMaxChars="255"
 				app:et_supportMode="charCounter"/>
 
 			<com.rey.material.widget.Spinner
 				style="@style/LightSpinnerNoArrow"
-				android:id="@+id/date_button"
+				android:id="@+id/spn_new_date"
 				android:layout_marginBottom="@dimen/view_margin_small"
-				app:spn_label="@string/textview_date"/>
+				app:spn_label="@string/msg_date"/>
 
 			<com.rey.material.widget.Spinner
 				style="@style/LightSpinnerNoArrow"
-				android:id="@+id/start_time_button"
+				android:id="@+id/spn_new_start_time"
 				android:layout_marginBottom="@dimen/view_margin_small"
-				app:spn_label="@string/textview_start_time"/>
+				app:spn_label="@string/new_meeting_start_time"/>
 
 			<com.rey.material.widget.Spinner
 				style="@style/LightSpinnerNoArrow"
-				android:id="@+id/end_time_button"
+				android:id="@+id/spn_new_end_time"
 				android:layout_marginBottom="@dimen/view_margin_small"
-				app:spn_label="@string/textview_end_time"/>
+				app:spn_label="@string/new_meeting_end_time"/>
 
 			<com.rey.material.widget.Spinner
 				style="@style/LightSpinnerNoArrow"
-				android:id="@+id/location_info"
+				android:id="@+id/spn_new_location"
 				android:layout_marginBottom="@dimen/view_margin_small"
 				app:spn_label="Location"/>
 
 			<com.rey.material.widget.Spinner
 				style="@style/LightSpinnerNoArrow"
-				android:id="@+id/participants_info"
+				android:id="@+id/spn_new_participants"
 				android:layout_marginBottom="@dimen/view_margin_small"
 				app:spn_label="Participants"/>
 
@@ -85,9 +84,9 @@
 
 			<com.rey.material.widget.Button
 				style="@style/RaisedButtonColored"
-				android:id="@+id/create_button"
+				android:id="@+id/btn_new_create"
 				android:layout_marginTop="@dimen/view_margin_large"
-				android:text="@string/button_create"/>
+				android:text="@string/action_create"/>
 
 		</LinearLayout>
 

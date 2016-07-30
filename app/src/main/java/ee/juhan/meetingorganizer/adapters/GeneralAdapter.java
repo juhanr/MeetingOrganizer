@@ -2,6 +2,7 @@ package ee.juhan.meetingorganizer.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +17,12 @@ public abstract class GeneralAdapter<T> extends ArrayAdapter<T> {
 	private final int layoutId;
 	private ViewGroup adapterLayout;
 	private int currentPosition;
-	private List<T> objects;
+	private List<T> items;
 
-	public GeneralAdapter(Context context, int layoutId, List<T> objects) {
-		super(context, layoutId, objects);
+	public GeneralAdapter(Context context, int layoutId, List<T> items) {
+		super(context, layoutId, items);
 		this.layoutId = layoutId;
-		this.objects = objects;
+		this.items = items;
 		this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
@@ -37,10 +38,17 @@ public abstract class GeneralAdapter<T> extends ArrayAdapter<T> {
 	protected abstract void populateLayout();
 
 	protected final void addIcon(int iconResource) {
-		ImageView accountIcon = new ImageView(getContext());
-		accountIcon.setBackgroundResource(iconResource);
+		addIcon(iconResource, 0);
+	}
+
+	protected final void addIcon(int iconResource, int tintColorId) {
+		ImageView icon = new ImageView(getContext());
+		icon.setImageResource(iconResource);
+		if (tintColorId != 0) {
+			icon.setColorFilter(ContextCompat.getColor(getContext(), tintColorId));
+		}
 		if (adapterLayout != null) {
-			adapterLayout.addView(accountIcon);
+			adapterLayout.addView(icon);
 		}
 	}
 
@@ -56,8 +64,8 @@ public abstract class GeneralAdapter<T> extends ArrayAdapter<T> {
 		return inflater;
 	}
 
-	public final List<T> getObjects() {
-		return objects;
+	public final List<T> getItems() {
+		return items;
 	}
 
 }

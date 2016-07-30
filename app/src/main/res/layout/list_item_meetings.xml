@@ -1,25 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-			  android:layout_width="match_parent"
-			  android:layout_height="wrap_content"
-			  android:gravity="center_vertical"
-			  android:orientation="vertical"
-			  android:paddingBottom="@dimen/view_margin_medium"
-			  android:paddingTop="@dimen/view_margin_medium">
+<LinearLayout
+	style="@style/ListItemLayout"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:gravity="center_vertical"
+	android:orientation="vertical">
 
 	<TextView
-		android:id="@+id/meeting_title"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
+		style="@style/TextPrimary"
+		android:id="@+id/txt_meeting_title"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"/>
 
 	<TextView
-		android:id="@+id/meeting_date"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
+		style="@style/TextSecondary"
+		android:id="@+id/txt_meeting_description"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"/>
 
-	<TextView
-		android:id="@+id/meeting_time"
+	<LinearLayout
+		android:gravity="center_vertical"
+		android:layout_height="wrap_content"
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
+		android:orientation="horizontal">
+
+		<ImageView
+			android:contentDescription="@string/msg_time"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:paddingRight="5dp"
+			android:src="@drawable/ic_time_black_18dp"
+			android:tint="@color/dark_gray"/>
+
+		<TextView
+			style="@style/TextSecondary"
+			android:id="@+id/txt_meeting_time"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"/>
+
+	</LinearLayout>
 
 </LinearLayout>

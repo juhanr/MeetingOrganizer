@@ -21,6 +21,21 @@ public class MapCoordinate {
 		this.longitude = latLng.longitude;
 	}
 
+	@Override
+	public int hashCode() {
+		int result = latitude.hashCode();
+		result = 31 * result + longitude.hashCode();
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) { return true; }
+		if (o == null || getClass() != o.getClass()) { return false; }
+		MapCoordinate that = (MapCoordinate) o;
+		return latitude.equals(that.latitude) && longitude.equals(that.longitude);
+	}
+
 	public final Double getLatitude() {
 		return latitude;
 	}
@@ -39,20 +54,5 @@ public class MapCoordinate {
 
 	public final LatLng toLatLng() {
 		return new LatLng(this.latitude, this.longitude);
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) { return true; }
-		if (o == null || getClass() != o.getClass()) { return false; }
-		MapCoordinate that = (MapCoordinate) o;
-		return latitude.equals(that.latitude) && longitude.equals(that.longitude);
-	}
-
-	@Override
-	public int hashCode() {
-		int result = latitude.hashCode();
-		result = 31 * result + longitude.hashCode();
-		return result;
 	}
 }

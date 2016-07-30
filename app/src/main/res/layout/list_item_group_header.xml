@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	style="@style/ListItemLayout"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:background="@color/light_gray"
+	android:orientation="horizontal">
+
+	<TextView
+		style="@style/TextSecondary"
+		android:id="@+id/txt_group_name"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"/>
+
+</LinearLayout>

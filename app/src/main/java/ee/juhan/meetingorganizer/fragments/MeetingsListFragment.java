@@ -10,11 +10,14 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.activities.MainActivity;
-import ee.juhan.meetingorganizer.adapters.GeneralAdapter;
+import ee.juhan.meetingorganizer.adapters.GroupedListAdapter;
+import ee.juhan.meetingorganizer.adapters.GroupedListAdapter.GroupedListItem;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
@@ -60,11 +63,11 @@ public class MeetingsListFragment extends Fragment {
 			meetingsListLayout =
 					(ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
 			TextView infoText = (TextView) meetingsListLayout.findViewById(R.id.info_text);
-			infoText.setText(getString(R.string.textview_no_meetings));
+			infoText.setText(getString(R.string.meeting_no_meetings));
 		} else {
 			meetingsListLayout =
-					(ViewGroup) inflater.inflate(R.layout.layout_listview, container, false);
-			refreshListView();
+					(ViewGroup) inflater.inflate(R.layout.layout_list, container, false);
+			refreshMeetingsListView();
 		}
 		return meetingsListLayout;
 	}
@@ -76,7 +79,7 @@ public class MeetingsListFragment extends Fragment {
 	private void getMeetingsRequest() {
 		final Fragment fragment = this;
 		activity.showProgress(true);
-		RestClient.get().getMeetingsRequest(meetingsType, activity.getUserId(),
+		RestClient.get().getMeetingsRequest(meetingsType, activity.getAccountId(),
 				new Callback<List<MeetingDTO>>() {
 					@Override
 					public void success(final List<MeetingDTO> meetingDTOList, Response response) {
@@ -91,43 +94,70 @@ public class MeetingsListFragment extends Fragment {
 					@Override
 					public void failure(RetrofitError error) {
 						activity.showProgress(false);
-						UIUtil.showToastMessage(activity, getString(R.string.toast_server_fail));
+						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
 					}
 				});
 	}
 
-	private void refreshListView() {
-		ListView listview = (ListView) meetingsListLayout.findViewById(R.id.listView);
+	private void refreshMeetingsListView() {
+		ListView listview = (ListView) meetingsListLayout.findViewById(R.id.list_view);
 		listview.setOnItemClickListener((parent, view, position, id) -> {
-			MeetingDTO meeting = adapter.getItem(position);
-			((MainActivity) getActivity()).changeFragmentToMeetingInfo(meeting);
+			GroupedListItem item = adapter.getItem(position);
+			if (!item.isGroupItem()) {
+				MeetingDTO meeting = (MeetingDTO) item.getObject();
+				((MainActivity) getActivity()).changeFragmentToMeetingInfo(meeting);
+			}
 		});
-		adapter = new MeetingsAdapter(getActivity(), meetingsList);
+		adapter = new MeetingsAdapter(getActivity(), getGroupedListItems());
 		listview.setAdapter(adapter);
 	}
 
-	private class MeetingsAdapter extends GeneralAdapter<MeetingDTO> {
+	private List<GroupedListAdapter.GroupedListItem> getGroupedListItems() {
+		List<GroupedListItem> groupedListItems = new ArrayList<>();
+		Date currentGroupDate = new Date(Long.MIN_VALUE);
+		for (MeetingDTO meeting : meetingsList) {
+			if (!DateUtil.dateEquals(meeting.getStartDateTime(), currentGroupDate)) {
+				currentGroupDate = meeting.getStartDateTime();
+				GroupedListItem groupItem;
+				if (DateUtil.isYesterday(currentGroupDate)) {
+					groupItem = new GroupedListItem(getString(R.string.msg_yesterday));
+				} else if (DateUtil.isToday(currentGroupDate)) {
+					groupItem = new GroupedListItem(getString(R.string.msg_today));
+				} else if (DateUtil.isTomorrow(currentGroupDate)) {
+					groupItem = new GroupedListItem(getString(R.string.msg_tomorrow));
+				} else {
+					groupItem = new GroupedListItem(DateUtil.formatDate(currentGroupDate));
+				}
+				groupedListItems.add(groupItem);
+			}
+			groupedListItems.add(new GroupedListItem<>(meeting));
+		}
+		return groupedListItems;
+	}
 
-		public MeetingsAdapter(Context context, List<MeetingDTO> meetingsList) {
-			super(context, R.layout.list_item_meetings, meetingsList);
+	private class MeetingsAdapter extends GroupedListAdapter {
+
+		public MeetingsAdapter(Context context, List<GroupedListItem> listItems) {
+			super(context, R.layout.list_item_meetings, listItems);
 		}
 
 		@Override
 		protected void populateLayout() {
-			MeetingDTO meeting = super.getCurrentItem();
+			MeetingDTO meeting = (MeetingDTO) super.getCurrentItem().getObject();
 			TextView meetingTitleView =
-					(TextView) super.getLayout().findViewById(R.id.meeting_title);
-			TextView meetingDateView = (TextView) super.getLayout().findViewById(R.id.meeting_date);
-			TextView meetingTimeView = (TextView) super.getLayout().findViewById(R.id.meeting_time);
-			meetingTitleView.setText(
-					String.format("%s: %s", getContext().getString(R.string.textview_title),
-							meeting.getTitle()));
-			meetingDateView.setText(
-					String.format("%s: %s", getContext().getString(R.string.textview_date),
-							DateUtil.formatDate(meeting.getStartDateTime())));
+					(TextView) super.getLayout().findViewById(R.id.txt_meeting_title);
+			TextView meetingDescView =
+					(TextView) super.getLayout().findViewById(R.id.txt_meeting_description);
+			TextView meetingTimeView =
+					(TextView) super.getLayout().findViewById(R.id.txt_meeting_time);
+			meetingTitleView.setText(meeting.getTitle());
+			if (meeting.getDescription().equals("") || meeting.getDescription() == null) {
+				meetingDescView.setVisibility(View.GONE);
+			} else {
+				meetingDescView.setText(meeting.getDescription());
+			}
 			meetingTimeView.setText(
-					String.format("%s: %s - %s", getContext().getString(R.string.textview_time),
-							DateUtil.formatTime(meeting.getStartDateTime()),
+					String.format("%s - %s", DateUtil.formatTime(meeting.getStartDateTime()),
 							DateUtil.formatTime(meeting.getEndDateTime())));
 		}
 

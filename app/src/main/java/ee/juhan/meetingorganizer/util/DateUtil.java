@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -11,14 +12,13 @@ import java.util.concurrent.TimeUnit;
 
 public final class DateUtil {
 
-	private static final String TAG = "DateUtil";
-
 	public static final SimpleDateFormat DATETIME_FORMAT =
 			new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
 	public static final SimpleDateFormat DATE_FORMAT =
 			new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
 	public static final SimpleDateFormat TIME_FORMAT =
 			new SimpleDateFormat("HH:mm", Locale.getDefault());
+	private static final String TAG = "DateUtil";
 
 	private DateUtil() {
 
@@ -76,20 +76,45 @@ public final class DateUtil {
 		return new Date(date.getTime() + (toTimeZoneOffset - fromTimeZoneOffset));
 	}
 
-	private static long getTimeZoneUTCAndDSTOffset(Date date, TimeZone timeZone) {
-		long timeZoneDSTOffset = 0;
-		if (timeZone.inDaylightTime(date)) {
-			timeZoneDSTOffset = timeZone.getDSTSavings();
-		}
-		return timeZone.getRawOffset() + timeZoneDSTOffset;
-	}
-
 	public static Date toUTCTimezone(Date date) {
 		return convertTimeZone(date, TimeZone.getDefault(), TimeZone.getTimeZone("UTC"));
 	}
 
 	public static Date toLocalTimezone(Date date) {
 		return convertTimeZone(date, TimeZone.getTimeZone("UTC"), TimeZone.getDefault());
+	}
+
+	public static boolean dateEquals(Date date1, Date date2) {
+		return date1 != null && date2 != null &&
+				formatDate(date1).equals(formatDate(date2));
+	}
+
+	public static boolean isYesterday(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_YEAR, -1);
+		Date yesterday = calendar.getTime();
+		return dateEquals(yesterday, date);
+	}
+
+	public static boolean isToday(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		Date today = calendar.getTime();
+		return dateEquals(today, date);
+	}
+
+	public static boolean isTomorrow(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_YEAR, 1);
+		Date tomorrow = calendar.getTime();
+		return dateEquals(tomorrow, date);
+	}
+
+	private static long getTimeZoneUTCAndDSTOffset(Date date, TimeZone timeZone) {
+		long timeZoneDSTOffset = 0;
+		if (timeZone.inDaylightTime(date)) {
+			timeZoneDSTOffset = timeZone.getDSTSavings();
+		}
+		return timeZone.getRawOffset() + timeZoneDSTOffset;
 	}
 
 }

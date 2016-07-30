@@ -68,15 +68,15 @@ public class NewMeetingActivity extends AppCompatActivity {
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
-		setSavedDataViews();
-	}
-
-	@Override
 	public void onPause() {
 		saveData();
 		super.onPause();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		setSavedDataViews();
 	}
 
 	@Override
@@ -90,16 +90,17 @@ public class NewMeetingActivity extends AppCompatActivity {
 	}
 
 	private void setButtonListeners() {
-		String[] items = new String[]{getString(R.string.textview_touch_to_set)};
+		String[] items = new String[]{getString(R.string.new_meeting_touch_to_set)};
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.row_spn, items);
 		adapter.setDropDownViewResource(R.layout.row_spn_dropdown);
 
-		Spinner dateButton = (Spinner) newMeetingLayout.findViewById(R.id.date_button);
-		Spinner startTimeButton = (Spinner) newMeetingLayout.findViewById(R.id.start_time_button);
-		Spinner endTimeButton = (Spinner) newMeetingLayout.findViewById(R.id.end_time_button);
-		Spinner locationInfo = (Spinner) newMeetingLayout.findViewById(R.id.location_info);
-		Spinner participantsInfo = (Spinner) newMeetingLayout.findViewById(R.id.participants_info);
-		Button createButton = (Button) newMeetingLayout.findViewById(R.id.create_button);
+		Spinner dateButton = (Spinner) newMeetingLayout.findViewById(R.id.spn_new_date);
+		Spinner startTimeButton = (Spinner) newMeetingLayout.findViewById(R.id.spn_new_start_time);
+		Spinner endTimeButton = (Spinner) newMeetingLayout.findViewById(R.id.spn_new_end_time);
+		Spinner locationInfo = (Spinner) newMeetingLayout.findViewById(R.id.spn_new_location);
+		Spinner participantsInfo =
+				(Spinner) newMeetingLayout.findViewById(R.id.spn_new_participants);
+		Button createButton = (Button) newMeetingLayout.findViewById(R.id.btn_new_create);
 
 		dateButton.setAdapter(adapter);
 		dateButton.setClickable(false);
@@ -135,49 +136,49 @@ public class NewMeetingActivity extends AppCompatActivity {
 
 	private void setSavedDataViews() {
 		if (newMeetingModel.getTitle() != null) {
-			setViewText(R.id.title_textbox, newMeetingModel.getTitle());
-			setViewText(R.id.description_textbox, newMeetingModel.getDescription());
+			setViewText(R.id.edt_new_title, newMeetingModel.getTitle());
+			setViewText(R.id.edt_new_description, newMeetingModel.getDescription());
 		}
 		if (newMeetingModel.getStartDateTime() != null) {
-			setViewText(R.id.date_button, DateUtil.formatDate(newMeetingModel.getStartDateTime()));
-			setViewText(R.id.start_time_button,
+			setViewText(R.id.spn_new_date, DateUtil.formatDate(newMeetingModel.getStartDateTime()));
+			setViewText(R.id.spn_new_start_time,
 					DateUtil.formatTime(newMeetingModel.getStartDateTime()));
 		}
 		if (newMeetingModel.getEndDateTime() != null) {
-			setViewText(R.id.date_button, DateUtil.formatDate(newMeetingModel.getStartDateTime()));
-			setViewText(R.id.end_time_button,
+			setViewText(R.id.spn_new_date, DateUtil.formatDate(newMeetingModel.getStartDateTime()));
+			setViewText(R.id.spn_new_end_time,
 					DateUtil.formatTime(newMeetingModel.getEndDateTime()));
 		}
 		if (newMeetingModel.getLocationType() == LocationType.SPECIFIC_LOCATION &&
 				newMeetingModel.getLocation() != null || newMeetingModel.getLocationType() ==
 				LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
 				!newMeetingModel.getPredefinedLocations().isEmpty()) {
-			setViewText(R.id.location_info, getString(R.string.textview_touch_to_view));
+			setViewText(R.id.spn_new_location, getString(R.string.new_meeting_touch_to_view));
 		} else {
-			setViewText(R.id.location_info, getString(R.string.textview_touch_to_set));
+			setViewText(R.id.spn_new_location, getString(R.string.new_meeting_touch_to_set));
 		}
 		if (newMeetingModel.getParticipants().isEmpty()) {
-			setViewText(R.id.participants_info, getString(R.string.textview_touch_to_set));
+			setViewText(R.id.spn_new_participants, getString(R.string.new_meeting_touch_to_set));
 		} else {
-			setViewText(R.id.participants_info,
+			setViewText(R.id.spn_new_participants,
 					newMeetingModel.getParticipants().size() + " contacts invited. " +
-							getString(R.string.textview_touch_to_view));
+							getString(R.string.new_meeting_touch_to_view));
 		}
 
 	}
 
 	private boolean isValidData() {
-		if (getViewText(R.id.title_textbox).length() == 0) {
-			UIUtil.showToastMessage(this, getString(R.string.toast_please_enter_title));
-		} else if (getViewText(R.id.date_button)
-				.equals(getString(R.string.textview_touch_to_set))) {
-			UIUtil.showToastMessage(this, getString(R.string.toast_please_set_date));
+		if (getViewText(R.id.edt_new_title).length() == 0) {
+			UIUtil.showToastMessage(this, getString(R.string.new_meeting_enter_title));
+		} else if (getViewText(R.id.spn_new_date)
+				.equals(getString(R.string.new_meeting_touch_to_set))) {
+			UIUtil.showToastMessage(this, getString(R.string.new_meeting_set_date));
 		} else if (newMeetingModel.getStartDateTime() == null) {
-			UIUtil.showToastMessage(this, getString(R.string.toast_please_set_start_time));
+			UIUtil.showToastMessage(this, getString(R.string.new_meeting_set_start_time));
 		} else if (newMeetingModel.getEndDateTime() == null) {
-			UIUtil.showToastMessage(this, getString(R.string.toast_please_set_end_time));
+			UIUtil.showToastMessage(this, getString(R.string.new_meeting_set_end_time));
 		} else if (newMeetingModel.getStartDateTime().after(newMeetingModel.getEndDateTime())) {
-			UIUtil.showToastMessage(this, getString(R.string.toast_end_time_after_start));
+			UIUtil.showToastMessage(this, getString(R.string.new_meeting_end_time_after_start));
 		} else {
 			return true;
 		}
@@ -219,24 +220,24 @@ public class NewMeetingActivity extends AppCompatActivity {
 	}
 
 	private void saveData() {
-		newMeetingModel.setTitle(getViewText(R.id.title_textbox));
-		newMeetingModel.setDescription(getViewText(R.id.description_textbox));
+		newMeetingModel.setTitle(getViewText(R.id.edt_new_title));
+		newMeetingModel.setDescription(getViewText(R.id.edt_new_description));
 		newMeetingModel.setStartDateTime(DateUtil.parseDateTime(
-				getViewText(R.id.date_button) + " " + getViewText(R.id.start_time_button)));
+				getViewText(R.id.spn_new_date) + " " + getViewText(R.id.spn_new_start_time)));
 		newMeetingModel.setEndDateTime(DateUtil.parseDateTime(
-				getViewText(R.id.date_button) + " " + getViewText(R.id.end_time_button)));
+				getViewText(R.id.spn_new_date) + " " + getViewText(R.id.spn_new_end_time)));
 	}
 
 	private void addLeaderInfo() {
-		NewMeetingActivity.getNewMeetingModel().setLeaderId(getUserId());
+		NewMeetingActivity.getNewMeetingModel().setLeaderId(getAccountId());
 		ParticipantDTO participant =
 				new ParticipantDTO(NewMeetingActivity.getNewMeetingModel().getLeaderId(),
 						ParticipationAnswer.PARTICIPATING, MyLocationListener.getMyLocation());
 		NewMeetingActivity.getNewMeetingModel().addParticipant(participant);
 	}
 
-	public final Integer getUserId() {
-		return PreferenceManager.getDefaultSharedPreferences(this).getInt("userId", 0);
+	public final int getAccountId() {
+		return PreferenceManager.getDefaultSharedPreferences(this).getInt("accountId", 0);
 	}
 
 	public void showProgress(final boolean show) {
@@ -270,14 +271,14 @@ public class NewMeetingActivity extends AppCompatActivity {
 
 	private void showWriteSMSDialog() {
 		final YesNoFragment dialog = new YesNoFragment();
-		dialog.setMessage(getString(R.string.textview_please_write_sms));
-		dialog.setInputText(getString(R.string.message_invite_via_sms));
-		dialog.setPositiveButton(getString(R.string.button_send_sms), view -> {
+		dialog.setMessage(getString(R.string.dialog_please_write_sms));
+		dialog.setInputText(getString(R.string.dialog_msg_invite_via_sms));
+		dialog.setPositiveButton(getString(R.string.action_send_sms), view -> {
 			sendInvitationSMS(dialog.getInputValue());
 			sendNewMeetingRequest();
 			dialog.dismiss();
 		});
-		dialog.setNegativeButton(getString(R.string.button_cancel), view -> dialog.dismiss());
+		dialog.setNegativeButton(getString(R.string.action_cancel), view -> dialog.dismiss());
 		dialog.show(getFragmentManager(), "YesNoFragment");
 	}
 
@@ -302,7 +303,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 						meeting.toUTCTimeZone();
 						showProgress(false);
 						UIUtil.showToastMessage(activity,
-								getString(R.string.toast_meeting_created));
+								getString(R.string.contacts_meeting_created));
 						//						activity.changeFragmentToMeetingInfo(meeting);
 						NewMeetingActivity.setNewMeetingModel(new MeetingDTO());
 						finishWithResult();
@@ -311,7 +312,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 					@Override
 					public void failure(RetrofitError error) {
 						showProgress(false);
-						UIUtil.showToastMessage(activity, getString(R.string.toast_server_fail));
+						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
 					}
 				});
 	}
@@ -333,7 +334,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 			int current_day = c.get(Calendar.DAY_OF_MONTH);
 			int current_month = c.get(Calendar.MONTH);
 			int current_year = c.get(Calendar.YEAR);
-			if (!getViewText(view).equals(getString(R.string.textview_touch_to_set))) {
+			if (!getViewText(view).equals(getString(R.string.new_meeting_touch_to_set))) {
 				Date viewDate = DateUtil.parseDate(getViewText(view));
 				if (viewDate != null) {
 					c.setTime(viewDate);
@@ -368,7 +369,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 		@Override
 		public void onClick(final View view) {
 			Calendar c = Calendar.getInstance();
-			if (!getViewText(view).equals(getString(R.string.textview_touch_to_set))) {
+			if (!getViewText(view).equals(getString(R.string.new_meeting_touch_to_set))) {
 				Date viewDate = DateUtil.parseTime(getViewText(view));
 				assert viewDate != null;
 				c.setTime(viewDate);

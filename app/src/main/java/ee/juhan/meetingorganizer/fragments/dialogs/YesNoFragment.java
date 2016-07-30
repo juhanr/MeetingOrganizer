@@ -37,6 +37,14 @@ public class YesNoFragment extends DialogFragment {
 		return dialogLayout;
 	}
 
+	@Override
+	public final Dialog onCreateDialog(Bundle savedInstanceState) {
+		Dialog dialog = super.onCreateDialog(savedInstanceState);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.setCancelable(false);
+		return dialog;
+	}
+
 	public final void refreshDialog() {
 		if (dialogLayout != null) {
 			TextView messageTextView = (TextView) dialogLayout.findViewById(R.id.dialog_message);
@@ -61,14 +69,6 @@ public class YesNoFragment extends DialogFragment {
 				}
 			}
 		}
-	}
-
-	@Override
-	public final Dialog onCreateDialog(Bundle savedInstanceState) {
-		Dialog dialog = super.onCreateDialog(savedInstanceState);
-		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		dialog.setCancelable(false);
-		return dialog;
 	}
 
 	public final YesNoFragment setMessage(String message) {

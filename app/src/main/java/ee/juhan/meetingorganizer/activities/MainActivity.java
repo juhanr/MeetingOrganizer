@@ -22,8 +22,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.List;
-
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.fragments.HistoryFragment;
 import ee.juhan.meetingorganizer.fragments.InvitationsFragment;
@@ -31,8 +29,8 @@ import ee.juhan.meetingorganizer.fragments.LoginFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingInfoFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
 import ee.juhan.meetingorganizer.fragments.ParticipantInfoFragment;
-import ee.juhan.meetingorganizer.fragments.ParticipantsListFragment;
 import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
+import ee.juhan.meetingorganizer.models.server.AccountDTO;
 import ee.juhan.meetingorganizer.models.server.MeetingDTO;
 import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
 import ee.juhan.meetingorganizer.rest.RestClient;
@@ -64,6 +62,61 @@ public class MainActivity extends AppCompatActivity
 		fragmentContainer = findViewById(R.id.fragment_container);
 		setupListeners();
 		checkIfLoggedIn();
+		showLocationFAB(false);
+		showEmailFAB(false);
+		showSmsFAB(false);
+		showCallFAB(false);
+	}
+
+	@Override
+	public final void setTitle(CharSequence title) {
+		actionBar.setTitle(title);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case 1:
+				if (resultCode == RESULT_OK) {
+					Bundle res = data.getExtras();
+					String result = res.getString("param_result");
+				}
+				break;
+		}
+	}
+
+	@Override
+	public final void onBackPressed() {
+		if (drawer.isDrawerOpen(GravityCompat.START)) {
+			drawer.closeDrawer(GravityCompat.START);
+		} else if (getFragmentManager().getBackStackEntryCount() - backStackCounter > 0) {
+			getFragmentManager().popBackStack();
+		} else {
+			moveTaskToBack(true);
+		}
+	}
+
+	@SuppressWarnings("StatementWithEmptyBody")
+	@Override
+	public boolean onNavigationItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.nav_meetings) {
+			changeFragmentToMeetings();
+		} else if (id == R.id.nav_invitations) {
+			changeFragmentToInvitations();
+		} else if (id == R.id.nav_history) {
+			changeFragmentToHistory();
+		} else if (id == R.id.nav_settings) {
+
+		} else if (id == R.id.nav_log_out) {
+			logOut();
+		} else if (id == R.id.nav_log_in) {
+			changeFragmentToLogIn();
+		} else if (id == R.id.nav_registration) {
+			changeFragmentToRegistration();
+		}
+		drawer.closeDrawer(GravityCompat.START);
+		return true;
 	}
 
 	private void setupListeners() {
@@ -88,46 +141,21 @@ public class MainActivity extends AppCompatActivity
 		});
 	}
 
-	@Override
-	public final void onBackPressed() {
-		if (drawer.isDrawerOpen(GravityCompat.START)) {
-			drawer.closeDrawer(GravityCompat.START);
-		} else if (getFragmentManager().getBackStackEntryCount() - backStackCounter > 0) {
-			getFragmentManager().popBackStack();
-		} else {
-			moveTaskToBack(true);
-		}
-	}
-
-	@Override
-	public final void setTitle(CharSequence title) {
-		actionBar.setTitle(title);
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-			case 1:
-				if (resultCode == RESULT_OK) {
-					Bundle res = data.getExtras();
-					String result = res.getString("param_result");
-				}
-				break;
-		}
-	}
-
 	private void checkIfLoggedIn() {
 		resetBackStack();
 		if (getSID() == null) { // logged out
 			setUpDrawer();
-			setEmail(getString(R.string.textview_not_logged_in));
+			setEmail(getString(R.string.drawer_not_logged_in));
 			changeFragmentToLogIn();
+			showNewMeetingFAB(false);
 		} else { // logged in
 			RestClient.setSID(getSID());
 			isLoggedIn = true;
 			setUpDrawer();
 			setEmail(sharedPref.getString("email", ""));
+			setName(sharedPref.getString("name", ""));
 			changeFragmentToMeetings();
+			showNewMeetingFAB(true);
 		}
 	}
 
@@ -135,30 +163,40 @@ public class MainActivity extends AppCompatActivity
 		return sharedPref.getString("sid", null);
 	}
 
-	public final Integer getUserId() {
-		return sharedPref.getInt("userId", 0);
+	public final int getAccountId() {
+		return sharedPref.getInt("accountId", 0);
 	}
 
-	public final void logIn(String email, String sid, Integer userId) {
-		sharedPref.edit().putString("email", email).putString("sid", sid).putInt("userId", userId)
-				.apply();
+	public final String getPhoneNumber() {
+		return sharedPref.getString("phone", null);
+	}
+
+
+	public final void logIn(String sid, AccountDTO accountDTO) {
+		sharedPref.edit().putString("email", accountDTO.getEmail()).putString("sid", sid)
+				.putInt("accountId", accountDTO.getAccountId())
+				.putString("name", accountDTO.getName())
+				.putString("phone", accountDTO.getPhoneNumber()).apply();
 		RestClient.setSID(sid);
-		setEmail(email);
+		setEmail(accountDTO.getEmail());
+		setName(accountDTO.getName());
 		isLoggedIn = true;
 		setUpDrawer();
 		resetBackStack();
 		changeFragmentToMeetings();
+		showNewMeetingFAB(true);
 	}
 
 	private void logOut() {
-		sharedPref.edit().putString("email", null).putString("sid", null).putInt("userId", 0)
-				.apply();
+		sharedPref.edit().putString("email", null).putString("sid", null).putInt("accountId", 0)
+				.putString("name", null).putString("phone", null).apply();
 		RestClient.setSID(null);
-		setEmail(getString(R.string.textview_not_logged_in));
+		setEmail(getString(R.string.drawer_not_logged_in));
 		isLoggedIn = false;
 		setUpDrawer();
 		resetBackStack();
 		changeFragmentToLogIn();
+		showNewMeetingFAB(false);
 	}
 
 	private void setEmail(String email) {
@@ -211,29 +249,6 @@ public class MainActivity extends AppCompatActivity
 		item.setChecked(true);
 	}
 
-	@SuppressWarnings("StatementWithEmptyBody")
-	@Override
-	public boolean onNavigationItemSelected(MenuItem item) {
-		int id = item.getItemId();
-		if (id == R.id.nav_meetings) {
-			changeFragmentToMeetings();
-		} else if (id == R.id.nav_invitations) {
-			changeFragmentToInvitations();
-		} else if (id == R.id.nav_history) {
-			changeFragmentToHistory();
-		} else if (id == R.id.nav_settings) {
-
-		} else if (id == R.id.nav_log_out) {
-			logOut();
-		} else if (id == R.id.nav_log_in) {
-			changeFragmentToLogIn();
-		} else if (id == R.id.nav_registration) {
-			changeFragmentToRegistration();
-		}
-		drawer.closeDrawer(GravityCompat.START);
-		return true;
-	}
-
 	public final void resetBackStack() {
 		resetBackStackCounter = true;
 	}
@@ -284,11 +299,6 @@ public class MainActivity extends AppCompatActivity
 		changeFragment(new ParticipantInfoFragment(participant));
 	}
 
-	public final void changeFragmentToParticipantsList(List<ParticipantDTO> participantList) {
-		changeFragment(new ParticipantsListFragment(participantList));
-	}
-
-
 	public final void refreshFragment(Fragment fragment) {
 		if (!fragment.getClass().equals(currentFragmentClass)) {
 			return;
@@ -302,6 +312,35 @@ public class MainActivity extends AppCompatActivity
 
 	public void showProgress(final boolean show) {
 		UIUtil.showProgress(this, progressView, fragmentContainer, show);
+	}
+
+	public void showFAB(int fabId, boolean show) {
+		FloatingActionButton fab = (FloatingActionButton) findViewById(fabId);
+		if (show) {
+			fab.show();
+		} else {
+			fab.hide();
+		}
+	}
+
+	public void showNewMeetingFAB(boolean show) {
+		showFAB(R.id.fab_new_meeting, show);
+	}
+
+	public void showLocationFAB(boolean show) {
+		showFAB(R.id.fab_location, show);
+	}
+
+	public void showEmailFAB(boolean show) {
+		showFAB(R.id.fab_email, show);
+	}
+
+	public void showSmsFAB(boolean show) {
+		showFAB(R.id.fab_sms, show);
+	}
+
+	public void showCallFAB(boolean show) {
+		showFAB(R.id.fab_call, show);
 	}
 
 }

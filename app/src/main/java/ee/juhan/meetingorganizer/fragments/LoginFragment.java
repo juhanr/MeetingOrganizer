@@ -52,13 +52,12 @@ public class LoginFragment extends Fragment {
 	}
 
 	private void setButtonListeners() {
-		Button loginButton = (Button) loginLayout.findViewById(R.id.login_button);
-		TextView createAccountButton =
-				(TextView) loginLayout.findViewById(R.id.create_account_textbutton);
+		Button loginButton = (Button) loginLayout.findViewById(R.id.btn_login);
+		Button createAccountButton = (Button) loginLayout.findViewById(R.id.btn_login_create);
 		loginButton.setOnClickListener(view -> {
 			if (isValidData()) {
-				sendLoginRequest(getViewText(R.id.email_textbox),
-						getViewText(R.id.password_textbox));
+				sendLoginRequest(getViewText(R.id.edt_login_email),
+						getViewText(R.id.edt_login_password));
 			}
 		});
 		createAccountButton.setOnClickListener(view -> activity.changeFragmentToRegistration());
@@ -67,11 +66,11 @@ public class LoginFragment extends Fragment {
 	}
 
 	private boolean isValidData() {
-		if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.email_textbox))) {
-			UIUtil.showToastMessage(activity, getString(R.string.toast_invalid_email));
-		} else if (getViewText(R.id.password_textbox).length() < PASSWORD_MIN_LENGTH) {
-			UIUtil.showToastMessage(activity, getString(R.string.toast_short_password1) +
-					PASSWORD_MIN_LENGTH + getString(R.string.toast_short_password2));
+		if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.edt_login_email))) {
+			UIUtil.showToastMessage(activity, getString(R.string.login_invalid_email));
+		} else if (getViewText(R.id.edt_login_password).length() < PASSWORD_MIN_LENGTH) {
+			UIUtil.showToastMessage(activity, getString(R.string.login_short_password1) +
+					PASSWORD_MIN_LENGTH + getString(R.string.login_short_password2));
 		} else {
 			return true;
 		}
@@ -99,21 +98,21 @@ public class LoginFragment extends Fragment {
 						switch (serverResponse.getResult()) {
 							case SUCCESS:
 								UIUtil.showToastMessage(activity,
-										(getString(R.string.toast_login_successful)));
-								activity.logIn(email, serverResponse.getSid(),
-										serverResponse.getUserId());
+										(getString(R.string.login_successful)));
+								activity.logIn(serverResponse.getSid(),
+										serverResponse.getAccountDTO());
 								break;
 							case WRONG_PASSWORD:
 								UIUtil.showToastMessage(activity,
-										getString(R.string.toast_wrong_password));
+										getString(R.string.login_wrong_password));
 								break;
 							case NO_ACCOUNT_FOUND:
 								UIUtil.showToastMessage(activity,
-										getString(R.string.toast_no_account));
+										getString(R.string.login_no_account));
 								break;
 							case FAIL:
 								UIUtil.showToastMessage(activity,
-										getString(R.string.toast_server_fail));
+										getString(R.string.error_server_fail));
 								break;
 						}
 					}
@@ -121,7 +120,7 @@ public class LoginFragment extends Fragment {
 					@Override
 					public void failure(RetrofitError error) {
 						activity.showProgress(false);
-						UIUtil.showToastMessage(activity, getString(R.string.toast_server_fail));
+						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
 					}
 				});
 	}

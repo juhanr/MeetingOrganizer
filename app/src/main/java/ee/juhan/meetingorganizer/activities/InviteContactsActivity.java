@@ -58,7 +58,7 @@ public class InviteContactsActivity extends AppCompatActivity {
 			chooseContactsLayout = (ViewGroup) findViewById(R.id.layout_no_data);
 			if (chooseContactsLayout != null) {
 				TextView infoText = (TextView) chooseContactsLayout.findViewById(R.id.info_text);
-				infoText.setText(getString(R.string.textview_no_contacts));
+				infoText.setText(getString(R.string.contacts_no_contacts));
 			}
 			progressView = findViewById(R.id.progress_bar);
 		} else {
@@ -91,14 +91,14 @@ public class InviteContactsActivity extends AppCompatActivity {
 		UIUtil.showProgress(this, progressView, contactsListView, show);
 	}
 
-	public final Integer getUserId() {
-		return PreferenceManager.getDefaultSharedPreferences(this).getInt("userId", 0);
+	public final int getAccountId() {
+		return PreferenceManager.getDefaultSharedPreferences(this).getInt("accountId", 0);
 	}
 
 	private void checkContactsFromServer() {
 		showProgress(true);
-		RestClient.get()
-				.checkContactsRequest(contactsList, getUserId(), new Callback<List<ContactDTO>>() {
+		RestClient.get().checkContactsRequest(contactsList, getAccountId(),
+				new Callback<List<ContactDTO>>() {
 					@Override
 					public void success(final List<ContactDTO> serverResponse, Response response) {
 						showProgress(false);
@@ -109,13 +109,13 @@ public class InviteContactsActivity extends AppCompatActivity {
 					@Override
 					public void failure(RetrofitError error) {
 						showProgress(false);
-						UIUtil.showToastMessage(activity, getString(R.string.toast_server_fail));
+						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
 					}
 				});
 	}
 
 	private void removeCurrentUserFromContacts(List<ContactDTO> newList) {
-		int userId = getUserId();
+		int userId = getAccountId();
 		for (int i = 0; i < newList.size(); i++) {
 			ContactDTO contact = newList.get(i);
 			if (contact.getAccountId() == userId) {
@@ -230,7 +230,7 @@ public class InviteContactsActivity extends AppCompatActivity {
 			}
 			super.setCheckBoxText(contact.getName() + "\n" + contact.getPhoneNumber());
 			if (contact.getAccountId() != 0) {
-				super.addIcon(R.drawable.ic_account);
+				super.addIcon(R.drawable.ic_account_box_black_18dp, R.color.dark_gray);
 			}
 		}
 
@@ -238,7 +238,7 @@ public class InviteContactsActivity extends AppCompatActivity {
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 			String contactPhoneNumber = buttonView.getText().toString().split("\n")[1];
 			ContactDTO chosenContact = new ContactDTO();
-			for (ContactDTO contact : super.getObjects()) {
+			for (ContactDTO contact : super.getItems()) {
 				if (contact.getPhoneNumber().equals(contactPhoneNumber)) {
 					chosenContact = contact;
 					break;

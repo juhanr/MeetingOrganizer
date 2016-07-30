@@ -10,11 +10,11 @@ import ee.juhan.meetingorganizer.util.DateUtil;
 
 public class MeetingDTO {
 
+	public Date startDateTime;
 	private int id;
 	private int leaderId;
 	private String title;
 	private String description;
-	public Date startDateTime;
 	private Date endDateTime;
 	private MapCoordinate location;
 	private LocationType locationType = LocationType.SPECIFIC_LOCATION;

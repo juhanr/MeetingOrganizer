@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-			  android:layout_width="match_parent"
 			  android:layout_height="match_parent"
+			  android:layout_width="match_parent"
 			  android:orientation="horizontal">
 
 	<EditText
+		style="@style/LightEditText"
 		android:id="@+id/map_search_textbox"
-		style="@style/TextBox"
-		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginBottom="0dp"
 		android:layout_marginRight="5dp"
 		android:layout_marginTop="0dp"
-		android:layout_weight="0.7"/>
+		android:layout_weight="0.7"
+		android:layout_width="wrap_content"/>
 
 	<Button
-		android:id="@+id/map_search_button"
 		style="@style/RaisedButton"
-		android:layout_width="wrap_content"
+		android:id="@+id/map_search_button"
 		android:layout_height="wrap_content"
-		android:text="@string/button_search"/>
+		android:layout_width="wrap_content"
+		android:text="@string/action_search"/>
 
 </LinearLayout>

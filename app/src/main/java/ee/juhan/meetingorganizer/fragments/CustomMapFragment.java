@@ -20,7 +20,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -77,6 +76,30 @@ public class CustomMapFragment extends MapFragment
 		return mapLayout;
 	}
 
+	@Override
+	public final boolean onMyLocationButtonClick() {
+		LocationManager locationManager =
+				(LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			UIUtil.showToastMessage(activity, "GPS is disabled!");
+		}
+		return false;
+	}
+
+	@Override
+	public final void onMapClick(LatLng latLng) {
+		if (temporaryMarker != null) {
+			temporaryMarker.remove();
+		}
+		setTemporaryMarker(latLng);
+	}
+
+	@Override
+	public void onMapReady(GoogleMap googleMap) {
+		this.map = googleMap;
+		initializeMap();
+	}
+
 	private void checkAndroidVersion() {
 		if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
 			FrameLayout frameLayout = new FrameLayout(activity);
@@ -123,7 +146,7 @@ public class CustomMapFragment extends MapFragment
 			setFocus(marker, true);
 			return false;
 		});
-
+		map.setPadding(0, 200, 0, 0);
 		isMapInitialized = true;
 	}
 
@@ -171,18 +194,6 @@ public class CustomMapFragment extends MapFragment
 		locationMarkers.remove(marker);
 	}
 
-	private void setTemporaryMarker(LatLng latLng) {
-		try {
-			Geocoder geocoder = new Geocoder(activity);
-			List<Address> addresses =
-					geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-			setTemporaryMarker(latLng, addresses.get(0).getAddressLine(0));
-		} catch (IOException e) {
-			Log.e(TAG, "Could not get location from address string.");
-			setTemporaryMarker(latLng, "");
-		}
-	}
-
 	private void setTemporaryMarker(LatLng latLng, String address) {
 		this.temporaryMarkerAddress = address;
 		if (temporaryMarker != null) {
@@ -191,6 +202,7 @@ public class CustomMapFragment extends MapFragment
 		setFocus(null, false);
 		temporaryMarker =
 				map.addMarker(new MarkerOptions().position(latLng).title(address).draggable(true));
+		temporaryMarker.setAlpha(0.5f);
 		temporaryMarker.showInfoWindow();
 		if (activity instanceof LocationActivity) {
 			((LocationActivity) activity).refreshConfirmMarkerFABState();
@@ -198,8 +210,7 @@ public class CustomMapFragment extends MapFragment
 	}
 
 	public Marker confirmTemporaryMarker() {
-		temporaryMarker
-				.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+		temporaryMarker.setAlpha(1);
 		locationMarkers.add(temporaryMarker);
 		temporaryMarker = null;
 		return locationMarkers.get(locationMarkers.size() - 1);
@@ -223,6 +234,22 @@ public class CustomMapFragment extends MapFragment
 
 	public final Marker getTemporaryMarker() {
 		return temporaryMarker;
+	}
+
+	private void setTemporaryMarker(LatLng latLng) {
+		try {
+			Geocoder geocoder = new Geocoder(activity);
+			List<Address> addresses =
+					geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+			if (addresses.size() > 0) {
+				setTemporaryMarker(latLng, addresses.get(0).getAddressLine(0));
+			} else {
+				setTemporaryMarker(latLng, "Unknown address");
+			}
+		} catch (IOException e) {
+			Log.e(TAG, "Could not get location from address string.");
+			setTemporaryMarker(latLng, "");
+		}
 	}
 
 	public final void setIsClickableMap(boolean isClickableMap) {
@@ -258,41 +285,15 @@ public class CustomMapFragment extends MapFragment
 				map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_CAMERA_ZOOM));
 				setTemporaryMarker(latLng, addresses.get(0).getAddressLine(0));
 			} else {
-				UIUtil.showToastMessage(activity, getString(R.string.toast_location_not_found));
+				UIUtil.showToastMessage(activity, getString(R.string.location_not_found));
 			}
 		} catch (IOException e) {
 			Log.e(TAG, "Could not get location from address string.");
-			UIUtil.showToastMessage(activity, getString(R.string.toast_geocoder_service_error));
+			UIUtil.showToastMessage(activity, getString(R.string.location_geocoder_service_error));
 		}
 	}
 
 	public final boolean isMapInitialized() {
 		return isMapInitialized;
-	}
-
-	@Override
-	public final boolean onMyLocationButtonClick() {
-		LocationManager locationManager =
-				(LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			UIUtil.showToastMessage(activity, "Waiting for location...");
-		} else {
-			UIUtil.showToastMessage(activity, "GPS is disabled!");
-		}
-		return false;
-	}
-
-	@Override
-	public final void onMapClick(LatLng latLng) {
-		if (temporaryMarker != null) {
-			temporaryMarker.remove();
-		}
-		setTemporaryMarker(latLng);
-	}
-
-	@Override
-	public void onMapReady(GoogleMap googleMap) {
-		this.map = googleMap;
-		initializeMap();
 	}
 }

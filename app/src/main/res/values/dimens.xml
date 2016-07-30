@@ -10,6 +10,8 @@
 	<dimen name="view_margin_small">5dp</dimen>
 	<dimen name="view_margin_extra_small">3dp</dimen>
 
+	<dimen name="view_padding_large">50dp</dimen>
+
 	<dimen name="textbox_width_normal">200dp</dimen>
 
 	<dimen name="nav_header_vertical_spacing">16dp</dimen>

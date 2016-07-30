@@ -2,13 +2,13 @@ package ee.juhan.meetingorganizer.models.server;
 
 public class AccountDTO {
 
+	private int accountId;
 	private String name;
 	private String email;
 	private String password;
 	private String phoneNumber;
 
-	public AccountDTO() {
-	}
+	public AccountDTO() {}
 
 	public AccountDTO(String name, String email, String password, String phoneNumber) {
 		this.name = name;
@@ -20,6 +20,14 @@ public class AccountDTO {
 	public AccountDTO(String email, String password) {
 		this.email = email;
 		this.password = password;
+	}
+
+	public int getAccountId() {
+		return accountId;
+	}
+
+	public void setAccountId(int accountId) {
+		this.accountId = accountId;
 	}
 
 	public final String getName() {

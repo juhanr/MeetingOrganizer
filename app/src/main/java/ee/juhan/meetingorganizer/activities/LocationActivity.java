@@ -39,25 +39,65 @@ import static ee.juhan.meetingorganizer.models.server.LocationType.SPECIFIC_LOCA
 
 public class LocationActivity extends AppCompatActivity {
 
+	public static final String SHOW_LOCATION_OPTIONS = "location-options";
+	public static final String MARKER_LATITUDE = "marker-latitude";
+	public static final String MARKER_LONGITUDE = "marker-longitude";
 	private ViewGroup chooseLocationLayout;
 	private List<String> filtersList;
 	private CustomMapFragment customMapFragment = new CustomMapFragment();
 	private TextView locationTypeInfo;
+	private FloatingActionButton confirmFAB;
 	private FloatingActionButton confirmMarkerFAB;
 	private FloatingActionButton deleteMarkerFAB;
+	private View bottomSheet;
+	private boolean showLocationOptions;
+	private LatLng markerLocation;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getIntentExtras();
 		setContentView(R.layout.activity_location);
 		chooseLocationLayout = (ViewGroup) findViewById(R.id.activity_location);
 		locationTypeInfo = (TextView) findViewById(R.id.location_type_info);
+		confirmFAB = (FloatingActionButton) findViewById(R.id.fab_confirm);
+		confirmMarkerFAB = (FloatingActionButton) findViewById(R.id.fab_confirm_marker);
+		deleteMarkerFAB = (FloatingActionButton) findViewById(R.id.fab_delete_marker);
+		bottomSheet = findViewById(R.id.bottom_sheet);
 		filtersList =
-				Arrays.asList(getResources().getStringArray(R.array.array_location_parameters));
+				Arrays.asList(getResources().getStringArray(R.array.location_parameters_array));
 		setUpActionBar();
-		setButtonListeners();
 		setUpMapLayout();
-		setLocationSpinner();
+
+		if (showLocationOptions) {
+			setButtonListeners();
+			setLocationSpinner();
+		} else {
+			bottomSheet.setVisibility(View.GONE);
+			confirmFAB.hide();
+			confirmMarkerFAB.hide();
+			deleteMarkerFAB.hide();
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				break;
+		}
+		return false;
+	}
+
+	private void getIntentExtras() {
+		showLocationOptions = getIntent().getBooleanExtra(SHOW_LOCATION_OPTIONS, true);
+		double markerLatitude = getIntent().getDoubleExtra(MARKER_LATITUDE, 0);
+		double markerLongitude = getIntent().getDoubleExtra(MARKER_LONGITUDE, 0);
+		if (markerLatitude != 0 && markerLongitude != 0) {
+			markerLocation = new LatLng(markerLatitude, markerLongitude);
+		}
+
 	}
 
 	private void setUpActionBar() {
@@ -68,7 +108,7 @@ public class LocationActivity extends AppCompatActivity {
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setDisplayShowCustomEnabled(true);
-		actionBar.setCustomView(R.layout.search_bar);
+		actionBar.setCustomView(R.layout.layout_search_bar);
 		actionBar.setDisplayShowTitleEnabled(false);
 		EditText editSearch =
 				(EditText) actionBar.getCustomView().findViewById(R.id.search_edittext);
@@ -82,20 +122,10 @@ public class LocationActivity extends AppCompatActivity {
 		actionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case android.R.id.home:
-				finish();
-				break;
-		}
-		return false;
-	}
-
 	private void setLocationSpinner() {
 		Spinner spinner = (Spinner) chooseLocationLayout.findViewById(R.id.location_spinner);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter
-				.createFromResource(this, R.array.array_location_items, R.layout.row_spn);
+				.createFromResource(this, R.array.location_options_array, R.layout.row_spn);
 		adapter.setDropDownViewResource(R.layout.row_spn_dropdown);
 		spinner.setAdapter(adapter);
 		spinner.setOnItemSelectedListener(new SpinnerListener());
@@ -123,12 +153,10 @@ public class LocationActivity extends AppCompatActivity {
 	}
 
 	private void setButtonListeners() {
-		FloatingActionButton confirmFAB = (FloatingActionButton) findViewById(R.id.fab_confirm);
 		if (confirmFAB != null) {
 			confirmFAB.setOnClickListener(view -> finish());
 		}
 
-		confirmMarkerFAB = (FloatingActionButton) findViewById(R.id.fab_confirm_marker);
 		if (confirmMarkerFAB != null) {
 			confirmMarkerFAB.setOnClickListener(view -> {
 				Marker locationMarker = customMapFragment.confirmTemporaryMarker();
@@ -148,7 +176,6 @@ public class LocationActivity extends AppCompatActivity {
 			});
 		}
 
-		deleteMarkerFAB = (FloatingActionButton) findViewById(R.id.fab_delete_marker);
 		if (deleteMarkerFAB != null) {
 			deleteMarkerFAB.setOnClickListener(view -> {
 				Marker focusedMarker = customMapFragment.getFocusedMarker();
@@ -172,8 +199,6 @@ public class LocationActivity extends AppCompatActivity {
 		}
 		showDeleteMarkerFAB(false);
 
-
-		View bottomSheet = findViewById(R.id.bottom_sheet);
 		final BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 		bottomSheetBehavior.setPeekHeight(450);
 		bottomSheet.post(() -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED));
@@ -192,11 +217,10 @@ public class LocationActivity extends AppCompatActivity {
 
 			}
 		});
-
 	}
 
 	public void showDeleteMarkerFAB(boolean show) {
-		if (show) {
+		if (show && showLocationOptions) {
 			confirmMarkerFAB.hide();
 			deleteMarkerFAB.show();
 		} else {
@@ -244,6 +268,10 @@ public class LocationActivity extends AppCompatActivity {
 			}
 			customMapFragment.setMarkerLocations(locationsList);
 		}
+
+		if (markerLocation != null) {
+			customMapFragment.setMarkerLocations(Collections.singletonList(markerLocation));
+		}
 	}
 
 	private class LocationParametersAdapter extends CheckBoxAdapter<String> {
@@ -275,8 +303,8 @@ public class LocationActivity extends AppCompatActivity {
 			switch (pos) {
 				case 0:
 					NewMeetingActivity.getNewMeetingModel().setLocationType(SPECIFIC_LOCATION);
-					locationTypeInfo
-							.setText(getResources().getString(R.string.info_specific_location));
+					locationTypeInfo.setText(
+							getResources().getString(R.string.location_specific_location_info));
 					setUpMapLayout();
 					customMapFragment.setMaxLocationMarkers(1);
 					break;
@@ -284,7 +312,7 @@ public class LocationActivity extends AppCompatActivity {
 					NewMeetingActivity.getNewMeetingModel()
 							.setLocationType(GENERATED_FROM_PREDEFINED_LOCATIONS);
 					locationTypeInfo.setText(getResources()
-							.getString(R.string.info_location_generated_from_locations));
+							.getString(R.string.location_generated_from_locations_info));
 					setUpMapLayout();
 					customMapFragment.setMaxLocationMarkers(5);
 					break;

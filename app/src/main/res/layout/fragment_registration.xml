@@ -1,107 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-			android:fillViewport="true"
-			android:layout_height="match_parent"
-			android:layout_width="match_parent">
+<LinearLayout
+	style="@style/FragmentLayout"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:clickable="true"
+	android:focusableInTouchMode="true"
+	android:layout_height="match_parent"
+	android:layout_width="match_parent"
+	android:orientation="vertical"
+	android:padding="@dimen/view_padding_large">
+
+	<com.rey.material.widget.EditText
+		style="@style/LightEditText"
+		android:hint="@string/msg_email"
+		android:inputType="textEmailAddress"
+		android:layout_marginBottom="@dimen/view_margin_medium"
+		android:maxLength="40"
+		app:et_inputId="@+id/edt_register_email"/>
+
+	<com.rey.material.widget.EditText
+		style="@style/LightEditText"
+		android:hint="@string/login_password"
+		android:inputType="textPassword"
+		android:layout_marginBottom="@dimen/view_margin_medium"
+		app:et_inputId="@+id/edt_register_password"/>
+
+	<com.rey.material.widget.EditText
+		style="@style/LightEditText"
+		android:hint="@string/registration_password_confirm"
+		android:inputType="textPassword"
+		android:layout_marginBottom="@dimen/view_margin_medium"
+		app:et_inputId="@+id/edt_register_password_confirm"/>
+
+	<com.rey.material.widget.EditText
+		style="@style/LightEditText"
+		android:hint="@string/registration_full_name"
+		android:layout_marginBottom="@dimen/view_margin_medium"
+		app:et_inputId="@+id/edt_register_name"/>
 
 	<LinearLayout
-		style="@style/FragmentLayout"
-		android:clickable="true"
-		android:focusableInTouchMode="true"
-		android:layout_height="match_parent"
+		android:layout_height="wrap_content"
 		android:layout_width="match_parent"
-		android:orientation="vertical">
+		android:orientation="horizontal">
 
-		<TextView
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:text="@string/textview_email"/>
+		<com.rey.material.widget.EditText
+			style="@style/LightEditText"
+			android:digits="0123456789"
+			android:hint="@string/msg_cc"
+			android:inputType="phone"
+			android:layout_weight="0.2"
+			android:layout_width="0dp"
+			android:maxLength="3"
+			app:et_inputId="@+id/edt_register_country_code"/>
 
-		<EditText
-			style="@style/TextBox"
-			android:id="@+id/email_textbox"
-			android:inputType="textEmailAddress"
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:maxLength="40"/>
-
-		<TextView
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:text="@string/textview_password"/>
-
-		<EditText
-			style="@style/TextBox"
-			android:id="@+id/password_textbox"
-			android:inputType="textPassword"
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"/>
-
-		<TextView
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:text="@string/textview_password_confirm"/>
-
-		<EditText
-			style="@style/TextBox"
-			android:id="@+id/password_confirmation_textbox"
-			android:inputType="textPassword"
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"/>
-
-		<TextView
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:text="@string/textview_full_name"/>
-
-		<EditText
-			style="@style/TextBox"
-			android:id="@+id/name_textbox"
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"/>
-
-		<TextView
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:text="@string/textview_phone_number"/>
-
-		<RelativeLayout
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:paddingLeft="@dimen/fragment_margin"
-			android:paddingRight="@dimen/fragment_margin">
-
-			<EditText
-				style="@style/TextBox"
-				android:digits="0123456789"
-				android:id="@+id/area_number_textbox"
-				android:inputType="phone"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="3dp"
-				android:layout_width="55dp"
-				android:maxLength="3"/>
-
-			<EditText
-				style="@style/TextBox"
-				android:digits="0123456789"
-				android:id="@+id/phone_number_textbox"
-				android:inputType="phone"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="3dp"
-				android:layout_marginRight="3dp"
-				android:layout_toRightOf="@id/area_number_textbox"
-				android:layout_width="wrap_content"/>
-		</RelativeLayout>
-
-		<include layout="@layout/view_empty_space"/>
-
-		<Button
-			style="@style/RaisedButton"
-			android:id="@+id/register_button"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="@dimen/view_margin_large"
-			android:layout_width="wrap_content"
-			android:text="@string/button_create_account"/>
-
+		<com.rey.material.widget.EditText
+			style="@style/LightEditText"
+			android:digits="0123456789"
+			android:hint="@string/msg_phone_number"
+			android:inputType="phone"
+			android:layout_marginLeft="3dp"
+			android:layout_weight="0.8"
+			android:layout_width="0dp"
+			app:et_inputId="@+id/edt_register_phone_nr"/>
 	</LinearLayout>
-</ScrollView>
+
+	<include layout="@layout/view_empty_space"/>
+
+	<com.rey.material.widget.Button
+		style="@style/RaisedButtonColored"
+		android:id="@+id/btn_register"
+		android:text="@string/registration_create_account"/>
+
+</LinearLayout>

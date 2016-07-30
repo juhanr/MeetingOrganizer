@@ -20,8 +20,7 @@
 		android:id="@+id/bottom_sheet"
 		android:layout_height="350dp"
 		android:layout_width="match_parent"
-		app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
-		>
+		app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
 		<LinearLayout
 			android:layout_height="match_parent"
@@ -44,7 +43,7 @@
 				android:layout_marginRight="@dimen/view_margin_large"
 				android:layout_marginTop="@dimen/view_margin_medium"
 				android:layout_width="match_parent"
-				android:text="@string/info_specific_location"/>
+				android:text="@string/location_specific_location_info"/>
 
 			<TextView
 				style="@style/TextHint"
@@ -53,7 +52,7 @@
 				android:layout_marginLeft="@dimen/view_margin_large"
 				android:layout_marginRight="@dimen/view_margin_large"
 				android:layout_width="match_parent"
-				android:text="@string/textview_slide_up"
+				android:text="@string/location_slide_up_info"
 				android:textColor="@color/accent"/>
 		</LinearLayout>
 
@@ -65,7 +64,8 @@
 		android:layout_marginEnd="88dp"
 		android:layout_marginRight="88dp"
 		android:layout_width="wrap_content"
-		android:src="@drawable/ic_room_white_48dp"
+		android:src="@drawable/ic_marker_black_18dp"
+		android:tint="@color/white"
 		app:layout_anchor="@id/bottom_sheet"
 		app:layout_anchorGravity="top|end"/>
 
@@ -75,7 +75,8 @@
 		android:layout_marginEnd="88dp"
 		android:layout_marginRight="88dp"
 		android:layout_width="wrap_content"
-		android:src="@drawable/ic_clear_white_24dp"
+		android:src="@drawable/ic_remove_marker_black_18dp"
+		android:tint="@color/white"
 		app:layout_anchor="@id/bottom_sheet"
 		app:layout_anchorGravity="top|end"/>
 

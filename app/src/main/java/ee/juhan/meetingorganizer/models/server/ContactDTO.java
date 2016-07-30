@@ -17,6 +17,15 @@ public class ContactDTO {
 		this.phoneNumber = phoneNumber;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) { return true; }
+		if (o == null || getClass() != o.getClass()) { return false; }
+		ContactDTO that = (ContactDTO) o;
+		return phoneNumber.equals(that.phoneNumber);
+
+	}
+
 	public final int getAccountId() {
 		return accountId;
 	}
@@ -47,14 +56,5 @@ public class ContactDTO {
 
 	public final void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) { return true; }
-		if (o == null || getClass() != o.getClass()) { return false; }
-		ContactDTO that = (ContactDTO) o;
-		return phoneNumber.equals(that.phoneNumber);
-
 	}
 }

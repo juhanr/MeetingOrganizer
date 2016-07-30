@@ -12,16 +12,16 @@ public class EditTextFocusListener implements View.OnFocusChangeListener {
 		this.activity = activity;
 	}
 
-	public final void hideKeyboard(View view) {
-		InputMethodManager inputMethodManager =
-				(InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-		inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-	}
-
 	@Override
 	public void onFocusChange(View v, boolean hasFocus) {
 		if (!hasFocus) {
 			hideKeyboard(v);
 		}
+	}
+
+	public final void hideKeyboard(View view) {
+		InputMethodManager inputMethodManager =
+				(InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+		inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
 	}
 }

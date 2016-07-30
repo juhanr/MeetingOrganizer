@@ -1,30 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	style="@style/FragmentLayout"
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
 	android:gravity="start"
-	android:orientation="vertical">
+	android:layout_height="match_parent"
+	android:layout_width="match_parent">
 
 	<TextView
+		style="@style/TextPrimary"
 		android:id="@+id/participant_name"
+		android:layout_height="wrap_content"
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
+		android:paddingBottom="5dp"
+		android:textSize="24sp"/>
+
+	<ImageView
+		android:contentDescription="@string/msg_phone_number"
+		android:id="@+id/img_phone"
+		android:layout_below="@id/participant_name"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:paddingBottom="5dp"
+		android:paddingRight="5dp"
+		android:src="@drawable/ic_phone_black_18dp"
+		android:tint="@color/dark_gray"/>
 
 	<TextView
+		style="@style/TextSecondary"
 		android:id="@+id/participant_phone_number"
+		android:layout_below="@id/participant_name"
+		android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/img_phone"
+		android:layout_width="wrap_content"/>
+
+	<ImageView
+		android:contentDescription="@string/msg_email"
+		android:id="@+id/img_email"
+		android:layout_below="@id/img_phone"
+		android:layout_height="wrap_content"
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
+		android:paddingBottom="5dp"
+		android:paddingRight="5dp"
+		android:src="@drawable/ic_email_black_18dp"
+		android:tint="@color/dark_gray"/>
 
 	<TextView
+		style="@style/TextSecondary"
 		android:id="@+id/participant_email"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
+		android:layout_below="@id/img_phone"
+		android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/img_email"
+		android:layout_width="wrap_content"/>
 
-	<TextView
-		android:id="@+id/participant_answer"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
-
-</LinearLayout>
+</RelativeLayout>

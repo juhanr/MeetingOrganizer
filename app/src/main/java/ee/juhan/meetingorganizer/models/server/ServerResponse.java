@@ -4,7 +4,17 @@ public class ServerResponse {
 
 	private ServerResult result;
 	private String sid;
-	private Integer userId;
+	private AccountDTO accountDTO;
+
+	public ServerResponse(ServerResult result, String sid, AccountDTO accountDTO) {
+		this.result = result;
+		this.sid = sid;
+		this.accountDTO = accountDTO;
+	}
+
+	public ServerResponse(ServerResult result) {
+		this.result = result;
+	}
 
 	public final ServerResult getResult() {
 		return result;
@@ -22,11 +32,11 @@ public class ServerResponse {
 		this.sid = sid;
 	}
 
-	public final Integer getUserId() {
-		return userId;
+	public AccountDTO getAccountDTO() {
+		return accountDTO;
 	}
 
-	public final void setUserId(Integer userId) {
-		this.userId = userId;
+	public void setAccountDTO(AccountDTO accountDTO) {
+		this.accountDTO = accountDTO;
 	}
 }

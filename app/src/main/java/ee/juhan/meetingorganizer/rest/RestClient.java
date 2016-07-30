@@ -36,6 +36,10 @@ public final class RestClient {
 		return client;
 	}
 
+	public static void setSID(String sid) {
+		RestClient.sid = sid;
+	}
+
 	private static void setupRestClient() {
 		Gson gson = new GsonBuilder().registerTypeAdapter(Date.class,
 				(JsonDeserializer<Date>) (json, type, context) -> new Date(
@@ -49,9 +53,5 @@ public final class RestClient {
 
 		RestAdapter restAdapter = builder.build();
 		client = restAdapter.create(RestService.class);
-	}
-
-	public static void setSID(String sid) {
-		RestClient.sid = sid;
 	}
 }

@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-			  android:layout_width="match_parent"
-			  android:layout_height="match_parent"
 			  android:gravity="center"
+			  android:layout_height="match_parent"
+			  android:layout_width="match_parent"
 			  android:orientation="vertical"
 			  android:padding="35dp">
 
 	<TextView
-		android:id="@+id/dialog_message"
 		style="@style/TextPrimary"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
+		android:id="@+id/dialog_message"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"/>
 
 	<EditText
+		style="@style/LightEditText"
 		android:id="@+id/dialog_input"
-		style="@style/TextBox"
-		android:layout_width="wrap_content"
+		android:inputType="textMultiLine"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="@dimen/view_margin_small"
-		android:inputType="textMultiLine"
+		android:layout_width="wrap_content"
 		android:maxLength="255">
 
 		<requestFocus/>
 	</EditText>
 
 	<LinearLayout
-		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="@dimen/view_margin_large"
+		android:layout_width="match_parent"
 		android:orientation="horizontal">
 
 		<Button
-			android:id="@+id/dialog_positive_button"
 			style="@style/RaisedButton"
-			android:layout_width="wrap_content"
+			android:id="@+id/dialog_positive_button"
 			android:layout_height="wrap_content"
 			android:layout_marginRight="@dimen/view_margin_small"
 			android:layout_weight="0.5"
-			android:text="@string/button_yes"/>
+			android:layout_width="wrap_content"
+			android:text="@string/action_yes"/>
 
 		<Button
-			android:id="@+id/dialog_negative_button"
 			style="@style/RaisedButton"
-			android:layout_width="wrap_content"
+			android:id="@+id/dialog_negative_button"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="@dimen/view_margin_small"
 			android:layout_weight="0.5"
-			android:text="@string/button_no"/>
+			android:layout_width="wrap_content"
+			android:text="@string/action_no"/>
 	</LinearLayout>
 </LinearLayout>

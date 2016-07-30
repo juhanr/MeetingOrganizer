@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:fitsSystemWindows="true"
+	android:layout_height="match_parent"
+	android:layout_width="match_parent">
+
+	<android.support.design.widget.AppBarLayout
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:theme="@style/AppTheme.AppBarOverlay">
+
+		<android.support.v7.widget.Toolbar
+			android:background="?attr/colorPrimary"
+			android:id="@+id/toolbar"
+			android:layout_height="?attr/actionBarSize"
+			android:layout_width="match_parent"
+			app:popupTheme="@style/AppTheme.PopupOverlay"/>
+
+	</android.support.design.widget.AppBarLayout>
+
+	<RelativeLayout
+		android:layout_height="match_parent"
+		android:layout_marginTop="?attr/actionBarSize"
+		android:layout_width="match_parent">
+
+		<ProgressBar
+			style="?android:attr/progressBarStyleLarge"
+			android:id="@+id/progress_bar"
+			android:layout_centerInParent="true"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="8dp"
+			android:layout_width="wrap_content"
+			android:visibility="gone"/>
+
+	</RelativeLayout>
+
+	<FrameLayout
+		android:id="@+id/fragment_container"
+		android:layout_height="match_parent"
+		android:layout_marginTop="?attr/actionBarSize"
+		android:layout_width="match_parent"/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab_new_meeting"
+		android:layout_gravity="bottom|end"
+		android:layout_height="wrap_content"
+		android:layout_margin="@dimen/fab_margin"
+		android:layout_width="wrap_content"
+		android:src="@drawable/ic_add_black_18dp"
+		android:tint="@color/white"/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab_location"
+		android:layout_gravity="bottom|end"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="88dp"
+		android:layout_marginEnd="24dp"
+		android:layout_marginRight="24dp"
+		android:layout_width="wrap_content"
+		android:src="@drawable/ic_marker_black_18dp"
+		android:tint="@color/white"
+		app:fabSize="mini"/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab_call"
+		android:layout_gravity="bottom|end"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="88dp"
+		android:layout_marginEnd="24dp"
+		android:layout_marginRight="24dp"
+		android:layout_width="wrap_content"
+		android:src="@drawable/ic_phone_black_18dp"
+		android:tint="@color/white"
+		app:backgroundTint="@color/green"
+		app:fabSize="mini"/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab_sms"
+		android:layout_gravity="bottom|end"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="144dp"
+		android:layout_marginEnd="24dp"
+		android:layout_marginRight="24dp"
+		android:layout_width="wrap_content"
+		android:src="@drawable/ic_sms_black_18dp"
+		android:tint="@color/white"
+		app:backgroundTint="@color/green"
+		app:fabSize="mini"/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab_email"
+		android:layout_gravity="bottom|end"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="200dp"
+		android:layout_marginEnd="24dp"
+		android:layout_marginRight="24dp"
+		android:layout_width="wrap_content"
+		android:src="@drawable/ic_email_black_18dp"
+		android:tint="@color/white"
+		app:backgroundTint="@color/red"
+		app:fabSize="mini"/>
+
+</android.support.design.widget.CoordinatorLayout>

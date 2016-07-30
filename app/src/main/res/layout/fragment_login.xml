@@ -2,51 +2,42 @@
 <LinearLayout
 	style="@style/FragmentLayout"
 	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:clickable="true"
 	android:focusableInTouchMode="true"
+	android:gravity="center"
 	android:layout_height="match_parent"
+	android:layout_weight="1"
 	android:layout_width="match_parent"
 	android:orientation="vertical">
 
-	<TextView
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		android:text="@string/textview_email"/>
-
-	<EditText
-		style="@style/TextBox"
-		android:id="@+id/email_textbox"
+	<com.rey.material.widget.EditText
+		style="@style/LightEditText"
+		android:hint="@string/msg_email"
 		android:inputType="textEmailAddress"
-		android:layout_height="wrap_content"
+		android:layout_marginBottom="@dimen/view_margin_medium"
 		android:layout_width="@dimen/textbox_width_normal"
-		android:maxLength="40"/>
+		android:maxLength="40"
+		app:et_inputId="@+id/edt_login_email"/>
 
-	<TextView
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		android:text="@string/textview_password"/>
-
-	<EditText
-		style="@style/TextBox"
-		android:id="@+id/password_textbox"
+	<com.rey.material.widget.EditText
+		style="@style/LightEditText"
+		android:hint="@string/login_password"
 		android:inputType="textPassword"
-		android:layout_height="wrap_content"
-		android:layout_marginBottom="@dimen/view_margin_large"
-		android:layout_width="@dimen/textbox_width_normal"/>
+		android:layout_marginBottom="@dimen/view_margin_medium"
+		android:layout_width="@dimen/textbox_width_normal"
+		app:et_inputId="@+id/edt_login_password"/>
 
-	<TextView
-		android:id="@+id/create_account_textbutton"
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		android:text="@string/textview_create_account_u"/>
+	<com.rey.material.widget.Button
+		style="@style/FlatButtonColored"
+		android:id="@+id/btn_login_create"
+		android:layout_marginBottom="@dimen/view_margin_medium"
+		android:text="@string/login_create_account"/>
 
-	<include layout="@layout/view_empty_space"/>
-
-	<Button
-		style="@style/RaisedButton"
-		android:id="@+id/login_button"
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		android:text="@string/button_login"/>
+	<com.rey.material.widget.Button
+		style="@style/RaisedButtonColored"
+		android:id="@+id/btn_login"
+		android:layout_gravity="center_horizontal"
+		android:text="@string/action_login"/>
 
 </LinearLayout>
