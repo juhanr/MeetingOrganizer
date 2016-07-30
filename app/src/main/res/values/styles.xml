@@ -1,7 +1,7 @@
 <resources>
 
 	<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-		<item name="android:buttonStyle">@style/RaisedButton</item>
+		<item name="android:buttonStyle">@style/RaisedButtonColored</item>
 
 		<item name="colorPrimary">@color/indigo_500</item>
 		<item name="colorPrimaryDark">@color/indigo_700</item>
@@ -37,6 +37,15 @@
 		<item name="android:gravity">center_horizontal</item>
 	</style>
 
+	<style name="ListItemLayout">
+		<item name="android:paddingLeft">15dp</item>
+		<item name="android:paddingRight">15dp</item>
+		<item name="android:paddingTop">10dp</item>
+		<item name="android:paddingBottom">10dp</item>
+		<item name="android:layout_height">match_parent</item>
+		<item name="android:layout_width">match_parent</item>
+	</style>
+
 	<style name="TextPrimary" parent="@android:style/TextAppearance">
 		<item name="android:textColor">@color/text_primary</item>
 		<item name="android:textSize">16sp</item>
@@ -44,45 +53,17 @@
 
 	<style name="TextSecondary">
 		<item name="android:textColor">@color/text_secondary</item>
-		<item name="android:textSize">16sp</item>
+		<item name="android:textSize">14sp</item>
 	</style>
 
 	<style name="TextHint">
 		<item name="android:textColor">@color/text_hint</item>
-		<item name="android:textSize">16sp</item>
+		<item name="android:textSize">14sp</item>
 	</style>
 
 	<style name="TextPrimaryWhite">
 		<item name="android:textColor">@color/text_primary_white</item>
 		<item name="android:textSize">16sp</item>
-	</style>
-
-	<style name="TextBox" parent="TextSecondary">
-		<item name="android:layout_marginTop">@dimen/view_margin_small</item>
-		<item name="android:layout_marginBottom">@dimen/view_margin_medium</item>
-		<item name="android:background">@drawable/textbox</item>
-		<item name="android:ems">10</item>
-		<item name="android:singleLine">true</item>
-		<item name="android:maxLength">20</item>
-		<item name="android:minHeight">50dp</item>
-		<item name="android:padding">10dp</item>
-		<item name="android:gravity">center|left</item>
-		<!--<item name="android:textColor">@color/madison</item>-->
-	</style>
-
-	<!--<style name="Button" parent="TextPrimaryWhite">-->
-	<!--<item name="android:background">@drawable/button</item>-->
-	<!--<item name="android:textColor">@drawable/raised_button_text_selector</item>-->
-	<!--</style>-->
-
-	<style name="Spinner" parent="TextPrimary">
-		<item name="android:background">@drawable/spinner_bg</item>
-	</style>
-
-	<style name="CheckBox">
-		<item name="android:textColor">@color/text_primary</item>
-		<item name="android:gravity">center|left</item>
-		<item name="android:button">@drawable/checkbox</item>
 	</style>
 
 	<style name="FlatButton" parent="Material.Drawable.Ripple.Touch.Light">

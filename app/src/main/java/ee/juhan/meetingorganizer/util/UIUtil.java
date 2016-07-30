@@ -38,6 +38,9 @@ public class UIUtil {
 
 	public static void showProgress(Activity activity, final View progressView,
 			final View contentView, final boolean show) {
+		if (contentView == null) {
+			return;
+		}
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
 			int shortAnimTime =
 					activity.getResources().getInteger(android.R.integer.config_shortAnimTime);

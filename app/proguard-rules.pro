@@ -20,6 +20,7 @@
 -dontwarn rx.**
 -dontwarn retrofit.**
 -dontwarn okio.**
+-dontwarn java.lang.invoke.*
 
 -keep class ee.juhan.meetingorganizer.models.server.** { *; }
 -keep class retrofit.** { *; }
