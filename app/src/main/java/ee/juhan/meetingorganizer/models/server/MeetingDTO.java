@@ -20,6 +20,7 @@ public class MeetingDTO {
 	private LocationType locationType = LocationType.SPECIFIC_LOCATION;
 	private List<ParticipantDTO> participants = new ArrayList<>();
 	private Set<MapCoordinate> predefinedLocations = new HashSet<>();
+	private boolean isQuickMeeting = true;
 
 	public MeetingDTO() {
 
@@ -166,4 +167,11 @@ public class MeetingDTO {
 		}
 	}
 
+	public boolean isQuickMeeting() {
+		return isQuickMeeting;
+	}
+
+	public void setQuickMeeting(boolean quickMeeting) {
+		isQuickMeeting = quickMeeting;
+	}
 }

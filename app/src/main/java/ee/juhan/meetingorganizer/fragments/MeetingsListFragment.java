@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -159,6 +160,12 @@ public class MeetingsListFragment extends Fragment {
 			meetingTimeView.setText(
 					String.format("%s - %s", DateUtil.formatTime(meeting.getStartDateTime()),
 							DateUtil.formatTime(meeting.getEndDateTime())));
+
+			if (meeting.getStartDateTime().before(new Date()) &&
+					meeting.getEndDateTime().after(new Date())) {
+				LinearLayout itemLayout = (LinearLayout) super.getLayout();
+				itemLayout.setBackgroundColor(getResources().getColor(R.color.green_transparent));
+			}
 		}
 
 	}

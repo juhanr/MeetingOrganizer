@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
@@ -11,14 +12,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.rey.material.app.DatePickerDialog;
 import com.rey.material.app.Dialog;
 import com.rey.material.app.DialogFragment;
 import com.rey.material.app.TimePickerDialog;
+import com.rey.material.widget.CheckBox;
 import com.rey.material.widget.Spinner;
 
 import java.util.Calendar;
@@ -100,7 +102,10 @@ public class NewMeetingActivity extends AppCompatActivity {
 		Spinner locationInfo = (Spinner) newMeetingLayout.findViewById(R.id.spn_new_location);
 		Spinner participantsInfo =
 				(Spinner) newMeetingLayout.findViewById(R.id.spn_new_participants);
-		Button createButton = (Button) newMeetingLayout.findViewById(R.id.btn_new_create);
+		FloatingActionButton createButton = (FloatingActionButton) findViewById(R.id.fab_confirm);
+		CheckBox quickMeetingCheckBox = (CheckBox) findViewById(R.id.chk_quick_meeting);
+		com.rey.material.widget.EditText descriptionEditText =
+				(com.rey.material.widget.EditText) findViewById(R.id.edt_description);
 
 		dateButton.setAdapter(adapter);
 		dateButton.setClickable(false);
@@ -127,9 +132,34 @@ public class NewMeetingActivity extends AppCompatActivity {
 
 		createButton.setOnClickListener(view -> {
 			if (isValidData()) {
+				if (newMeetingModel.isQuickMeeting()) {
+					Date currentDateTime = new Date();
+					newMeetingModel.setStartDateTime(currentDateTime);
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(currentDateTime);
+					cal.add(Calendar.HOUR_OF_DAY, 1);
+					newMeetingModel.setEndDateTime(cal.getTime());
+				}
 				sendNewMeetingRequest();
 			}
 		});
+
+		quickMeetingCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			if (isChecked) {
+				newMeetingModel.setQuickMeeting(true);
+				descriptionEditText.setVisibility(View.GONE);
+				dateButton.setVisibility(View.GONE);
+				startTimeButton.setVisibility(View.GONE);
+				endTimeButton.setVisibility(View.GONE);
+			} else {
+				newMeetingModel.setQuickMeeting(false);
+				descriptionEditText.setVisibility(View.VISIBLE);
+				dateButton.setVisibility(View.VISIBLE);
+				startTimeButton.setVisibility(View.VISIBLE);
+				endTimeButton.setVisibility(View.VISIBLE);
+			}
+		});
+		quickMeetingCheckBox.setCheckedImmediately(newMeetingModel.isQuickMeeting());
 
 		UIUtil.setupEditTextFocusListeners(activity, newMeetingLayout);
 	}
@@ -137,7 +167,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 	private void setSavedDataViews() {
 		if (newMeetingModel.getTitle() != null) {
 			setViewText(R.id.edt_new_title, newMeetingModel.getTitle());
-			setViewText(R.id.edt_new_description, newMeetingModel.getDescription());
+			setViewText(R.id.edt_input_description, newMeetingModel.getDescription());
 		}
 		if (newMeetingModel.getStartDateTime() != null) {
 			setViewText(R.id.spn_new_date, DateUtil.formatDate(newMeetingModel.getStartDateTime()));
@@ -170,7 +200,12 @@ public class NewMeetingActivity extends AppCompatActivity {
 	private boolean isValidData() {
 		if (getViewText(R.id.edt_new_title).length() == 0) {
 			UIUtil.showToastMessage(this, getString(R.string.new_meeting_enter_title));
-		} else if (getViewText(R.id.spn_new_date)
+			return false;
+		}
+		if (newMeetingModel.isQuickMeeting()) {
+			return true;
+		}
+		if (getViewText(R.id.spn_new_date)
 				.equals(getString(R.string.new_meeting_touch_to_set))) {
 			UIUtil.showToastMessage(this, getString(R.string.new_meeting_set_date));
 		} else if (newMeetingModel.getStartDateTime() == null) {
@@ -221,7 +256,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 
 	private void saveData() {
 		newMeetingModel.setTitle(getViewText(R.id.edt_new_title));
-		newMeetingModel.setDescription(getViewText(R.id.edt_new_description));
+		newMeetingModel.setDescription(getViewText(R.id.edt_input_description));
 		newMeetingModel.setStartDateTime(DateUtil.parseDateTime(
 				getViewText(R.id.spn_new_date) + " " + getViewText(R.id.spn_new_start_time)));
 		newMeetingModel.setEndDateTime(DateUtil.parseDateTime(
@@ -305,8 +340,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 						UIUtil.showToastMessage(activity,
 								getString(R.string.contacts_meeting_created));
 						//						activity.changeFragmentToMeetingInfo(meeting);
-						NewMeetingActivity.setNewMeetingModel(new MeetingDTO());
-						finishWithResult();
+						finishWithResult(meeting);
 					}
 
 					@Override
@@ -317,9 +351,9 @@ public class NewMeetingActivity extends AppCompatActivity {
 				});
 	}
 
-	private void finishWithResult() {
+	private void finishWithResult(MeetingDTO meeting) {
 		Bundle conData = new Bundle();
-		conData.putString("param_result", "Thanks Thanks");
+		conData.putString("meeting", (new Gson()).toJson(meeting));
 		Intent intent = new Intent();
 		intent.putExtras(conData);
 		setResult(RESULT_OK, intent);

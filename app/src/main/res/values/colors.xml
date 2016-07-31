@@ -7,6 +7,7 @@
 	<item name="dark_gray" type="color">#707070</item>
 
 	<item name="green" type="color">#33CC00</item>
+	<item name="green_transparent" type="color">#50BCED91</item>
 
 	<item name="red" type="color">#CC0000</item>
 

@@ -22,6 +22,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.fragments.HistoryFragment;
 import ee.juhan.meetingorganizer.fragments.InvitationsFragment;
@@ -78,8 +80,11 @@ public class MainActivity extends AppCompatActivity
 		switch (requestCode) {
 			case 1:
 				if (resultCode == RESULT_OK) {
+					NewMeetingActivity.setNewMeetingModel(new MeetingDTO());
 					Bundle res = data.getExtras();
-					String result = res.getString("param_result");
+					MeetingDTO meeting =
+							(new Gson()).fromJson(res.getString("meeting"), MeetingDTO.class);
+					changeFragmentToMeetingInfoImmediately(meeting);
 				}
 				break;
 		}
@@ -126,7 +131,6 @@ public class MainActivity extends AppCompatActivity
 		if (newMeetingFAB != null) {
 			newMeetingFAB.setOnClickListener(view -> {
 				Intent myIntent = new Intent(getBaseContext(), NewMeetingActivity.class);
-				//					myIntent.putExtra("key", value); //Optional parameters
 				startActivityForResult(myIntent, 1);
 			});
 		}
@@ -253,14 +257,16 @@ public class MainActivity extends AppCompatActivity
 		resetBackStackCounter = true;
 	}
 
-	private void changeFragment(Fragment fragment) {
+	private void changeFragment(Fragment fragment, boolean showAnimation) {
 		if (fragment.getClass().equals(currentFragmentClass)) {
 			return;
 		}
 		currentFragmentClass = fragment.getClass();
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
-		ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_right,
-				R.animator.slide_in_right, R.animator.slide_out_left);
+		if (showAnimation) {
+			ft.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_right,
+					R.animator.slide_in_right, R.animator.slide_out_left);
+		}
 		ft.replace(R.id.fragment_container, fragment);
 		if (resetBackStackCounter) {
 			backStackCounter = getFragmentManager().getBackStackEntryCount();
@@ -269,6 +275,10 @@ public class MainActivity extends AppCompatActivity
 			ft.addToBackStack(null);
 		}
 		ft.commit();
+	}
+
+	private void changeFragment(Fragment fragment) {
+		changeFragment(fragment, true);
 	}
 
 	public final void changeFragmentToMeetings() {
@@ -293,6 +303,10 @@ public class MainActivity extends AppCompatActivity
 
 	public final void changeFragmentToMeetingInfo(MeetingDTO meeting) {
 		changeFragment(MeetingInfoFragment.newInstance(meeting));
+	}
+
+	public final void changeFragmentToMeetingInfoImmediately(MeetingDTO meeting) {
+		changeFragment(MeetingInfoFragment.newInstance(meeting), false);
 	}
 
 	public final void changeFragmentToParticipantInfo(ParticipantDTO participant) {

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<android.support.design.widget.CoordinatorLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:fillViewport="true"
 	android:layout_height="match_parent"
 	android:layout_width="match_parent">
 
 	<RelativeLayout
-		android:layout_height="wrap_content"
+		android:layout_height="match_parent"
+		android:layout_marginTop="?attr/actionBarSize"
 		android:layout_width="match_parent">
 
 		<ProgressBar
@@ -16,27 +16,37 @@
 			android:layout_centerInParent="true"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="8dp"
-			android:layout_marginTop="?attr/actionBarSize"
 			android:layout_width="wrap_content"
 			android:visibility="gone"/>
+
+	</RelativeLayout>
+
+	<ScrollView
+		android:layout_height="match_parent"
+		android:layout_width="match_parent">
 
 		<LinearLayout
 			style="@style/FragmentLayout"
 			android:clickable="true"
 			android:focusableInTouchMode="true"
-			android:gravity="center"
+			android:gravity="center|left"
 			android:id="@+id/layout_content"
 			android:layout_height="wrap_content"
 			android:layout_width="match_parent"
 			android:orientation="vertical"
 			android:weightSum="1.0">
 
+			<com.rey.material.widget.CheckBox
+				android:gravity="center_vertical"
+				android:id="@+id/chk_quick_meeting"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:text="Quick meeting"/>
+
 			<com.rey.material.widget.EditText
 				style="@style/LightEditText"
 				android:hint="@string/msg_title"
 				android:inputType="textCapSentences"
-				android:layout_marginBottom="@dimen/view_margin_small"
-				android:layout_marginTop="0dp"
 				app:et_inputId="@+id/edt_new_title"
 				app:et_supportMaxChars="20"
 				app:et_supportMode="charCounter"/>
@@ -44,9 +54,9 @@
 			<com.rey.material.widget.EditText
 				style="@style/LightEditText"
 				android:hint="@string/msg_description"
+				android:id="@+id/edt_description"
 				android:inputType="textMultiLine"
-				android:layout_marginBottom="@dimen/view_margin_medium"
-				app:et_inputId="@+id/edt_new_description"
+				app:et_inputId="@+id/edt_input_description"
 				app:et_supportMaxChars="255"
 				app:et_supportMode="charCounter"/>
 
@@ -80,16 +90,17 @@
 				android:layout_marginBottom="@dimen/view_margin_small"
 				app:spn_label="Participants"/>
 
-			<include layout="@layout/view_empty_space"/>
-
-			<com.rey.material.widget.Button
-				style="@style/RaisedButtonColored"
-				android:id="@+id/btn_new_create"
-				android:layout_marginTop="@dimen/view_margin_large"
-				android:text="@string/action_create"/>
-
 		</LinearLayout>
 
-	</RelativeLayout>
+	</ScrollView>
 
-</ScrollView>
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab_confirm"
+		android:layout_gravity="bottom|end"
+		android:layout_height="wrap_content"
+		android:layout_margin="@dimen/fab_margin"
+		android:layout_width="wrap_content"
+		android:src="@drawable/ic_check_mark"
+		android:tint="@color/white"/>
+
+</android.support.design.widget.CoordinatorLayout>
