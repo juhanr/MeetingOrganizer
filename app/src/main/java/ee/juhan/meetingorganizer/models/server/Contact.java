@@ -1,17 +1,17 @@
 package ee.juhan.meetingorganizer.models.server;
 
-public class ContactDTO {
+public class Contact {
 
 	private int accountId;
 	private String name;
 	private String email;
 	private String phoneNumber;
 
-	public ContactDTO() {
+	public Contact() {
 
 	}
 
-	public ContactDTO(String name, String email, String phoneNumber) {
+	public Contact(String name, String email, String phoneNumber) {
 		this.name = name;
 		this.email = email;
 		this.phoneNumber = phoneNumber;
@@ -21,7 +21,7 @@ public class ContactDTO {
 	public boolean equals(Object o) {
 		if (this == o) { return true; }
 		if (o == null || getClass() != o.getClass()) { return false; }
-		ContactDTO that = (ContactDTO) o;
+		Contact that = (Contact) o;
 		return phoneNumber.equals(that.phoneNumber);
 
 	}

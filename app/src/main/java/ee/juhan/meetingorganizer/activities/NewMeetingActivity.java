@@ -28,11 +28,12 @@ import java.util.Date;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.fragments.dialogs.YesNoFragment;
-import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
+import ee.juhan.meetingorganizer.fragments.listeners.LocationClient;
 import ee.juhan.meetingorganizer.models.server.LocationType;
-import ee.juhan.meetingorganizer.models.server.MeetingDTO;
-import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
+import ee.juhan.meetingorganizer.models.server.Meeting;
+import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
+import ee.juhan.meetingorganizer.models.server.SendGpsLocationAnswer;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
@@ -42,16 +43,16 @@ import retrofit.client.Response;
 
 public class NewMeetingActivity extends AppCompatActivity {
 
-	private static MeetingDTO newMeetingModel = new MeetingDTO();
+	private static Meeting newMeetingModel = new Meeting();
 	private ViewGroup newMeetingLayout;
 	private View progressView;
 	private Activity activity = this;
 
-	public static MeetingDTO getNewMeetingModel() {
+	public static Meeting getNewMeetingModel() {
 		return NewMeetingActivity.newMeetingModel;
 	}
 
-	public static void setNewMeetingModel(MeetingDTO meetingModel) {
+	public static void setNewMeetingModel(Meeting meetingModel) {
 		NewMeetingActivity.newMeetingModel = meetingModel;
 	}
 
@@ -145,6 +146,8 @@ public class NewMeetingActivity extends AppCompatActivity {
 		});
 
 		quickMeetingCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			newMeetingModel.setLocation(null);
+			newMeetingModel.setLocationType(LocationType.SPECIFIC_LOCATION);
 			if (isChecked) {
 				newMeetingModel.setQuickMeeting(true);
 				descriptionEditText.setVisibility(View.GONE);
@@ -179,13 +182,10 @@ public class NewMeetingActivity extends AppCompatActivity {
 			setViewText(R.id.spn_new_end_time,
 					DateUtil.formatTime(newMeetingModel.getEndDateTime()));
 		}
-		if (newMeetingModel.getLocationType() == LocationType.SPECIFIC_LOCATION &&
-				newMeetingModel.getLocation() != null || newMeetingModel.getLocationType() ==
-				LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
-				!newMeetingModel.getPredefinedLocations().isEmpty()) {
-			setViewText(R.id.spn_new_location, getString(R.string.new_meeting_touch_to_view));
-		} else {
+		if (newMeetingModel.getLocationType() == LocationType.NOT_SET) {
 			setViewText(R.id.spn_new_location, getString(R.string.new_meeting_touch_to_set));
+		} else {
+			setViewText(R.id.spn_new_location, getString(R.string.new_meeting_touch_to_view));
 		}
 		if (newMeetingModel.getParticipants().isEmpty()) {
 			setViewText(R.id.spn_new_participants, getString(R.string.new_meeting_touch_to_set));
@@ -205,8 +205,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 		if (newMeetingModel.isQuickMeeting()) {
 			return true;
 		}
-		if (getViewText(R.id.spn_new_date)
-				.equals(getString(R.string.new_meeting_touch_to_set))) {
+		if (getViewText(R.id.spn_new_date).equals(getString(R.string.new_meeting_touch_to_set))) {
 			UIUtil.showToastMessage(this, getString(R.string.new_meeting_set_date));
 		} else if (newMeetingModel.getStartDateTime() == null) {
 			UIUtil.showToastMessage(this, getString(R.string.new_meeting_set_start_time));
@@ -265,9 +264,10 @@ public class NewMeetingActivity extends AppCompatActivity {
 
 	private void addLeaderInfo() {
 		NewMeetingActivity.getNewMeetingModel().setLeaderId(getAccountId());
-		ParticipantDTO participant =
-				new ParticipantDTO(NewMeetingActivity.getNewMeetingModel().getLeaderId(),
-						ParticipationAnswer.PARTICIPATING, MyLocationListener.getMyLocation());
+		Participant participant =
+				new Participant(NewMeetingActivity.getNewMeetingModel().getLeaderId(),
+						ParticipationAnswer.PARTICIPATING, SendGpsLocationAnswer.NO_ANSWER,
+						LocationClient.getMyLocation(), new Date());
 		NewMeetingActivity.getNewMeetingModel().addParticipant(participant);
 	}
 
@@ -282,18 +282,18 @@ public class NewMeetingActivity extends AppCompatActivity {
 
 /*	private void checkParticipantsWithoutAccount() {
 		if (participantsWithoutAccount > 0) {
-			showAskSMSDialog();
+			showAskSmsDialog();
 		} else {
 			sendNewMeetingRequest();
 		}
 	}*/
 
-	private void showAskSMSDialog() {
+	private void showAskSmsDialog() {
 		final YesNoFragment dialog = new YesNoFragment();
 		//		dialog.setMessage(
 		//				participantsWithoutAccount + getString(R.string.textview_info_invite_via_sms));
 		dialog.setPositiveButton(view -> {
-			showWriteSMSDialog();
+			showWriteSmsDialog();
 			dialog.dismiss();
 		});
 		dialog.setNegativeButton(view -> {
@@ -304,12 +304,12 @@ public class NewMeetingActivity extends AppCompatActivity {
 		dialog.show(getFragmentManager(), "YesNoFragment");
 	}
 
-	private void showWriteSMSDialog() {
+	private void showWriteSmsDialog() {
 		final YesNoFragment dialog = new YesNoFragment();
 		dialog.setMessage(getString(R.string.dialog_please_write_sms));
 		dialog.setInputText(getString(R.string.dialog_msg_invite_via_sms));
 		dialog.setPositiveButton(getString(R.string.action_send_sms), view -> {
-			sendInvitationSMS(dialog.getInputValue());
+			sendInvitationSms(dialog.getInputValue());
 			sendNewMeetingRequest();
 			dialog.dismiss();
 		});
@@ -317,9 +317,9 @@ public class NewMeetingActivity extends AppCompatActivity {
 		dialog.show(getFragmentManager(), "YesNoFragment");
 	}
 
-	private void sendInvitationSMS(String smsMessage) {
+	private void sendInvitationSms(String smsMessage) {
 		SmsManager smsManager = SmsManager.getDefault();
-		for (ParticipantDTO participant : NewMeetingActivity.getNewMeetingModel()
+		for (Participant participant : NewMeetingActivity.getNewMeetingModel()
 				.getParticipants()) {
 			if (participant.getAccountId() == 0) {
 				smsManager.sendTextMessage(participant.getPhoneNumber(), null, smsMessage, null,
@@ -332,10 +332,9 @@ public class NewMeetingActivity extends AppCompatActivity {
 		addLeaderInfo();
 		showProgress(true);
 		RestClient.get().newMeetingRequest(NewMeetingActivity.getNewMeetingModel(),
-				new Callback<MeetingDTO>() {
+				new Callback<Meeting>() {
 					@Override
-					public void success(MeetingDTO meeting, Response response) {
-						meeting.toUTCTimeZone();
+					public void success(Meeting meeting, Response response) {
 						showProgress(false);
 						UIUtil.showToastMessage(activity,
 								getString(R.string.contacts_meeting_created));
@@ -351,7 +350,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 				});
 	}
 
-	private void finishWithResult(MeetingDTO meeting) {
+	private void finishWithResult(Meeting meeting) {
 		Bundle conData = new Bundle();
 		conData.putString("meeting", (new Gson()).toJson(meeting));
 		Intent intent = new Intent();

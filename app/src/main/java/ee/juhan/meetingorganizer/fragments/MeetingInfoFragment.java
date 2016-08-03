@@ -20,10 +20,10 @@ import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.activities.LocationActivity;
 import ee.juhan.meetingorganizer.activities.MainActivity;
 import ee.juhan.meetingorganizer.adapters.GroupedListAdapter;
-import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
+import ee.juhan.meetingorganizer.fragments.listeners.LocationClient;
 import ee.juhan.meetingorganizer.models.server.LocationType;
-import ee.juhan.meetingorganizer.models.server.MeetingDTO;
-import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
+import ee.juhan.meetingorganizer.models.server.Meeting;
+import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
@@ -37,12 +37,12 @@ public class MeetingInfoFragment extends Fragment {
 	private String title;
 	private MainActivity activity;
 	private ViewGroup meetingInfoLayout;
-	private MeetingDTO meeting;
+	private Meeting meeting;
 
-	private List<ParticipantDTO> participantsList;
+	private List<Participant> participantsList;
 	private ParticipantsAdapter adapter;
 
-	public static MeetingInfoFragment newInstance(MeetingDTO meeting) {
+	public static MeetingInfoFragment newInstance(Meeting meeting) {
 		MeetingInfoFragment fragment = new MeetingInfoFragment();
 		fragment.setMeeting(meeting);
 		return fragment;
@@ -77,21 +77,39 @@ public class MeetingInfoFragment extends Fragment {
 
 	@Override
 	public void onDestroyView() {
-		activity.showLocationFAB(false);
+		activity.showLocationFab(false);
 		super.onDestroyView();
 	}
 
-	public void setMeeting(MeetingDTO meeting) {
+	public void setMeeting(Meeting meeting) {
 		this.meeting = meeting;
 	}
 
 	private void populateLayout() {
 		TextView title = (TextView) meetingInfoLayout.findViewById(R.id.txt_meeting_title);
+		TextView status = (TextView) meetingInfoLayout.findViewById(R.id.txt_meeting_status);
 		TextView description =
 				(TextView) meetingInfoLayout.findViewById(R.id.txt_meeting_description);
 		TextView date = (TextView) meetingInfoLayout.findViewById(R.id.txt_meeting_date);
 		TextView time = (TextView) meetingInfoLayout.findViewById(R.id.txt_meeting_time);
+
 		title.setText(meeting.getTitle());
+
+		switch (meeting.getStatus()) {
+			case ACTIVE:
+				status.setVisibility(View.GONE);
+				break;
+			case CANCELLED:
+				status.setText(getString(R.string.meeting_cancelled));
+				break;
+			case WAITING_LOCATION_CHOICE:
+				status.setText(getString(R.string.meeting_waiting_location_choice));
+				break;
+			case WAITING_PARTICIPANT_ANSWERS:
+				status.setText(getString(R.string.meeting_waiting_participant_answers));
+				break;
+		}
+
 		if (meeting.getDescription().trim().isEmpty()) {
 			description.setVisibility(View.GONE);
 		} else {
@@ -102,11 +120,19 @@ public class MeetingInfoFragment extends Fragment {
 				DateUtil.formatTime(meeting.getEndDateTime())));
 
 		setAnswerButtons();
+
+		if (meeting.isOngoing()) {
+			setUpOngoingMeetingViews();
+		}
+	}
+
+	private void setUpOngoingMeetingViews() {
+
 	}
 
 	private void setButtonListeners() {
 		if (meeting.getLocation() != null) {
-			activity.showLocationFAB(true);
+			activity.showLocationFab(true);
 			FloatingActionButton showLocation =
 					(FloatingActionButton) activity.findViewById(R.id.fab_location);
 			showLocation.setOnClickListener(view -> {
@@ -122,32 +148,32 @@ public class MeetingInfoFragment extends Fragment {
 	}
 
 	private void setAnswerButtons() {
-		final ParticipantDTO participantObject = getParticipantObject();
+		final Participant participantObject = getParticipantObject();
 		if (participantObject != null &&
-				participantObject.getParticipationAnswer() == ParticipationAnswer.NOT_ANSWERED &&
+				participantObject.getParticipationAnswer() == ParticipationAnswer.NO_ANSWER &&
 				meeting.getEndDateTime().after(new Date())) {
 			Button acceptInvitation =
 					(Button) meetingInfoLayout.findViewById(R.id.accept_invitation);
 			Button denyInvitation = (Button) meetingInfoLayout.findViewById(R.id.deny_invitation);
 			acceptInvitation.setOnClickListener(view -> {
-				if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
-						MyLocationListener.getMyLocation() != null ||
+				if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREFERRED_LOCATIONS &&
+						LocationClient.getMyLocation() != null ||
 						meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
-					participantObject.setLocation(MyLocationListener.getMyLocation());
+					participantObject.setLocation(LocationClient.getMyLocation());
 					participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
-					sendUpdateParticipantRequest(participantObject);
+					sendUpdateParticipationAnswerRequest(participantObject);
 				} else {
 					UIUtil.showToastMessage(activity,
 							getString(R.string.location_get_your_location));
 				}
 			});
 			denyInvitation.setOnClickListener(view -> {
-				if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREDEFINED_LOCATIONS &&
-						MyLocationListener.getMyLocation() != null ||
+				if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREFERRED_LOCATIONS &&
+						LocationClient.getMyLocation() != null ||
 						meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
-					participantObject.setLocation(MyLocationListener.getMyLocation());
+					participantObject.setLocation(LocationClient.getMyLocation());
 					participantObject.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
-					sendUpdateParticipantRequest(participantObject);
+					sendUpdateParticipationAnswerRequest(participantObject);
 				} else {
 					UIUtil.showToastMessage(activity,
 							getString(R.string.location_get_your_location));
@@ -160,15 +186,14 @@ public class MeetingInfoFragment extends Fragment {
 		}
 	}
 
-	private void sendUpdateParticipantRequest(ParticipantDTO participantDTO) {
+	private void sendUpdateParticipationAnswerRequest(Participant participant) {
 		activity.showProgress(true);
-		RestClient.get().updateParticipantRequest(participantDTO, meeting.getId(),
-				new Callback<MeetingDTO>() {
+		RestClient.get().updateParticipationAnswerRequest(participant, meeting.getId(),
+				new Callback<Meeting>() {
 					@Override
-					public void success(MeetingDTO meetingDTO, Response response) {
+					public void success(Meeting meeting, Response response) {
 						activity.showProgress(false);
-						meeting = meetingDTO;
-						meeting.toUTCTimeZone();
+						MeetingInfoFragment.this.meeting = meeting;
 						populateLayout();
 					}
 
@@ -180,9 +205,9 @@ public class MeetingInfoFragment extends Fragment {
 				});
 	}
 
-	private ParticipantDTO getParticipantObject() {
+	private Participant getParticipantObject() {
 		int accountId = activity.getAccountId();
-		for (ParticipantDTO participant : meeting.getParticipants()) {
+		for (Participant participant : meeting.getParticipants()) {
 			if (participant.getAccountId() == accountId) {
 				return participant;
 			}
@@ -196,7 +221,7 @@ public class MeetingInfoFragment extends Fragment {
 
 			GroupedListAdapter.GroupedListItem item = adapter.getItem(position);
 			if (!item.isGroupItem()) {
-				ParticipantDTO participant = (ParticipantDTO) item.getObject();
+				Participant participant = (Participant) item.getObject();
 				activity.changeFragmentToParticipantInfo(participant);
 			}
 		});
@@ -211,7 +236,7 @@ public class MeetingInfoFragment extends Fragment {
 		notAttending.add(new GroupedListAdapter.GroupedListItem("Not going"));
 		List<GroupedListAdapter.GroupedListItem> invited = new ArrayList<>();
 		invited.add(new GroupedListAdapter.GroupedListItem("Invited"));
-		for (ParticipantDTO participant : participantsList) {
+		for (Participant participant : participantsList) {
 			switch (participant.getParticipationAnswer()) {
 				case PARTICIPATING:
 					attending.add(new GroupedListAdapter.GroupedListItem<>(participant));
@@ -219,7 +244,7 @@ public class MeetingInfoFragment extends Fragment {
 				case NOT_PARTICIPATING:
 					notAttending.add(new GroupedListAdapter.GroupedListItem<>(participant));
 					break;
-				case NOT_ANSWERED:
+				case NO_ANSWER:
 					invited.add(new GroupedListAdapter.GroupedListItem<>(participant));
 					break;
 			}
@@ -245,7 +270,7 @@ public class MeetingInfoFragment extends Fragment {
 
 		@Override
 		protected void populateLayout() {
-			ParticipantDTO participant = (ParticipantDTO) super.getCurrentItem().getObject();
+			Participant participant = (Participant) super.getCurrentItem().getObject();
 			TextView participantNameView =
 					(TextView) super.getLayout().findViewById(R.id.participant_name);
 			if (participant.getName() == null) {
@@ -255,6 +280,13 @@ public class MeetingInfoFragment extends Fragment {
 			}
 			if (participant.getAccountId() != 0) {
 				super.addIcon(R.drawable.ic_account_box_black_18dp, R.color.dark_gray);
+			}
+			if (meeting.isOngoing()) {
+				if (participant.getLocation() == null) {
+					super.addIcon(R.drawable.ic_remove_marker_black_18dp, R.color.red);
+				} else {
+					super.addIcon(R.drawable.ic_marker_black_18dp, R.color.green);
+				}
 			}
 		}
 

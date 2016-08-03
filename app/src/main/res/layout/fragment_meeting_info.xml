@@ -19,8 +19,16 @@
 
 		<TextView
 			style="@style/TextSecondary"
-			android:id="@+id/txt_meeting_description"
+			android:id="@+id/txt_meeting_status"
 			android:layout_below="@id/txt_meeting_title"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:paddingBottom="5dp"/>
+
+		<TextView
+			style="@style/TextSecondary"
+			android:id="@+id/txt_meeting_description"
+			android:layout_below="@id/txt_meeting_status"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
 			android:paddingBottom="5dp"/>
@@ -63,6 +71,14 @@
 			android:layout_toRightOf="@id/img_time"
 			android:layout_width="wrap_content"/>
 
+		<com.rey.material.widget.CheckBox
+			android:gravity="center_vertical"
+			android:id="@+id/chk_send_my_location"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_below="@id/img_time"
+			android:text="Send my GPS location to other participants"/>
+
 		<LinearLayout
 			android:id="@+id/invitation_answer_buttons"
 			android:layout_height="wrap_content"
@@ -94,7 +110,7 @@
 		<TextView
 			style="@style/TextPrimary"
 			android:id="@+id/txt_meeting_participants"
-			android:layout_below="@id/img_time"
+			android:layout_below="@id/chk_send_my_location"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
 			android:paddingBottom="10dp"

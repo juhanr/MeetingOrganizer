@@ -36,7 +36,7 @@ public final class RestClient {
 		return client;
 	}
 
-	public static void setSID(String sid) {
+	public static void setSid(String sid) {
 		RestClient.sid = sid;
 	}
 

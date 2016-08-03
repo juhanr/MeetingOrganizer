@@ -19,7 +19,7 @@ import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.activities.MainActivity;
 import ee.juhan.meetingorganizer.adapters.GroupedListAdapter;
 import ee.juhan.meetingorganizer.adapters.GroupedListAdapter.GroupedListItem;
-import ee.juhan.meetingorganizer.models.server.MeetingDTO;
+import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
@@ -36,7 +36,7 @@ public class MeetingsListFragment extends Fragment {
 	private MainActivity activity;
 	private ViewGroup meetingsListLayout;
 	private MeetingsAdapter adapter;
-	private List<MeetingDTO> meetingsList;
+	private List<Meeting> meetingsList;
 
 	public MeetingsListFragment() {
 		this.title = "Meetings";
@@ -81,14 +81,11 @@ public class MeetingsListFragment extends Fragment {
 		final Fragment fragment = this;
 		activity.showProgress(true);
 		RestClient.get().getMeetingsRequest(meetingsType, activity.getAccountId(),
-				new Callback<List<MeetingDTO>>() {
+				new Callback<List<Meeting>>() {
 					@Override
-					public void success(final List<MeetingDTO> meetingDTOList, Response response) {
+					public void success(final List<Meeting> meetingList, Response response) {
 						activity.showProgress(false);
-						meetingsList = meetingDTOList;
-						for (MeetingDTO meeting : meetingsList) {
-							meeting.toUTCTimeZone();
-						}
+						meetingsList = meetingList;
 						activity.refreshFragment(fragment);
 					}
 
@@ -105,7 +102,7 @@ public class MeetingsListFragment extends Fragment {
 		listview.setOnItemClickListener((parent, view, position, id) -> {
 			GroupedListItem item = adapter.getItem(position);
 			if (!item.isGroupItem()) {
-				MeetingDTO meeting = (MeetingDTO) item.getObject();
+				Meeting meeting = (Meeting) item.getObject();
 				((MainActivity) getActivity()).changeFragmentToMeetingInfo(meeting);
 			}
 		});
@@ -116,7 +113,7 @@ public class MeetingsListFragment extends Fragment {
 	private List<GroupedListAdapter.GroupedListItem> getGroupedListItems() {
 		List<GroupedListItem> groupedListItems = new ArrayList<>();
 		Date currentGroupDate = new Date(Long.MIN_VALUE);
-		for (MeetingDTO meeting : meetingsList) {
+		for (Meeting meeting : meetingsList) {
 			if (!DateUtil.dateEquals(meeting.getStartDateTime(), currentGroupDate)) {
 				currentGroupDate = meeting.getStartDateTime();
 				GroupedListItem groupItem;
@@ -144,7 +141,7 @@ public class MeetingsListFragment extends Fragment {
 
 		@Override
 		protected void populateLayout() {
-			MeetingDTO meeting = (MeetingDTO) super.getCurrentItem().getObject();
+			Meeting meeting = (Meeting) super.getCurrentItem().getObject();
 			TextView meetingTitleView =
 					(TextView) super.getLayout().findViewById(R.id.txt_meeting_title);
 			TextView meetingDescView =
@@ -161,8 +158,7 @@ public class MeetingsListFragment extends Fragment {
 					String.format("%s - %s", DateUtil.formatTime(meeting.getStartDateTime()),
 							DateUtil.formatTime(meeting.getEndDateTime())));
 
-			if (meeting.getStartDateTime().before(new Date()) &&
-					meeting.getEndDateTime().after(new Date())) {
+			if (meeting.isOngoing()) {
 				LinearLayout itemLayout = (LinearLayout) super.getLayout();
 				itemLayout.setBackgroundColor(getResources().getColor(R.color.green_transparent));
 			}

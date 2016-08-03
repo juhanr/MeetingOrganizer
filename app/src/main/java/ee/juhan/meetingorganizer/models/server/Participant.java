@@ -1,26 +1,36 @@
 package ee.juhan.meetingorganizer.models.server;
 
-public class ParticipantDTO {
+import java.util.Date;
+
+import ee.juhan.meetingorganizer.util.DateUtil;
+
+public class Participant {
 
 	private int id;
 	private int accountId;
 	private String name;
 	private String email;
 	private String phoneNumber;
-	private ParticipationAnswer participationAnswer = ParticipationAnswer.NOT_ANSWERED;
+	private ParticipationAnswer participationAnswer = ParticipationAnswer.NO_ANSWER;
+	private SendGpsLocationAnswer sendGpsLocationAnswer = SendGpsLocationAnswer.NO_ANSWER;
 	private MapCoordinate location;
+	private Date locationTimestamp;
 
-	public ParticipantDTO() {
-	}
+	private boolean isUTCTimeZone = false;
 
-	public ParticipantDTO(int accountId, ParticipationAnswer participationAnswer,
-			MapCoordinate location) {
+	public Participant() {}
+
+	public Participant(int accountId, ParticipationAnswer participationAnswer,
+			SendGpsLocationAnswer sendGpsLocationAnswer, MapCoordinate location,
+			Date locationTimestamp) {
 		this.accountId = accountId;
 		this.participationAnswer = participationAnswer;
+		this.sendGpsLocationAnswer = sendGpsLocationAnswer;
 		this.location = location;
+		this.setLocationTimestamp(locationTimestamp);
 	}
 
-	public ParticipantDTO(int accountId, String name, String email, String phoneNumber) {
+	public Participant(int accountId, String name, String email, String phoneNumber) {
 		this.accountId = accountId;
 		this.name = name;
 		this.email = email;
@@ -75,12 +85,29 @@ public class ParticipantDTO {
 		this.participationAnswer = participationAnswer;
 	}
 
+	public SendGpsLocationAnswer getSendGpsLocationAnswer() {
+		return sendGpsLocationAnswer;
+	}
+
+	public void setSendGpsLocationAnswer(SendGpsLocationAnswer sendGpsLocationAnswer) {
+		this.sendGpsLocationAnswer = sendGpsLocationAnswer;
+	}
+
 	public final MapCoordinate getLocation() {
 		return location;
 	}
 
 	public final void setLocation(MapCoordinate location) {
 		this.location = location;
+	}
+
+	public Date getLocationTimestamp() {
+		return isUTCTimeZone ? DateUtil.toLocalTimezone(locationTimestamp) : locationTimestamp;
+	}
+
+	public void setLocationTimestamp(Date locationTimestamp) {
+		this.locationTimestamp = DateUtil.toUTCTimezone(locationTimestamp);
+		this.isUTCTimeZone = true;
 	}
 
 }

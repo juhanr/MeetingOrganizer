@@ -1,6 +1,6 @@
 package ee.juhan.meetingorganizer.models.server;
 
-public class AccountDTO {
+public class Account {
 
 	private int accountId;
 	private String name;
@@ -8,16 +8,16 @@ public class AccountDTO {
 	private String password;
 	private String phoneNumber;
 
-	public AccountDTO() {}
+	public Account() {}
 
-	public AccountDTO(String name, String email, String password, String phoneNumber) {
+	public Account(String name, String email, String password, String phoneNumber) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.phoneNumber = phoneNumber;
 	}
 
-	public AccountDTO(String email, String password) {
+	public Account(String email, String password) {
 		this.email = email;
 		this.password = password;
 	}

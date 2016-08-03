@@ -13,19 +13,19 @@ import android.widget.TextView;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.activities.MainActivity;
-import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
+import ee.juhan.meetingorganizer.models.server.Participant;
 
 public class ParticipantInfoFragment extends Fragment {
 
 	private String title;
 	private MainActivity activity;
 	private ViewGroup participantInfoLayout;
-	private ParticipantDTO participant;
+	private Participant participant;
 
 	public ParticipantInfoFragment() {}
 
 	@SuppressLint("ValidFragment")
-	public ParticipantInfoFragment(ParticipantDTO participant) {
+	public ParticipantInfoFragment(Participant participant) {
 		this.participant = participant;
 	}
 
@@ -49,13 +49,13 @@ public class ParticipantInfoFragment extends Fragment {
 
 	@Override
 	public void onDestroyView() {
-		activity.showEmailFAB(false);
-		activity.showSmsFAB(false);
-		activity.showCallFAB(false);
+		activity.showEmailFab(false);
+		activity.showSmsFab(false);
+		activity.showCallFab(false);
 		super.onDestroyView();
 	}
 
-	private void populateLayout(ParticipantDTO participant) {
+	private void populateLayout(Participant participant) {
 		TextView name = (TextView) participantInfoLayout.findViewById(R.id.participant_name);
 		TextView phoneNumber =
 				(TextView) participantInfoLayout.findViewById(R.id.participant_phone_number);
@@ -65,13 +65,13 @@ public class ParticipantInfoFragment extends Fragment {
 		if (participant.getEmail() == null || participant.getEmail().isEmpty()) {
 			email.setVisibility(View.GONE);
 			participantInfoLayout.findViewById(R.id.img_email).setVisibility(View.GONE);
-			activity.showEmailFAB(false);
+			activity.showEmailFab(false);
 		} else {
 			email.setText(participant.getEmail());
-			activity.showEmailFAB(true);
+			activity.showEmailFab(true);
 		}
-		activity.showSmsFAB(true);
-		activity.showCallFAB(true);
+		activity.showSmsFab(true);
+		activity.showCallFab(true);
 	}
 
 	private void setupFABListeners() {

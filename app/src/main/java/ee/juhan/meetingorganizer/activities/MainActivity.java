@@ -32,9 +32,9 @@ import ee.juhan.meetingorganizer.fragments.MeetingInfoFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
 import ee.juhan.meetingorganizer.fragments.ParticipantInfoFragment;
 import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
-import ee.juhan.meetingorganizer.models.server.AccountDTO;
-import ee.juhan.meetingorganizer.models.server.MeetingDTO;
-import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
+import ee.juhan.meetingorganizer.models.server.Account;
+import ee.juhan.meetingorganizer.models.server.Meeting;
+import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.UIUtil;
 
@@ -64,10 +64,10 @@ public class MainActivity extends AppCompatActivity
 		fragmentContainer = findViewById(R.id.fragment_container);
 		setupListeners();
 		checkIfLoggedIn();
-		showLocationFAB(false);
-		showEmailFAB(false);
-		showSmsFAB(false);
-		showCallFAB(false);
+		showLocationFab(false);
+		showEmailFab(false);
+		showSmsFab(false);
+		showCallFab(false);
 	}
 
 	@Override
@@ -80,10 +80,10 @@ public class MainActivity extends AppCompatActivity
 		switch (requestCode) {
 			case 1:
 				if (resultCode == RESULT_OK) {
-					NewMeetingActivity.setNewMeetingModel(new MeetingDTO());
+					NewMeetingActivity.setNewMeetingModel(new Meeting());
 					Bundle res = data.getExtras();
-					MeetingDTO meeting =
-							(new Gson()).fromJson(res.getString("meeting"), MeetingDTO.class);
+					Meeting meeting =
+							(new Gson()).fromJson(res.getString("meeting"), Meeting.class);
 					changeFragmentToMeetingInfoImmediately(meeting);
 				}
 				break;
@@ -147,23 +147,23 @@ public class MainActivity extends AppCompatActivity
 
 	private void checkIfLoggedIn() {
 		resetBackStack();
-		if (getSID() == null) { // logged out
+		if (getSid() == null) { // logged out
 			setUpDrawer();
 			setEmail(getString(R.string.drawer_not_logged_in));
 			changeFragmentToLogIn();
-			showNewMeetingFAB(false);
+			showNewMeetingFab(false);
 		} else { // logged in
-			RestClient.setSID(getSID());
+			RestClient.setSid(getSid());
 			isLoggedIn = true;
 			setUpDrawer();
 			setEmail(sharedPref.getString("email", ""));
 			setName(sharedPref.getString("name", ""));
 			changeFragmentToMeetings();
-			showNewMeetingFAB(true);
+			showNewMeetingFab(true);
 		}
 	}
 
-	public final String getSID() {
+	public final String getSid() {
 		return sharedPref.getString("sid", null);
 	}
 
@@ -176,31 +176,30 @@ public class MainActivity extends AppCompatActivity
 	}
 
 
-	public final void logIn(String sid, AccountDTO accountDTO) {
-		sharedPref.edit().putString("email", accountDTO.getEmail()).putString("sid", sid)
-				.putInt("accountId", accountDTO.getAccountId())
-				.putString("name", accountDTO.getName())
-				.putString("phone", accountDTO.getPhoneNumber()).apply();
-		RestClient.setSID(sid);
-		setEmail(accountDTO.getEmail());
-		setName(accountDTO.getName());
+	public final void logIn(String sid, Account account) {
+		sharedPref.edit().putString("email", account.getEmail()).putString("sid", sid)
+				.putInt("accountId", account.getAccountId()).putString("name", account.getName())
+				.putString("phone", account.getPhoneNumber()).apply();
+		RestClient.setSid(sid);
+		setEmail(account.getEmail());
+		setName(account.getName());
 		isLoggedIn = true;
 		setUpDrawer();
 		resetBackStack();
 		changeFragmentToMeetings();
-		showNewMeetingFAB(true);
+		showNewMeetingFab(true);
 	}
 
 	private void logOut() {
 		sharedPref.edit().putString("email", null).putString("sid", null).putInt("accountId", 0)
 				.putString("name", null).putString("phone", null).apply();
-		RestClient.setSID(null);
+		RestClient.setSid(null);
 		setEmail(getString(R.string.drawer_not_logged_in));
 		isLoggedIn = false;
 		setUpDrawer();
 		resetBackStack();
 		changeFragmentToLogIn();
-		showNewMeetingFAB(false);
+		showNewMeetingFab(false);
 	}
 
 	private void setEmail(String email) {
@@ -301,15 +300,15 @@ public class MainActivity extends AppCompatActivity
 		changeFragment(new RegistrationFragment());
 	}
 
-	public final void changeFragmentToMeetingInfo(MeetingDTO meeting) {
+	public final void changeFragmentToMeetingInfo(Meeting meeting) {
 		changeFragment(MeetingInfoFragment.newInstance(meeting));
 	}
 
-	public final void changeFragmentToMeetingInfoImmediately(MeetingDTO meeting) {
+	public final void changeFragmentToMeetingInfoImmediately(Meeting meeting) {
 		changeFragment(MeetingInfoFragment.newInstance(meeting), false);
 	}
 
-	public final void changeFragmentToParticipantInfo(ParticipantDTO participant) {
+	public final void changeFragmentToParticipantInfo(Participant participant) {
 		changeFragment(new ParticipantInfoFragment(participant));
 	}
 
@@ -328,7 +327,7 @@ public class MainActivity extends AppCompatActivity
 		UIUtil.showProgress(this, progressView, fragmentContainer, show);
 	}
 
-	public void showFAB(int fabId, boolean show) {
+	public void showFab(int fabId, boolean show) {
 		FloatingActionButton fab = (FloatingActionButton) findViewById(fabId);
 		if (show) {
 			fab.show();
@@ -337,24 +336,24 @@ public class MainActivity extends AppCompatActivity
 		}
 	}
 
-	public void showNewMeetingFAB(boolean show) {
-		showFAB(R.id.fab_new_meeting, show);
+	public void showNewMeetingFab(boolean show) {
+		showFab(R.id.fab_new_meeting, show);
 	}
 
-	public void showLocationFAB(boolean show) {
-		showFAB(R.id.fab_location, show);
+	public void showLocationFab(boolean show) {
+		showFab(R.id.fab_location, show);
 	}
 
-	public void showEmailFAB(boolean show) {
-		showFAB(R.id.fab_email, show);
+	public void showEmailFab(boolean show) {
+		showFab(R.id.fab_email, show);
 	}
 
-	public void showSmsFAB(boolean show) {
-		showFAB(R.id.fab_sms, show);
+	public void showSmsFab(boolean show) {
+		showFab(R.id.fab_sms, show);
 	}
 
-	public void showCallFAB(boolean show) {
-		showFAB(R.id.fab_call, show);
+	public void showCallFab(boolean show) {
+		showFab(R.id.fab_call, show);
 	}
 
 }

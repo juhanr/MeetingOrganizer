@@ -9,7 +9,8 @@
 	<item name="green" type="color">#33CC00</item>
 	<item name="green_transparent" type="color">#50BCED91</item>
 
-	<item name="red" type="color">#CC0000</item>
+	<item name="dark_red" type="color">#CC0000</item>
+	<item name="red" type="color">#FF0000</item>
 
 	<item name="san_marino" type="color">#446CB3</item>
 	<item name="jacksons_purple" type="color">#1F3A93</item>

@@ -30,18 +30,15 @@ import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.activities.LocationActivity;
-import ee.juhan.meetingorganizer.fragments.listeners.MyLocationListener;
 import ee.juhan.meetingorganizer.util.UIUtil;
 
 public class CustomMapFragment extends MapFragment
 		implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMapClickListener,
 		OnMapReadyCallback {
 
+	private static final String TAG = CustomMapFragment.class.getSimpleName();
 	private static final LatLng DEFAULT_CAMERA_LOCATION = new LatLng(59.437046, 24.753742);
 	private static final float DEFAULT_CAMERA_ZOOM = 10;
-	private static final long GPS_MIN_TIME = 1000;
-	private static final float GPS_MIN_DISTANCE = 10;
-	private static final String TAG = "CustomMapFragment";
 	private static int mapVisibility = View.VISIBLE;
 	private Activity activity;
 	private GoogleMap map;
@@ -72,7 +69,6 @@ public class CustomMapFragment extends MapFragment
 			Bundle savedInstanceState) {
 		mapLayout = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
 		checkAndroidVersion();
-		setUpLocationListener();
 		return mapLayout;
 	}
 
@@ -148,20 +144,6 @@ public class CustomMapFragment extends MapFragment
 		});
 		map.setPadding(0, 200, 0, 0);
 		isMapInitialized = true;
-	}
-
-	private void setUpLocationListener() {
-		LocationManager locationManager =
-				(LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-		if (ActivityCompat
-				.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) !=
-				PackageManager.PERMISSION_GRANTED && ActivityCompat
-				.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) !=
-				PackageManager.PERMISSION_GRANTED) {
-			return;
-		}
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME,
-				GPS_MIN_DISTANCE, new MyLocationListener());
 	}
 
 	private void setFocus(Marker marker, boolean focused) {

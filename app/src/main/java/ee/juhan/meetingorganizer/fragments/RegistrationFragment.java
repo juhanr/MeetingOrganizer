@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.activities.MainActivity;
-import ee.juhan.meetingorganizer.models.server.AccountDTO;
+import ee.juhan.meetingorganizer.models.server.Account;
 import ee.juhan.meetingorganizer.models.server.ServerResponse;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.PatternMatcherUtil;
@@ -101,7 +101,7 @@ public class RegistrationFragment extends Fragment {
 	private void sendRegistrationRequest(String name, final String email, String password,
 			String phoneNr) {
 		activity.showProgress(true);
-		RestClient.get().registrationRequest(new AccountDTO(name, email, password, phoneNr),
+		RestClient.get().registrationRequest(new Account(name, email, password, phoneNr),
 				new Callback<ServerResponse>() {
 					@Override
 					public void success(final ServerResponse serverResponse, Response response) {
@@ -111,7 +111,7 @@ public class RegistrationFragment extends Fragment {
 								UIUtil.showToastMessage(activity,
 										getString(R.string.registration_successful));
 								activity.logIn(serverResponse.getSid(),
-										serverResponse.getAccountDTO());
+										serverResponse.getAccount());
 								break;
 							case EMAIL_IN_USE:
 								UIUtil.showToastMessage(activity,

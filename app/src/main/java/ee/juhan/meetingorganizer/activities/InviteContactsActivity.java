@@ -24,8 +24,8 @@ import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
-import ee.juhan.meetingorganizer.models.server.ContactDTO;
-import ee.juhan.meetingorganizer.models.server.ParticipantDTO;
+import ee.juhan.meetingorganizer.models.server.Contact;
+import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.rest.RestClient;
 import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
@@ -37,7 +37,7 @@ public class InviteContactsActivity extends AppCompatActivity {
 	private static final int CURSOR_NAME_INDEX = 1;
 	private static final int CURSOR_EMAIL_INDEX = 3;
 	private static ContactsAdapter contactsAdapter;
-	private List<ContactDTO> contactsList = new ArrayList<>();
+	private List<Contact> contactsList = new ArrayList<>();
 	private ViewGroup chooseContactsLayout;
 	private ListView contactsListView;
 	private int participantsWithoutAccount = 0;
@@ -98,9 +98,9 @@ public class InviteContactsActivity extends AppCompatActivity {
 	private void checkContactsFromServer() {
 		showProgress(true);
 		RestClient.get().checkContactsRequest(contactsList, getAccountId(),
-				new Callback<List<ContactDTO>>() {
+				new Callback<List<Contact>>() {
 					@Override
-					public void success(final List<ContactDTO> serverResponse, Response response) {
+					public void success(final List<Contact> serverResponse, Response response) {
 						showProgress(false);
 						removeCurrentUserFromContacts(serverResponse);
 						refreshListView();
@@ -114,10 +114,10 @@ public class InviteContactsActivity extends AppCompatActivity {
 				});
 	}
 
-	private void removeCurrentUserFromContacts(List<ContactDTO> newList) {
+	private void removeCurrentUserFromContacts(List<Contact> newList) {
 		int userId = getAccountId();
 		for (int i = 0; i < newList.size(); i++) {
-			ContactDTO contact = newList.get(i);
+			Contact contact = newList.get(i);
 			if (contact.getAccountId() == userId) {
 				newList.remove(i);
 				break;
@@ -136,12 +136,12 @@ public class InviteContactsActivity extends AppCompatActivity {
 	private void addContactsAsParticipants() {
 		NewMeetingActivity.getNewMeetingModel().getParticipants().clear();
 		participantsWithoutAccount = 0;
-		for (ContactDTO checkedContact : contactsAdapter.getCheckedItems()) {
+		for (Contact checkedContact : contactsAdapter.getCheckedItems()) {
 			if (checkedContact.getAccountId() == 0) {
 				participantsWithoutAccount++;
 			}
-			ParticipantDTO participant =
-					new ParticipantDTO(checkedContact.getAccountId(), checkedContact.getName(),
+			Participant participant =
+					new Participant(checkedContact.getAccountId(), checkedContact.getName(),
 							checkedContact.getEmail(), checkedContact.getPhoneNumber());
 			NewMeetingActivity.getNewMeetingModel().addParticipant(participant);
 		}
@@ -167,7 +167,7 @@ public class InviteContactsActivity extends AppCompatActivity {
 			while (numbersCur.moveToNext()) {
 				name = numbersCur.getString(nameColumn);
 				phoneNumber = numbersCur.getString(phoneColumn);
-				contactsList.add(new ContactDTO(name, null, phoneNumber));
+				contactsList.add(new Contact(name, null, phoneNumber));
 			}
 		}
 		numbersCur.close();
@@ -197,7 +197,7 @@ public class InviteContactsActivity extends AppCompatActivity {
 			String name = cur.getString(CURSOR_NAME_INDEX);
 			String email = cur.getString(CURSOR_EMAIL_INDEX);
 			for (int i = 0; i < contactsList.size(); i++) {
-				ContactDTO contact = contactsList.get(i);
+				Contact contact = contactsList.get(i);
 				if (contact.getName().equals(name)) {
 					contact.setEmail(email);
 					contactsList.set(i, contact);
@@ -216,15 +216,15 @@ public class InviteContactsActivity extends AppCompatActivity {
 		listview.setAdapter(contactsAdapter);
 	}
 
-	private class ContactsAdapter extends CheckBoxAdapter<ContactDTO> {
+	private class ContactsAdapter extends CheckBoxAdapter<Contact> {
 
-		public ContactsAdapter(Context context, List<ContactDTO> objects) {
+		public ContactsAdapter(Context context, List<Contact> objects) {
 			super(context, objects);
 		}
 
 		@Override
 		protected void setUpCheckBox() {
-			ContactDTO contact = super.getCurrentItem();
+			Contact contact = super.getCurrentItem();
 			if (super.getCheckedItems().contains(contact)) {
 				super.getCheckBox().setChecked(true);
 			}
@@ -237,8 +237,8 @@ public class InviteContactsActivity extends AppCompatActivity {
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 			String contactPhoneNumber = buttonView.getText().toString().split("\n")[1];
-			ContactDTO chosenContact = new ContactDTO();
-			for (ContactDTO contact : super.getItems()) {
+			Contact chosenContact = new Contact();
+			for (Contact contact : super.getItems()) {
 				if (contact.getPhoneNumber().equals(contactPhoneNumber)) {
 					chosenContact = contact;
 					break;

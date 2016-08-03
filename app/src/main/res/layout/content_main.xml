@@ -99,7 +99,7 @@
 		android:layout_width="wrap_content"
 		android:src="@drawable/ic_email_black_18dp"
 		android:tint="@color/white"
-		app:backgroundTint="@color/red"
+		app:backgroundTint="@color/dark_red"
 		app:fabSize="mini"/>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -125,6 +125,7 @@
 		<item>Cafe</item>
 		<item>Restaurant</item>
 		<item>Park</item>
+		<item>Night club</item>
 	</string-array>
 
 	<!-- Choose contacts strings -->
@@ -133,9 +134,12 @@
 	<string name="contacts_meeting_created">New meeting created!</string>
 
 	<!-- Meeting info strings -->
-	<string name="meeting_show_participants">Show participants</string>
+	<string name="meeting_cancelled">This meeting has been cancelled.</string>
 	<string name="meeting_no_info">No info found.</string>
 	<string name="meeting_no_meetings">No meetings found.</string>
+	<string name="meeting_show_participants">Show participants</string>
+	<string name="meeting_waiting_participant_answers">Currently waiting for responses from the invited.</string>
+	<string name="meeting_waiting_location_choice">Currently waiting on the leader to choose a location.</string>
 
 	<!-- Participant info strings -->
 	<string name="partic_no_participants">No participants found.</string>

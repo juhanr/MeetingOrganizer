@@ -4,12 +4,12 @@ public class ServerResponse {
 
 	private ServerResult result;
 	private String sid;
-	private AccountDTO accountDTO;
+	private Account account;
 
-	public ServerResponse(ServerResult result, String sid, AccountDTO accountDTO) {
+	public ServerResponse(ServerResult result, String sid, Account account) {
 		this.result = result;
 		this.sid = sid;
-		this.accountDTO = accountDTO;
+		this.account = account;
 	}
 
 	public ServerResponse(ServerResult result) {
@@ -32,11 +32,11 @@ public class ServerResponse {
 		this.sid = sid;
 	}
 
-	public AccountDTO getAccountDTO() {
-		return accountDTO;
+	public Account getAccount() {
+		return account;
 	}
 
-	public void setAccountDTO(AccountDTO accountDTO) {
-		this.accountDTO = accountDTO;
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 }
