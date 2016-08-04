@@ -25,13 +25,13 @@ import com.rey.material.widget.Spinner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
 import ee.juhan.meetingorganizer.fragments.CustomMapFragment;
-import ee.juhan.meetingorganizer.fragments.listeners.LocationClient;
 import ee.juhan.meetingorganizer.models.server.LocationType;
 import ee.juhan.meetingorganizer.models.server.MapCoordinate;
 import ee.juhan.meetingorganizer.models.server.Meeting;
@@ -40,11 +40,8 @@ import static ee.juhan.meetingorganizer.models.server.LocationType.GENERATED_FRO
 import static ee.juhan.meetingorganizer.models.server.LocationType.GENERATED_FROM_PREFERRED_LOCATIONS;
 import static ee.juhan.meetingorganizer.models.server.LocationType.SPECIFIC_LOCATION;
 
-public class LocationActivity extends AppCompatActivity {
+public class ChooseLocationActivity extends AppCompatActivity {
 
-	public static final String SHOW_LOCATION_OPTIONS = "location-options";
-	public static final String MARKER_LATITUDE = "marker-latitude";
-	public static final String MARKER_LONGITUDE = "marker-longitude";
 	private ViewGroup chooseLocationLayout;
 	private List<String> filtersList;
 	private CustomMapFragment customMapFragment = new CustomMapFragment();
@@ -53,14 +50,10 @@ public class LocationActivity extends AppCompatActivity {
 	private FloatingActionButton confirmMarkerFab;
 	private FloatingActionButton deleteMarkerFab;
 	private View bottomSheet;
-	private boolean showLocationOptions;
-	private LatLng markerLocation;
-	private LocationClient locationClient;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		getIntentExtras();
 		setContentView(R.layout.activity_location);
 		chooseLocationLayout = (ViewGroup) findViewById(R.id.activity_location);
 		locationTypeInfo = (TextView) findViewById(R.id.location_type_info);
@@ -72,17 +65,8 @@ public class LocationActivity extends AppCompatActivity {
 				Arrays.asList(getResources().getStringArray(R.array.location_parameters_array));
 		setUpActionBar();
 		setUpMapLayout();
-
-		if (showLocationOptions) {
-			setButtonListeners();
-			setLocationSpinner();
-		} else {
-			bottomSheet.setVisibility(View.GONE);
-			confirmFab.hide();
-			confirmMarkerFab.hide();
-			deleteMarkerFab.hide();
-		}
-
+		setButtonListeners();
+		setLocationSpinner();
 		NewMeetingActivity.getNewMeetingModel().setLocationType(LocationType.SPECIFIC_LOCATION);
 	}
 
@@ -107,16 +91,6 @@ public class LocationActivity extends AppCompatActivity {
 				break;
 		}
 		return false;
-	}
-
-	private void getIntentExtras() {
-		showLocationOptions = getIntent().getBooleanExtra(SHOW_LOCATION_OPTIONS, true);
-		double markerLatitude = getIntent().getDoubleExtra(MARKER_LATITUDE, 0);
-		double markerLongitude = getIntent().getDoubleExtra(MARKER_LONGITUDE, 0);
-		if (markerLatitude != 0 && markerLongitude != 0) {
-			markerLocation = new LatLng(markerLatitude, markerLongitude);
-		}
-
 	}
 
 	private void setUpActionBar() {
@@ -239,7 +213,7 @@ public class LocationActivity extends AppCompatActivity {
 	}
 
 	public void showDeleteMarkerFAB(boolean show) {
-		if (show && showLocationOptions) {
+		if (show) {
 			confirmMarkerFab.hide();
 			deleteMarkerFab.show();
 		} else {
@@ -277,8 +251,8 @@ public class LocationActivity extends AppCompatActivity {
 		Set<MapCoordinate> newMeetingPredefinedLocations =
 				NewMeetingActivity.getNewMeetingModel().getUserPreferredLocations();
 		if (locationType == SPECIFIC_LOCATION && newMeetingLocation != null) {
-			customMapFragment
-					.setMarkerLocations(Collections.singletonList(newMeetingLocation.toLatLng()));
+			customMapFragment.setMarkerLocations(
+					new LinkedList<>(Collections.singletonList(newMeetingLocation.toLatLng())));
 		} else if (locationType == GENERATED_FROM_PREFERRED_LOCATIONS &&
 				newMeetingPredefinedLocations.size() > 0) {
 			List<LatLng> locationsList = new ArrayList<>();
@@ -286,10 +260,6 @@ public class LocationActivity extends AppCompatActivity {
 				locationsList.add(location.toLatLng());
 			}
 			customMapFragment.setMarkerLocations(locationsList);
-		}
-
-		if (markerLocation != null) {
-			customMapFragment.setMarkerLocations(Collections.singletonList(markerLocation));
 		}
 	}
 

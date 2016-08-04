@@ -26,7 +26,7 @@ import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
 import ee.juhan.meetingorganizer.models.server.Contact;
 import ee.juhan.meetingorganizer.models.server.Participant;
-import ee.juhan.meetingorganizer.rest.RestClient;
+import ee.juhan.meetingorganizer.network.RestClient;
 import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;

@@ -26,10 +26,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.activities.LocationActivity;
+import ee.juhan.meetingorganizer.activities.ChooseLocationActivity;
+import ee.juhan.meetingorganizer.activities.ShowLocationActivity;
+import ee.juhan.meetingorganizer.models.server.Participant;
+import ee.juhan.meetingorganizer.models.server.SendGpsLocationAnswer;
 import ee.juhan.meetingorganizer.util.UIUtil;
 
 public class CustomMapFragment extends MapFragment
@@ -40,8 +45,11 @@ public class CustomMapFragment extends MapFragment
 	private static final LatLng DEFAULT_CAMERA_LOCATION = new LatLng(59.437046, 24.753742);
 	private static final float DEFAULT_CAMERA_ZOOM = 10;
 	private static int mapVisibility = View.VISIBLE;
-	private Activity activity;
-	private GoogleMap map;
+	private static CustomMapFragment customMapFragment;
+	private static Activity activity;
+	private static GoogleMap map;
+	private static boolean isMapInitialized;
+	private static Map<Integer, Marker> participantMarkers = new HashMap<>();
 	private Marker temporaryMarker;
 	private Marker focusedMarker;
 	private List<Marker> locationMarkers = new ArrayList<>();
@@ -49,12 +57,40 @@ public class CustomMapFragment extends MapFragment
 	private boolean isClickableMap;
 	private ViewGroup mapLayout;
 	private String temporaryMarkerAddress = "";
-
 	private List<LatLng> markerLocationsToBeAdded = new ArrayList<>();
-	private boolean isMapInitialized;
+	private Map<Integer, MarkerOptions> participantMarkersToAdd = new HashMap<>();
 
 	public static CustomMapFragment newInstance() {
 		return new CustomMapFragment();
+	}
+
+	public static boolean isMapInitialized() {
+		return customMapFragment != null && isMapInitialized;
+	}
+
+	public static boolean canShowParticipantMarkers() {
+		return activity instanceof ShowLocationActivity;
+	}
+
+	public static void updateParticipantMarker(Participant participant) {
+		if (customMapFragment == null || !customMapFragment.isVisible() || !isMapInitialized ||
+				participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND ||
+				participant.getLocation() == null || !canShowParticipantMarkers()) {
+			return;
+		}
+		Marker marker = participantMarkers.get(participant.getId());
+		if (marker != null) {
+			marker.setPosition(participant.getLocation().toLatLng());
+			marker.setSnippet("Last updated: " + participant.getLocationTimestampFormatted());
+
+			// Refresh info window if it's open.
+			if (marker.isInfoWindowShown()) {
+				marker.showInfoWindow();
+			}
+		} else {
+			marker = map.addMarker(participant.getMarkerOptions());
+			participantMarkers.put(participant.getId(), marker);
+		}
 	}
 
 	@Override
@@ -68,8 +104,17 @@ public class CustomMapFragment extends MapFragment
 	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		mapLayout = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
+		customMapFragment = this;
 		checkAndroidVersion();
 		return mapLayout;
+	}
+
+	@Override
+	public final void onDestroyView() {
+		customMapFragment = null;
+		locationMarkers.clear();
+		participantMarkers.clear();
+		super.onDestroyView();
 	}
 
 	@Override
@@ -92,7 +137,7 @@ public class CustomMapFragment extends MapFragment
 
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
-		this.map = googleMap;
+		CustomMapFragment.map = googleMap;
 		initializeMap();
 	}
 
@@ -124,11 +169,8 @@ public class CustomMapFragment extends MapFragment
 			map.setOnMapClickListener(this);
 		}
 
-		for (LatLng latLng : markerLocationsToBeAdded) {
-			setLocationMarker(latLng);
-			((LocationActivity) activity).refreshConfirmMarkerFABState();
-		}
-		markerLocationsToBeAdded = null;
+		addLocationMarkers();
+		addParticipantMarkers();
 
 		if (temporaryMarker == null) {
 			map.moveCamera(CameraUpdateFactory
@@ -146,15 +188,33 @@ public class CustomMapFragment extends MapFragment
 		isMapInitialized = true;
 	}
 
+	private void addLocationMarkers() {
+		for (LatLng latLng : markerLocationsToBeAdded) {
+			setLocationMarker(latLng);
+			if (activity instanceof ChooseLocationActivity) {
+				((ChooseLocationActivity) activity).refreshConfirmMarkerFABState();
+			}
+		}
+		markerLocationsToBeAdded = new ArrayList<>();
+	}
+
+	private void addParticipantMarkers() {
+		for (Integer participantId : participantMarkersToAdd.keySet()) {
+			Marker marker = map.addMarker(participantMarkersToAdd.get(participantId));
+			participantMarkers.put(participantId, marker);
+		}
+		participantMarkersToAdd.clear();
+	}
+
 	private void setFocus(Marker marker, boolean focused) {
 		if (focused) {
 			focusedMarker = marker;
-			if (activity instanceof LocationActivity) {
-				((LocationActivity) activity).showDeleteMarkerFAB(true);
+			if (activity instanceof ChooseLocationActivity) {
+				((ChooseLocationActivity) activity).showDeleteMarkerFAB(true);
 			}
 		} else {
-			if (activity instanceof LocationActivity) {
-				((LocationActivity) activity).showDeleteMarkerFAB(false);
+			if (activity instanceof ChooseLocationActivity) {
+				((ChooseLocationActivity) activity).showDeleteMarkerFAB(false);
 			}
 		}
 	}
@@ -162,8 +222,8 @@ public class CustomMapFragment extends MapFragment
 	private void setLocationMarker(LatLng latLng) {
 		setTemporaryMarker(latLng);
 		confirmTemporaryMarker();
-		if (activity instanceof LocationActivity) {
-			((LocationActivity) activity).refreshConfirmMarkerFABState();
+		if (activity instanceof ChooseLocationActivity) {
+			((ChooseLocationActivity) activity).refreshConfirmMarkerFABState();
 		}
 	}
 
@@ -183,11 +243,11 @@ public class CustomMapFragment extends MapFragment
 		}
 		setFocus(null, false);
 		temporaryMarker =
-				map.addMarker(new MarkerOptions().position(latLng).title(address).draggable(true));
+				map.addMarker(new MarkerOptions().position(latLng).title(address).draggable(false));
 		temporaryMarker.setAlpha(0.5f);
 		temporaryMarker.showInfoWindow();
-		if (activity instanceof LocationActivity) {
-			((LocationActivity) activity).refreshConfirmMarkerFABState();
+		if (activity instanceof ChooseLocationActivity) {
+			((ChooseLocationActivity) activity).refreshConfirmMarkerFABState();
 		}
 	}
 
@@ -275,7 +335,7 @@ public class CustomMapFragment extends MapFragment
 		}
 	}
 
-	public final boolean isMapInitialized() {
-		return isMapInitialized;
+	public void addParticipantMarkerOptions(int participantId, MarkerOptions markerOptions) {
+		participantMarkersToAdd.put(participantId, markerOptions);
 	}
 }

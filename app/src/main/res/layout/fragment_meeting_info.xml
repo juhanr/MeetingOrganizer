@@ -71,50 +71,40 @@
 			android:layout_toRightOf="@id/img_time"
 			android:layout_width="wrap_content"/>
 
-		<com.rey.material.widget.CheckBox
-			android:gravity="center_vertical"
-			android:id="@+id/chk_send_my_location"
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
+		<RelativeLayout
+			android:id="@+id/layout_temporary"
 			android:layout_below="@id/img_time"
-			android:text="Send my GPS location to other participants"/>
-
-		<LinearLayout
-			android:id="@+id/invitation_answer_buttons"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="@dimen/view_margin_large"
 			android:layout_width="match_parent"
 			android:orientation="horizontal">
 
-			<Button
-				style="@style/RaisedButton"
-				android:id="@+id/accept_invitation"
-				android:layout_gravity="center_horizontal"
+			<com.rey.material.widget.CheckBox
+				android:gravity="center_vertical"
+				android:id="@+id/chk_send_gps_location"
 				android:layout_height="wrap_content"
-				android:layout_marginRight="@dimen/view_margin_small"
-				android:layout_weight="0.5"
 				android:layout_width="wrap_content"
+				android:text="Send my GPS location to other participants"
+				android:visibility="gone"/>
+
+			<com.rey.material.widget.Button
+				style="@style/RaisedButtonColored"
+				android:id="@+id/btn_accept_invitation"
 				android:text="@string/action_accept"/>
 
-			<Button
-				style="@style/RaisedButton"
-				android:id="@+id/deny_invitation"
-				android:layout_gravity="center_horizontal"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="@dimen/view_margin_small"
-				android:layout_weight="0.5"
-				android:layout_width="wrap_content"
+			<com.rey.material.widget.Button
+				style="@style/RaisedButtonColored"
+				android:id="@+id/btn_deny_invitation"
+				android:layout_toRightOf="@id/btn_accept_invitation"
 				android:text="@string/action_deny"/>
-		</LinearLayout>
+		</RelativeLayout>
 
 		<TextView
 			style="@style/TextPrimary"
 			android:id="@+id/txt_meeting_participants"
-			android:layout_below="@id/chk_send_my_location"
+			android:layout_below="@id/layout_temporary"
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
 			android:paddingBottom="10dp"
-			android:paddingTop="15dp"
 			android:text="Participants"
 			android:textSize="20dp"/>
 

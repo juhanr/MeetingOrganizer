@@ -1,4 +1,4 @@
-package ee.juhan.meetingorganizer.rest;
+package ee.juhan.meetingorganizer.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

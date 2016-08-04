@@ -7,7 +7,6 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.SmsManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,14 +26,13 @@ import java.util.Calendar;
 import java.util.Date;
 
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.fragments.dialogs.YesNoFragment;
-import ee.juhan.meetingorganizer.fragments.listeners.LocationClient;
 import ee.juhan.meetingorganizer.models.server.LocationType;
 import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
 import ee.juhan.meetingorganizer.models.server.SendGpsLocationAnswer;
-import ee.juhan.meetingorganizer.rest.RestClient;
+import ee.juhan.meetingorganizer.network.LocationService;
+import ee.juhan.meetingorganizer.network.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
@@ -123,7 +121,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 		startTimeButton.setOnClickListener(new TimeClickListener());
 		endTimeButton.setOnClickListener(new TimeClickListener());
 		locationInfo.setOnClickListener(view -> {
-			Intent myIntent = new Intent(getBaseContext(), LocationActivity.class);
+			Intent myIntent = new Intent(getBaseContext(), ChooseLocationActivity.class);
 			startActivity(myIntent);
 		});
 		participantsInfo.setOnClickListener(view -> {
@@ -267,7 +265,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 		Participant participant =
 				new Participant(NewMeetingActivity.getNewMeetingModel().getLeaderId(),
 						ParticipationAnswer.PARTICIPATING, SendGpsLocationAnswer.NO_ANSWER,
-						LocationClient.getMyLocation(), new Date());
+						LocationService.getGpsLocation(), new Date());
 		NewMeetingActivity.getNewMeetingModel().addParticipant(participant);
 	}
 
@@ -288,45 +286,44 @@ public class NewMeetingActivity extends AppCompatActivity {
 		}
 	}*/
 
-	private void showAskSmsDialog() {
-		final YesNoFragment dialog = new YesNoFragment();
-		//		dialog.setMessage(
-		//				participantsWithoutAccount + getString(R.string.textview_info_invite_via_sms));
-		dialog.setPositiveButton(view -> {
-			showWriteSmsDialog();
-			dialog.dismiss();
-		});
-		dialog.setNegativeButton(view -> {
-			sendNewMeetingRequest();
-			dialog.dismiss();
-		});
-		dialog.hideInput();
-		dialog.show(getFragmentManager(), "YesNoFragment");
-	}
-
-	private void showWriteSmsDialog() {
-		final YesNoFragment dialog = new YesNoFragment();
-		dialog.setMessage(getString(R.string.dialog_please_write_sms));
-		dialog.setInputText(getString(R.string.dialog_msg_invite_via_sms));
-		dialog.setPositiveButton(getString(R.string.action_send_sms), view -> {
-			sendInvitationSms(dialog.getInputValue());
-			sendNewMeetingRequest();
-			dialog.dismiss();
-		});
-		dialog.setNegativeButton(getString(R.string.action_cancel), view -> dialog.dismiss());
-		dialog.show(getFragmentManager(), "YesNoFragment");
-	}
-
-	private void sendInvitationSms(String smsMessage) {
-		SmsManager smsManager = SmsManager.getDefault();
-		for (Participant participant : NewMeetingActivity.getNewMeetingModel()
-				.getParticipants()) {
-			if (participant.getAccountId() == 0) {
-				smsManager.sendTextMessage(participant.getPhoneNumber(), null, smsMessage, null,
-						null);
-			}
-		}
-	}
+	//	private void showAskSmsDialog() {
+	//		final YesNoFragment dialog = new YesNoFragment();
+	//		//		dialog.setMessage(
+	//		//				participantsWithoutAccount + getString(R.string.textview_info_invite_via_sms));
+	//		dialog.setPositiveButton(view -> {
+	//			showWriteSmsDialog();
+	//			dialog.dismiss();
+	//		});
+	//		dialog.setNegativeButton(view -> {
+	//			sendNewMeetingRequest();
+	//			dialog.dismiss();
+	//		});
+	//		dialog.hideInput();
+	//		dialog.show(getFragmentManager(), "YesNoFragment");
+	//	}
+	//
+	//	private void showWriteSmsDialog() {
+	//		final YesNoFragment dialog = new YesNoFragment();
+	//		dialog.setMessage(getString(R.string.dialog_please_write_sms));
+	//		dialog.setInputText(getString(R.string.dialog_msg_invite_via_sms));
+	//		dialog.setPositiveButton(getString(R.string.action_send_sms), view -> {
+	//			sendInvitationSms(dialog.getInputValue());
+	//			sendNewMeetingRequest();
+	//			dialog.dismiss();
+	//		});
+	//		dialog.setNegativeButton(getString(R.string.action_cancel), view -> dialog.dismiss());
+	//		dialog.show(getFragmentManager(), "YesNoFragment");
+	//	}
+	//
+	//	private void sendInvitationSms(String smsMessage) {
+	//		SmsManager smsManager = SmsManager.getDefault();
+	//		for (Participant participant : NewMeetingActivity.getNewMeetingModel().getParticipants()) {
+	//			if (participant.getAccountId() == 0) {
+	//				smsManager.sendTextMessage(participant.getPhoneNumber(), null, smsMessage, null,
+	//						null);
+	//			}
+	//		}
+	//	}
 
 	private void sendNewMeetingRequest() {
 		addLeaderInfo();
@@ -378,9 +375,9 @@ public class NewMeetingActivity extends AppCompatActivity {
 			int view_year = c.get(Calendar.YEAR);
 
 			Dialog.Builder builder =
-					new DatePickerDialog.Builder(R.style.Material_App_Dialog_DatePicker_Light,
-							current_day, current_month, current_year, 1, 1, 2020, view_day,
-							view_month, view_year) {
+					new DatePickerDialog.Builder(R.style.DialogTheme_DatePicker, current_day,
+							current_month, current_year, 1, 1, 2020, view_day, view_month,
+							view_year) {
 						@Override
 						public void onPositiveActionClicked(DialogFragment fragment) {
 							DatePickerDialog dialog = (DatePickerDialog) fragment.getDialog();
@@ -407,17 +404,16 @@ public class NewMeetingActivity extends AppCompatActivity {
 				assert viewDate != null;
 				c.setTime(viewDate);
 			}
-			Dialog.Builder builder =
-					new TimePickerDialog.Builder(R.style.Material_App_Dialog_TimePicker_Light,
-							c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE)) {
-						@Override
-						public void onPositiveActionClicked(DialogFragment fragment) {
-							TimePickerDialog dialog = (TimePickerDialog) fragment.getDialog();
-							String time = dialog.getFormattedTime(DateUtil.TIME_FORMAT);
-							setViewText(view, time);
-							super.onPositiveActionClicked(fragment);
-						}
-					};
+			Dialog.Builder builder = new TimePickerDialog.Builder(R.style.DialogTheme_TimePicker,
+					c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE)) {
+				@Override
+				public void onPositiveActionClicked(DialogFragment fragment) {
+					TimePickerDialog dialog = (TimePickerDialog) fragment.getDialog();
+					String time = dialog.getFormattedTime(DateUtil.TIME_FORMAT);
+					setViewText(view, time);
+					super.onPositiveActionClicked(fragment);
+				}
+			};
 
 			builder.positiveAction("OK").negativeAction("CANCEL");
 			DialogFragment fragment = DialogFragment.newInstance(builder);

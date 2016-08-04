@@ -12,20 +12,26 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.rey.material.app.DialogFragment;
+import com.rey.material.app.SimpleDialog;
+import com.rey.material.widget.CheckBox;
+import com.squareup.okhttp.ResponseBody;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.activities.LocationActivity;
 import ee.juhan.meetingorganizer.activities.MainActivity;
+import ee.juhan.meetingorganizer.activities.ShowLocationActivity;
 import ee.juhan.meetingorganizer.adapters.GroupedListAdapter;
-import ee.juhan.meetingorganizer.fragments.listeners.LocationClient;
-import ee.juhan.meetingorganizer.models.server.LocationType;
 import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
-import ee.juhan.meetingorganizer.rest.RestClient;
+import ee.juhan.meetingorganizer.models.server.SendGpsLocationAnswer;
+import ee.juhan.meetingorganizer.network.LocationService;
+import ee.juhan.meetingorganizer.network.MeetingUpdaterService;
+import ee.juhan.meetingorganizer.network.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
@@ -34,18 +40,30 @@ import retrofit.client.Response;
 
 public class MeetingInfoFragment extends Fragment {
 
+	private static MeetingInfoFragment meetingInfoFragment;
+	private static Meeting meeting;
 	private String title;
 	private MainActivity activity;
 	private ViewGroup meetingInfoLayout;
-	private Meeting meeting;
-
 	private List<Participant> participantsList;
-	private ParticipantsAdapter adapter;
+	private ParticipantsAdapter participantsAdapter;
 
 	public static MeetingInfoFragment newInstance(Meeting meeting) {
 		MeetingInfoFragment fragment = new MeetingInfoFragment();
-		fragment.setMeeting(meeting);
+		MeetingInfoFragment.setMeeting(meeting);
 		return fragment;
+	}
+
+	public static Meeting getMeeting() {
+		return MeetingInfoFragment.meeting;
+	}
+
+	public static void setMeeting(Meeting meeting) {
+		MeetingInfoFragment.meeting = meeting;
+	}
+
+	public static MeetingInfoFragment getFragment() {
+		return meetingInfoFragment;
 	}
 
 	@Override
@@ -60,6 +78,7 @@ public class MeetingInfoFragment extends Fragment {
 	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		activity.setTitle(title);
+		meetingInfoFragment = this;
 		if (meeting == null) {
 			meetingInfoLayout =
 					(ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
@@ -71,6 +90,9 @@ public class MeetingInfoFragment extends Fragment {
 			populateLayout();
 			setButtonListeners();
 			refreshParticipantsListView();
+			if (meeting.isOngoing()) {
+				MeetingUpdaterService.startMeetingUpdaterTask();
+			}
 		}
 		return meetingInfoLayout;
 	}
@@ -78,11 +100,15 @@ public class MeetingInfoFragment extends Fragment {
 	@Override
 	public void onDestroyView() {
 		activity.showLocationFab(false);
+		meetingInfoFragment = null;
 		super.onDestroyView();
 	}
 
-	public void setMeeting(Meeting meeting) {
-		this.meeting = meeting;
+	public void refreshLayoutIfVisible() {
+		if (this.isVisible()) {
+			populateLayout();
+			refreshParticipantsListView();
+		}
 	}
 
 	private void populateLayout() {
@@ -120,14 +146,35 @@ public class MeetingInfoFragment extends Fragment {
 				DateUtil.formatTime(meeting.getEndDateTime())));
 
 		setAnswerButtons();
-
-		if (meeting.isOngoing()) {
-			setUpOngoingMeetingViews();
-		}
+		setUpOngoingMeetingViews();
 	}
 
 	private void setUpOngoingMeetingViews() {
-
+		if (!meeting.isOngoing() || getParticipantObject() == null ||
+				getParticipantObject().getParticipationAnswer() !=
+						ParticipationAnswer.PARTICIPATING) {
+			return;
+		}
+		CheckBox chkSendGpsLocation =
+				(CheckBox) meetingInfoLayout.findViewById(R.id.chk_send_gps_location);
+		chkSendGpsLocation.setVisibility(View.VISIBLE);
+		chkSendGpsLocation.setOnCheckedChangeListener((view, isChecked) -> {
+			Participant participant = getParticipantObject();
+			if (isChecked) {
+				LocationService.connect();
+				participant.setSendGpsLocationAnswer(SendGpsLocationAnswer.SEND);
+			} else {
+				LocationService.disconnect();
+				participant.setSendGpsLocationAnswer(SendGpsLocationAnswer.NO_SEND);
+			}
+			sendUpdateGpsLocationAnswer(participant.getSendGpsLocationAnswer(),
+					participant.getId());
+			refreshParticipantsListView();
+		});
+		if (getParticipantObject() != null &&
+				getParticipantObject().getSendGpsLocationAnswer() == SendGpsLocationAnswer.SEND) {
+			chkSendGpsLocation.setCheckedImmediately(true);
+		}
 	}
 
 	private void setButtonListeners() {
@@ -136,11 +183,10 @@ public class MeetingInfoFragment extends Fragment {
 			FloatingActionButton showLocation =
 					(FloatingActionButton) activity.findViewById(R.id.fab_location);
 			showLocation.setOnClickListener(view -> {
-				Intent intent = new Intent(activity, LocationActivity.class);
-				intent.putExtra(LocationActivity.SHOW_LOCATION_OPTIONS, false);
-				intent.putExtra(LocationActivity.MARKER_LATITUDE,
+				Intent intent = new Intent(activity, ShowLocationActivity.class);
+				intent.putExtra(ShowLocationActivity.MARKER_LATITUDE,
 						meeting.getLocation().getLatitude());
-				intent.putExtra(LocationActivity.MARKER_LONGITUDE,
+				intent.putExtra(ShowLocationActivity.MARKER_LONGITUDE,
 						meeting.getLocation().getLongitude());
 				startActivity(intent);
 			});
@@ -148,52 +194,77 @@ public class MeetingInfoFragment extends Fragment {
 	}
 
 	private void setAnswerButtons() {
-		final Participant participantObject = getParticipantObject();
-		if (participantObject != null &&
-				participantObject.getParticipationAnswer() == ParticipationAnswer.NO_ANSWER &&
+		final Participant participant = getParticipantObject();
+		Button acceptInvitationButton =
+				(Button) meetingInfoLayout.findViewById(R.id.btn_accept_invitation);
+		Button denyInvitationButton =
+				(Button) meetingInfoLayout.findViewById(R.id.btn_deny_invitation);
+		if (participant != null &&
+				participant.getParticipationAnswer() == ParticipationAnswer.NO_ANSWER &&
 				meeting.getEndDateTime().after(new Date())) {
-			Button acceptInvitation =
-					(Button) meetingInfoLayout.findViewById(R.id.accept_invitation);
-			Button denyInvitation = (Button) meetingInfoLayout.findViewById(R.id.deny_invitation);
-			acceptInvitation.setOnClickListener(view -> {
-				if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREFERRED_LOCATIONS &&
-						LocationClient.getMyLocation() != null ||
-						meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
-					participantObject.setLocation(LocationClient.getMyLocation());
-					participantObject.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
-					sendUpdateParticipationAnswerRequest(participantObject);
-				} else {
-					UIUtil.showToastMessage(activity,
-							getString(R.string.location_get_your_location));
-				}
+			acceptInvitationButton.setOnClickListener(view -> {
+				participant.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
+				showSendGpsLocationDialog(participant);
 			});
-			denyInvitation.setOnClickListener(view -> {
-				if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREFERRED_LOCATIONS &&
-						LocationClient.getMyLocation() != null ||
-						meeting.getLocationType() == LocationType.SPECIFIC_LOCATION) {
-					participantObject.setLocation(LocationClient.getMyLocation());
-					participantObject.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
-					sendUpdateParticipationAnswerRequest(participantObject);
-				} else {
-					UIUtil.showToastMessage(activity,
-							getString(R.string.location_get_your_location));
-				}
+			denyInvitationButton.setOnClickListener(view -> {
+				showConfirmationDialog(participant);
 			});
 		} else {
-			ViewGroup answerButtons =
-					(ViewGroup) meetingInfoLayout.findViewById(R.id.invitation_answer_buttons);
-			answerButtons.setVisibility(View.GONE);
+			acceptInvitationButton.setVisibility(View.GONE);
+			denyInvitationButton.setVisibility(View.GONE);
 		}
+	}
+
+	private void showSendGpsLocationDialog(final Participant participant) {
+		SimpleDialog.Builder builder = new SimpleDialog.Builder(R.style.DialogTheme) {
+			@Override
+			public void onPositiveActionClicked(DialogFragment fragment) {
+				participant.setSendGpsLocationAnswer(SendGpsLocationAnswer.SEND);
+				sendUpdateParticipationAnswerRequest(participant);
+				super.onPositiveActionClicked(fragment);
+			}
+
+			@Override
+			public void onNegativeActionClicked(DialogFragment fragment) {
+				participant.setSendGpsLocationAnswer(SendGpsLocationAnswer.NO_SEND);
+				sendUpdateParticipationAnswerRequest(participant);
+				super.onNegativeActionClicked(fragment);
+			}
+		};
+		builder.message(
+				"Send your GPS location to other participants so they can track your location.")
+				.title("Send GPS location?").positiveAction("AGREE").negativeAction("DISAGREE");
+		DialogFragment fragment = DialogFragment.newInstance(builder);
+		fragment.show(activity.getSupportFragmentManager(), null);
+	}
+
+	private void showConfirmationDialog(final Participant participant) {
+		SimpleDialog.Builder builder = new SimpleDialog.Builder(R.style.DialogTheme) {
+			@Override
+			public void onPositiveActionClicked(DialogFragment fragment) {
+				participant.setParticipationAnswer(ParticipationAnswer.NOT_PARTICIPATING);
+				sendUpdateParticipationAnswerRequest(participant);
+				super.onPositiveActionClicked(fragment);
+			}
+
+			@Override
+			public void onNegativeActionClicked(DialogFragment fragment) {
+				super.onNegativeActionClicked(fragment);
+			}
+		};
+		builder.message("You are about to discard the invitation to the meeting.")
+				.title("Discard invitation?").positiveAction("OK").negativeAction("CANCEL");
+		DialogFragment fragment = DialogFragment.newInstance(builder);
+		fragment.show(activity.getSupportFragmentManager(), null);
 	}
 
 	private void sendUpdateParticipationAnswerRequest(Participant participant) {
 		activity.showProgress(true);
-		RestClient.get().updateParticipationAnswerRequest(participant, meeting.getId(),
-				new Callback<Meeting>() {
+		RestClient.get().updateParticipationAnswerRequest(participant.getParticipationAnswer(),
+				participant.getId(), new Callback<ResponseBody>() {
 					@Override
-					public void success(Meeting meeting, Response response) {
+					public void success(ResponseBody responseBody, Response response) {
 						activity.showProgress(false);
-						MeetingInfoFragment.this.meeting = meeting;
 						populateLayout();
 					}
 
@@ -205,8 +276,24 @@ public class MeetingInfoFragment extends Fragment {
 				});
 	}
 
+	private void sendUpdateGpsLocationAnswer(SendGpsLocationAnswer sendGpsLocationAnswer,
+			int participantId) {
+		RestClient.get().updateSendGpsLocationAnswer(sendGpsLocationAnswer, participantId,
+				new Callback<ResponseBody>() {
+					@Override
+					public void success(ResponseBody responseBody, Response response) {
+
+					}
+
+					@Override
+					public void failure(RetrofitError error) {
+						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
+					}
+				});
+	}
+
 	private Participant getParticipantObject() {
-		int accountId = activity.getAccountId();
+		int accountId = MainActivity.getAccountId();
 		for (Participant participant : meeting.getParticipants()) {
 			if (participant.getAccountId() == accountId) {
 				return participant;
@@ -216,17 +303,19 @@ public class MeetingInfoFragment extends Fragment {
 	}
 
 	private void refreshParticipantsListView() {
-		ListView listview = (ListView) meetingInfoLayout.findViewById(R.id.list_view_participants);
-		listview.setOnItemClickListener((parent, view, position, id) -> {
+		participantsList = meeting.getParticipants();
+		ListView participantsListView =
+				(ListView) meetingInfoLayout.findViewById(R.id.list_view_participants);
+		participantsListView.setOnItemClickListener((parent, view, position, id) -> {
 
-			GroupedListAdapter.GroupedListItem item = adapter.getItem(position);
+			GroupedListAdapter.GroupedListItem item = participantsAdapter.getItem(position);
 			if (!item.isGroupItem()) {
 				Participant participant = (Participant) item.getObject();
 				activity.changeFragmentToParticipantInfo(participant);
 			}
 		});
-		adapter = new ParticipantsAdapter(getActivity(), getGroupedListItems());
-		listview.setAdapter(adapter);
+		participantsAdapter = new ParticipantsAdapter(getActivity(), getGroupedListItems());
+		participantsListView.setAdapter(participantsAdapter);
 	}
 
 	private List<GroupedListAdapter.GroupedListItem> getGroupedListItems() {
@@ -282,8 +371,9 @@ public class MeetingInfoFragment extends Fragment {
 				super.addIcon(R.drawable.ic_account_box_black_18dp, R.color.dark_gray);
 			}
 			if (meeting.isOngoing()) {
-				if (participant.getLocation() == null) {
-					super.addIcon(R.drawable.ic_remove_marker_black_18dp, R.color.red);
+				if (participant.getLocation() == null ||
+						participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND) {
+					super.addIcon(R.drawable.ic_remove_marker_black_18dp, R.color.dark_red);
 				} else {
 					super.addIcon(R.drawable.ic_marker_black_18dp, R.color.green);
 				}

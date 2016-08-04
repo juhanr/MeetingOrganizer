@@ -20,7 +20,7 @@ import ee.juhan.meetingorganizer.activities.MainActivity;
 import ee.juhan.meetingorganizer.adapters.GroupedListAdapter;
 import ee.juhan.meetingorganizer.adapters.GroupedListAdapter.GroupedListItem;
 import ee.juhan.meetingorganizer.models.server.Meeting;
-import ee.juhan.meetingorganizer.rest.RestClient;
+import ee.juhan.meetingorganizer.network.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
@@ -31,12 +31,12 @@ import retrofit.client.Response;
 public class MeetingsListFragment extends Fragment {
 
 	public static final String ACTIVE_MEETINGS = "active-meetings";
+	private static List<Meeting> meetingsList;
 	private final String title;
 	private final String meetingsType;
 	private MainActivity activity;
 	private ViewGroup meetingsListLayout;
 	private MeetingsAdapter adapter;
-	private List<Meeting> meetingsList;
 
 	public MeetingsListFragment() {
 		this.title = "Meetings";
@@ -46,6 +46,15 @@ public class MeetingsListFragment extends Fragment {
 	public MeetingsListFragment(String title, String meetingsType) {
 		this.title = title;
 		this.meetingsType = meetingsType;
+	}
+
+	public static void updateSingleMeeting(Meeting meeting) {
+		for (int i = 0; i < meetingsList.size(); i++) {
+			if (meetingsList.get(i).getId() == meeting.getId()) {
+				meetingsList.set(i, meeting);
+				break;
+			}
+		}
 	}
 
 	@Override

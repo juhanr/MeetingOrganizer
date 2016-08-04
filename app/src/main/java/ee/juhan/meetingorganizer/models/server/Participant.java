@@ -1,5 +1,8 @@
 package ee.juhan.meetingorganizer.models.server;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.util.Date;
 
 import ee.juhan.meetingorganizer.util.DateUtil;
@@ -35,6 +38,12 @@ public class Participant {
 		this.name = name;
 		this.email = email;
 		this.phoneNumber = phoneNumber;
+	}
+
+	public Participant(int accountId, MapCoordinate location, Date locationTimestamp) {
+		this.accountId = accountId;
+		this.location = location;
+		this.setLocationTimestamp(locationTimestamp);
 	}
 
 	public final int getId() {
@@ -108,6 +117,18 @@ public class Participant {
 	public void setLocationTimestamp(Date locationTimestamp) {
 		this.locationTimestamp = DateUtil.toUTCTimezone(locationTimestamp);
 		this.isUTCTimeZone = true;
+	}
+
+	public String getLocationTimestampFormatted() {
+		return DateUtil.isToday(getLocationTimestamp()) ?
+				DateUtil.formatTime(getLocationTimestamp()) :
+				DateUtil.formatDateTime(getLocationTimestamp());
+	}
+
+	public MarkerOptions getMarkerOptions() {
+		return new MarkerOptions().position(location.toLatLng()).title(name)
+				.snippet("Last updated: " + getLocationTimestampFormatted()).draggable(false)
+				.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 	}
 
 }

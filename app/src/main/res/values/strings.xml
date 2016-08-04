@@ -34,7 +34,7 @@
 	<string name="msg_yesterday">Yesterday</string>
 
 	<!-- General error strings -->
-	<string name="error_server_fail">Server response fail.</string>
+	<string name="error_server_fail">Connection failed, please check your network connection.</string>
 
 	<!-- General title strings -->
 	<string name="title_choose_location">Choose a location</string>

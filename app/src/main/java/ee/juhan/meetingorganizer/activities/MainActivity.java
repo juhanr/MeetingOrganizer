@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -35,17 +34,18 @@ import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
 import ee.juhan.meetingorganizer.models.server.Account;
 import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.models.server.Participant;
-import ee.juhan.meetingorganizer.rest.RestClient;
+import ee.juhan.meetingorganizer.network.LocationService;
+import ee.juhan.meetingorganizer.network.RestClient;
 import ee.juhan.meetingorganizer.util.UIUtil;
 
 public class MainActivity extends AppCompatActivity
 		implements NavigationView.OnNavigationItemSelectedListener {
 
+	private static SharedPreferences sharedPref;
+	private static int accountId = 0;
 	private DrawerLayout drawer;
 	private TextView drawerEmailView;
 	private TextView drawerNameView;
-	private SharedPreferences sharedPref;
-	private Toast toast;
 	private boolean isLoggedIn;
 	private int backStackCounter = 0;
 	private boolean resetBackStackCounter;
@@ -55,6 +55,15 @@ public class MainActivity extends AppCompatActivity
 	private View progressView;
 	private View fragmentContainer;
 
+	public static int getAccountId() {
+		return accountId;
+	}
+
+	public static int getAccountIdFromPrefs() {
+		accountId = sharedPref.getInt("accountId", 0);
+		return accountId;
+	}
+
 	@Override
 	protected final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -62,12 +71,14 @@ public class MainActivity extends AppCompatActivity
 		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		progressView = findViewById(R.id.progress_bar);
 		fragmentContainer = findViewById(R.id.fragment_container);
+		accountId = getAccountIdFromPrefs();
 		setupListeners();
 		checkIfLoggedIn();
 		showLocationFab(false);
 		showEmailFab(false);
 		showSmsFab(false);
 		showCallFab(false);
+		new LocationService(this, false);
 	}
 
 	@Override
@@ -167,10 +178,6 @@ public class MainActivity extends AppCompatActivity
 		return sharedPref.getString("sid", null);
 	}
 
-	public final int getAccountId() {
-		return sharedPref.getInt("accountId", 0);
-	}
-
 	public final String getPhoneNumber() {
 		return sharedPref.getString("phone", null);
 	}
@@ -180,6 +187,7 @@ public class MainActivity extends AppCompatActivity
 		sharedPref.edit().putString("email", account.getEmail()).putString("sid", sid)
 				.putInt("accountId", account.getAccountId()).putString("name", account.getName())
 				.putString("phone", account.getPhoneNumber()).apply();
+		accountId = getAccountIdFromPrefs();
 		RestClient.setSid(sid);
 		setEmail(account.getEmail());
 		setName(account.getName());
@@ -193,6 +201,7 @@ public class MainActivity extends AppCompatActivity
 	private void logOut() {
 		sharedPref.edit().putString("email", null).putString("sid", null).putInt("accountId", 0)
 				.putString("name", null).putString("phone", null).apply();
+		accountId = getAccountIdFromPrefs();
 		RestClient.setSid(null);
 		setEmail(getString(R.string.drawer_not_logged_in));
 		isLoggedIn = false;

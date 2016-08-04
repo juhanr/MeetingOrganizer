@@ -46,7 +46,13 @@
 		</activity>
 		<activity
 			android:configChanges="orientation|keyboardHidden"
-			android:name=".activities.LocationActivity"
+			android:name=".activities.ChooseLocationActivity"
+			android:screenOrientation="portrait"
+			android:theme="@style/AppTheme.NoActionBar">
+		</activity>
+		<activity
+			android:configChanges="orientation|keyboardHidden"
+			android:name=".activities.ShowLocationActivity"
 			android:screenOrientation="portrait"
 			android:theme="@style/AppTheme.NoActionBar">
 		</activity>
