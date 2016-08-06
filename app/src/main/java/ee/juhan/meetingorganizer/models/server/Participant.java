@@ -19,6 +19,7 @@ public class Participant {
 	private MapCoordinate location;
 	private Date locationTimestamp;
 
+	// App-specific values, not used in server
 	private boolean isUTCTimeZone = false;
 
 	public Participant() {}
@@ -44,6 +45,22 @@ public class Participant {
 		this.accountId = accountId;
 		this.location = location;
 		this.setLocationTimestamp(locationTimestamp);
+	}
+
+	@Override
+	public String toString() {
+		return "Participant{" +
+				"id=" + id +
+				", accountId=" + accountId +
+				", name='" + name + '\'' +
+				", email='" + email + '\'' +
+				", phoneNumber='" + phoneNumber + '\'' +
+				", participationAnswer=" + participationAnswer +
+				", sendGpsLocationAnswer=" + sendGpsLocationAnswer +
+				", location=" + location +
+				", locationTimestamp=" + locationTimestamp +
+				", isUTCTimeZone=" + isUTCTimeZone +
+				'}';
 	}
 
 	public final int getId() {
@@ -130,5 +147,4 @@ public class Participant {
 				.snippet("Last updated: " + getLocationTimestampFormatted()).draggable(false)
 				.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 	}
-
 }

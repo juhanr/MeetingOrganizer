@@ -1,4 +1,4 @@
-package ee.juhan.meetingorganizer.network;
+package ee.juhan.meetingorganizer.services;
 
 import android.Manifest;
 import android.app.Activity;
@@ -27,6 +27,7 @@ import java.util.Date;
 import ee.juhan.meetingorganizer.activities.MainActivity;
 import ee.juhan.meetingorganizer.models.server.MapCoordinate;
 import ee.juhan.meetingorganizer.models.server.Participant;
+import ee.juhan.meetingorganizer.network.RestClient;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;

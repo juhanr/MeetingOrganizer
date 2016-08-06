@@ -2,7 +2,10 @@ package ee.juhan.meetingorganizer.fragments;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -33,14 +36,18 @@ import java.util.Map;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.activities.ChooseLocationActivity;
 import ee.juhan.meetingorganizer.activities.ShowLocationActivity;
+import ee.juhan.meetingorganizer.models.MarkerData;
+import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.models.server.SendGpsLocationAnswer;
+import ee.juhan.meetingorganizer.util.GsonUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
 
 public class CustomMapFragment extends MapFragment
 		implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMapClickListener,
 		OnMapReadyCallback {
 
+	public static final String UPDATE_PARTICIPANT_MARKERS_ACTION = "update-participant-markers";
 	private static final String TAG = CustomMapFragment.class.getSimpleName();
 	private static final LatLng DEFAULT_CAMERA_LOCATION = new LatLng(59.437046, 24.753742);
 	private static final float DEFAULT_CAMERA_ZOOM = 10;
@@ -49,16 +56,15 @@ public class CustomMapFragment extends MapFragment
 	private static Activity activity;
 	private static GoogleMap map;
 	private static boolean isMapInitialized;
-	private static Map<Integer, Marker> participantMarkers = new HashMap<>();
 	private Marker temporaryMarker;
 	private Marker focusedMarker;
-	private List<Marker> locationMarkers = new ArrayList<>();
 	private int maxLocationMarkers = 1;
 	private boolean isClickableMap;
 	private ViewGroup mapLayout;
-	private String temporaryMarkerAddress = "";
-	private List<LatLng> markerLocationsToBeAdded = new ArrayList<>();
-	private Map<Integer, MarkerOptions> participantMarkersToAdd = new HashMap<>();
+	private ParticipantMarkerUpdateReceiver participantMarkerUpdateReceiver;
+
+	private List<MarkerData> markersToAdd = new ArrayList<>();
+	private Map<Marker, MarkerData> addedMarkers = new HashMap<>();
 
 	public static CustomMapFragment newInstance() {
 		return new CustomMapFragment();
@@ -68,29 +74,26 @@ public class CustomMapFragment extends MapFragment
 		return customMapFragment != null && isMapInitialized;
 	}
 
+	public static CustomMapFragment getFragment() {
+		return customMapFragment;
+	}
+
 	public static boolean canShowParticipantMarkers() {
 		return activity instanceof ShowLocationActivity;
 	}
 
-	public static void updateParticipantMarker(Participant participant) {
-		if (customMapFragment == null || !customMapFragment.isVisible() || !isMapInitialized ||
-				participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND ||
-				participant.getLocation() == null || !canShowParticipantMarkers()) {
-			return;
-		}
-		Marker marker = participantMarkers.get(participant.getId());
-		if (marker != null) {
-			marker.setPosition(participant.getLocation().toLatLng());
-			marker.setSnippet("Last updated: " + participant.getLocationTimestampFormatted());
-
-			// Refresh info window if it's open.
-			if (marker.isInfoWindowShown()) {
-				marker.showInfoWindow();
+	public static String getAddressFromLatLng(LatLng latLng) {
+		try {
+			Geocoder geocoder = new Geocoder(activity);
+			List<Address> addresses =
+					geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+			if (addresses.size() > 0) {
+				return addresses.get(0).getAddressLine(0);
 			}
-		} else {
-			marker = map.addMarker(participant.getMarkerOptions());
-			participantMarkers.put(participant.getId(), marker);
+		} catch (IOException e) {
+			Log.e(TAG, "Could not get address string from location.");
 		}
+		return "Unknown address";
 	}
 
 	@Override
@@ -104,16 +107,30 @@ public class CustomMapFragment extends MapFragment
 	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		mapLayout = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
-		customMapFragment = this;
 		checkAndroidVersion();
 		return mapLayout;
 	}
 
 	@Override
-	public final void onDestroyView() {
+	public final void onResume() {
+		super.onResume();
+		customMapFragment = this;
+		participantMarkerUpdateReceiver = new ParticipantMarkerUpdateReceiver();
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(CustomMapFragment.UPDATE_PARTICIPANT_MARKERS_ACTION);
+		getActivity().registerReceiver(participantMarkerUpdateReceiver, intentFilter);
+	}
+
+	@Override
+	public final void onPause() {
 		customMapFragment = null;
-		locationMarkers.clear();
-		participantMarkers.clear();
+		getActivity().unregisterReceiver(participantMarkerUpdateReceiver);
+		super.onPause();
+	}
+
+	@Override
+	public final void onDestroyView() {
+		addedMarkers.clear();
 		super.onDestroyView();
 	}
 
@@ -169,8 +186,7 @@ public class CustomMapFragment extends MapFragment
 			map.setOnMapClickListener(this);
 		}
 
-		addLocationMarkers();
-		addParticipantMarkers();
+		addMarkersToMap();
 
 		if (temporaryMarker == null) {
 			map.moveCamera(CameraUpdateFactory
@@ -188,22 +204,16 @@ public class CustomMapFragment extends MapFragment
 		isMapInitialized = true;
 	}
 
-	private void addLocationMarkers() {
-		for (LatLng latLng : markerLocationsToBeAdded) {
-			setLocationMarker(latLng);
-			if (activity instanceof ChooseLocationActivity) {
-				((ChooseLocationActivity) activity).refreshConfirmMarkerFABState();
-			}
+	private void addMarkersToMap() {
+		for (MarkerData markerData : markersToAdd) {
+			Marker marker = map.addMarker(markerData.getMarkerOptions());
+			addedMarkers.put(marker, markerData);
 		}
-		markerLocationsToBeAdded = new ArrayList<>();
-	}
+		if (activity instanceof ChooseLocationActivity) {
+			((ChooseLocationActivity) activity).refreshConfirmMarkerFABState();
+		}
+		markersToAdd.clear();
 
-	private void addParticipantMarkers() {
-		for (Integer participantId : participantMarkersToAdd.keySet()) {
-			Marker marker = map.addMarker(participantMarkersToAdd.get(participantId));
-			participantMarkers.put(participantId, marker);
-		}
-		participantMarkersToAdd.clear();
 	}
 
 	private void setFocus(Marker marker, boolean focused) {
@@ -219,32 +229,31 @@ public class CustomMapFragment extends MapFragment
 		}
 	}
 
-	private void setLocationMarker(LatLng latLng) {
-		setTemporaryMarker(latLng);
-		confirmTemporaryMarker();
-		if (activity instanceof ChooseLocationActivity) {
-			((ChooseLocationActivity) activity).refreshConfirmMarkerFABState();
+	public void addMarker(MarkerData markerData) {
+		if (isMapInitialized()) {
+			Marker marker = map.addMarker(markerData.getMarkerOptions());
+			addedMarkers.put(marker, markerData);
+		} else {
+			markersToAdd.add(markerData);
 		}
 	}
 
-	public void setMarkerLocations(List<LatLng> locations) {
-		markerLocationsToBeAdded = locations;
-	}
-
-	public void removeLocationMarker(Marker marker) {
+	public void removeMarker(Marker marker) {
 		marker.remove();
-		locationMarkers.remove(marker);
+		addedMarkers.remove(marker);
 	}
 
 	private void setTemporaryMarker(LatLng latLng, String address) {
-		this.temporaryMarkerAddress = address;
-		if (temporaryMarker != null) {
-			temporaryMarker.remove();
-		}
 		setFocus(null, false);
-		temporaryMarker =
-				map.addMarker(new MarkerOptions().position(latLng).title(address).draggable(false));
-		temporaryMarker.setAlpha(0.5f);
+		if (temporaryMarker == null) {
+			MarkerData markerData = new MarkerData(
+					new MarkerOptions().draggable(false).alpha(0.5f).position(latLng),
+					MarkerData.Type.TEMPORARY_MARKER);
+			temporaryMarker = map.addMarker(markerData.getMarkerOptions());
+			addedMarkers.put(temporaryMarker, markerData);
+		}
+		temporaryMarker.setPosition(latLng);
+		temporaryMarker.setTitle(address);
 		temporaryMarker.showInfoWindow();
 		if (activity instanceof ChooseLocationActivity) {
 			((ChooseLocationActivity) activity).refreshConfirmMarkerFABState();
@@ -253,9 +262,11 @@ public class CustomMapFragment extends MapFragment
 
 	public Marker confirmTemporaryMarker() {
 		temporaryMarker.setAlpha(1);
-		locationMarkers.add(temporaryMarker);
+		MarkerData markerData = addedMarkers.get(temporaryMarker);
+		markerData.setType(MarkerData.Type.CONFIRMED_LOCATION_MARKER);
+		Marker returnableMarker = temporaryMarker;
 		temporaryMarker = null;
-		return locationMarkers.get(locationMarkers.size() - 1);
+		return returnableMarker;
 	}
 
 	public Marker getFocusedMarker() {
@@ -263,11 +274,15 @@ public class CustomMapFragment extends MapFragment
 	}
 
 	public boolean isLocationMarkerAvailable() {
-		return locationMarkers.size() < maxLocationMarkers;
-	}
-
-	public void clearLocationMarkers() {
-		locationMarkers.clear();
+		int locationMarkersCount = 0;
+		for (Marker marker : addedMarkers.keySet()) {
+			MarkerData markerData = addedMarkers.get(marker);
+			if (markerData.getType() == MarkerData.Type.CONFIRMED_LOCATION_MARKER ||
+					markerData.getType() == MarkerData.Type.PREFERRED_LOCATION_MARKER) {
+				locationMarkersCount++;
+			}
+		}
+		return locationMarkersCount < maxLocationMarkers;
 	}
 
 	public void setMaxLocationMarkers(int max) {
@@ -279,19 +294,7 @@ public class CustomMapFragment extends MapFragment
 	}
 
 	private void setTemporaryMarker(LatLng latLng) {
-		try {
-			Geocoder geocoder = new Geocoder(activity);
-			List<Address> addresses =
-					geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-			if (addresses.size() > 0) {
-				setTemporaryMarker(latLng, addresses.get(0).getAddressLine(0));
-			} else {
-				setTemporaryMarker(latLng, "Unknown address");
-			}
-		} catch (IOException e) {
-			Log.e(TAG, "Could not get location from address string.");
-			setTemporaryMarker(latLng, "");
-		}
+		setTemporaryMarker(latLng, getAddressFromLatLng(latLng));
 	}
 
 	public final void setIsClickableMap(boolean isClickableMap) {
@@ -305,15 +308,11 @@ public class CustomMapFragment extends MapFragment
 		}
 	}
 
-	public final String getTemporaryMarkerAddress() {
-		return temporaryMarkerAddress;
-	}
-
 	public final void clearMap() {
 		if (map != null) {
 			map.clear();
 			temporaryMarker = null;
-			temporaryMarkerAddress = "";
+			addedMarkers.clear();
 		}
 	}
 
@@ -335,7 +334,55 @@ public class CustomMapFragment extends MapFragment
 		}
 	}
 
-	public void addParticipantMarkerOptions(int participantId, MarkerOptions markerOptions) {
-		participantMarkersToAdd.put(participantId, markerOptions);
+	public void addParticipantMarkers(List<Participant> participants) {
+		for (Participant participant : participants) {
+			if (participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND ||
+					participant.getLocation() == null) {
+				continue;
+			}
+			markersToAdd.add(new MarkerData(participant.getMarkerOptions(),
+					MarkerData.Type.PARTICIPANT_MARKER, participant.getId()));
+		}
+	}
+
+	public void updateParticipantMarker(Participant participant) {
+		if (customMapFragment == null || !customMapFragment.isVisible() || !isMapInitialized ||
+				participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND ||
+				participant.getLocation() == null || !canShowParticipantMarkers()) {
+			return;
+		}
+		Marker marker = null;
+		for (Marker markerKey : addedMarkers.keySet()) {
+			MarkerData markerData = addedMarkers.get(markerKey);
+			if (markerData.getValueId() == participant.getId()) {
+				marker = markerKey;
+				break;
+			}
+		}
+		if (marker != null) {
+			marker.setPosition(participant.getLocation().toLatLng());
+			marker.setSnippet("Last updated: " + participant.getLocationTimestampFormatted());
+
+			// Refresh info window if it's open.
+			if (marker.isInfoWindowShown()) {
+				marker.showInfoWindow();
+			}
+		} else {
+			marker = map.addMarker(participant.getMarkerOptions());
+			addedMarkers.put(marker, new MarkerData(participant.getMarkerOptions(),
+					MarkerData.Type.PARTICIPANT_MARKER, participant.getId()));
+		}
+	}
+
+	private class ParticipantMarkerUpdateReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Meeting newMeetingInfo = GsonUtil.getJsonObjectFromIntentExtras(intent, Meeting.class,
+					Meeting.class.getSimpleName());
+			for (Participant participant : newMeetingInfo.getParticipants()) {
+				updateParticipantMarker(participant);
+			}
+		}
 	}
 }

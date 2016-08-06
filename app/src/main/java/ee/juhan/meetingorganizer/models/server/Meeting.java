@@ -2,9 +2,7 @@ package ee.juhan.meetingorganizer.models.server;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import ee.juhan.meetingorganizer.util.DateUtil;
 
@@ -20,8 +18,8 @@ public class Meeting {
 	private LocationType locationType = LocationType.NOT_SET;
 	private String locationName;
 	private List<Participant> participants = new ArrayList<>();
-	private Set<MapCoordinate> userPreferredLocations = new HashSet<>();
-	private List<MapCoordinate> recommendedLocations = new ArrayList<>();
+	private List<MapCoordinate> userPreferredLocations = new ArrayList<>();
+	private MapCoordinate recommendedLocation;
 	private MeetingStatus status = MeetingStatus.ACTIVE;
 
 	// App-specific values, not used in server
@@ -66,6 +64,27 @@ public class Meeting {
 		this.locationName = locationName;
 		this.participants = participants;
 		this.status = status;
+	}
+
+	@Override
+	public String toString() {
+		return "Meeting{" +
+				"startDateTime=" + startDateTime +
+				", id=" + id +
+				", leaderId=" + leaderId +
+				", title='" + title + '\'' +
+				", description='" + description + '\'' +
+				", endDateTime=" + endDateTime +
+				", location=" + location +
+				", locationType=" + locationType +
+				", locationName='" + locationName + '\'' +
+				", participants=" + participants +
+				", userPreferredLocations=" + userPreferredLocations +
+				", recommendedLocation=" + recommendedLocation +
+				", status=" + status +
+				", isQuickMeeting=" + isQuickMeeting +
+				", isUTCTimeZone=" + isUTCTimeZone +
+				'}';
 	}
 
 	public final int getId() {
@@ -154,11 +173,11 @@ public class Meeting {
 		return participants.add(participant);
 	}
 
-	public final Set<MapCoordinate> getUserPreferredLocations() {
+	public final List<MapCoordinate> getUserPreferredLocations() {
 		return userPreferredLocations;
 	}
 
-	public final void setUserPreferredLocations(Set<MapCoordinate> userPreferredLocations) {
+	public final void setUserPreferredLocations(List<MapCoordinate> userPreferredLocations) {
 		this.userPreferredLocations = userPreferredLocations;
 	}
 
@@ -170,12 +189,12 @@ public class Meeting {
 		this.userPreferredLocations.remove(userPreferredLocation);
 	}
 
-	public List<MapCoordinate> getRecommendedLocations() {
-		return recommendedLocations;
+	public MapCoordinate getRecommendedLocation() {
+		return recommendedLocation;
 	}
 
-	public void setRecommendedLocations(List<MapCoordinate> recommendedLocations) {
-		this.recommendedLocations = recommendedLocations;
+	public void setRecommendedLocation(MapCoordinate recommendedLocation) {
+		this.recommendedLocation = recommendedLocation;
 	}
 
 	public MeetingStatus getStatus() {
@@ -198,5 +217,4 @@ public class Meeting {
 		Date currentTime = new Date();
 		return getStartDateTime().before(currentTime) && getEndDateTime().after(currentTime);
 	}
-
 }

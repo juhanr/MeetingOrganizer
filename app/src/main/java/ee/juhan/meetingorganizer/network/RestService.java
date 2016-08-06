@@ -24,7 +24,7 @@ public interface RestService {
 	String UPDATE_PARTICIPATION_ANSWER_PATH = "/update-participation-answer";
 	String UPDATE_SEND_LOCATION_ANSWER_PATH = "/update-send-location-answer";
 	String UPDATE_LOCATION_ALL_PATH = "/update-location-all";
-	String GENERATE_RECOMMENDED_LOCATIONS_PATH = "/generate-recommended-locations";
+	String UPDATE_PATH = "/update";
 
 	String REGISTER = "/register";
 	String LOGIN = "/login";
@@ -59,6 +59,9 @@ public interface RestService {
 	@GET(MEETING + "/{" + MEETING_ID + "}")
 	void getMeetingRequest(@Path(MEETING_ID) int meetingId, Callback<Meeting> callback);
 
+	@POST(MEETING + UPDATE_PATH)
+	void updateMeetingRequest(@Body Meeting meeting, Callback<ResponseBody> callback);
+
 	@POST(PARTICIPANT + "/{" + PARTICIPANT_ID + "}" + UPDATE_PARTICIPATION_ANSWER_PATH)
 	void updateParticipationAnswerRequest(@Body ParticipationAnswer participationAnswer,
 			@Path(PARTICIPANT_ID) int participantId, Callback<ResponseBody> callback);
@@ -70,9 +73,5 @@ public interface RestService {
 	@POST(PARTICIPANT + UPDATE_LOCATION_ALL_PATH)
 	void updateParticipantLocationRequest(@Body Participant participant,
 			Callback<Boolean> callback);
-
-	@POST(MEETING + "/{" + MEETING_ID + "}" + GENERATE_RECOMMENDED_LOCATIONS_PATH)
-	void generateRecommendedLocationsRequest(@Path(MEETING_ID) int meetingId,
-			Callback<Meeting> callback);
 
 }

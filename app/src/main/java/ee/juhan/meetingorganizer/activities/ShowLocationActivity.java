@@ -9,22 +9,21 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.model.LatLng;
-
-import java.util.Collections;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.fragments.CustomMapFragment;
-import ee.juhan.meetingorganizer.fragments.MeetingInfoFragment;
-import ee.juhan.meetingorganizer.models.server.Participant;
-import ee.juhan.meetingorganizer.models.server.SendGpsLocationAnswer;
+import ee.juhan.meetingorganizer.models.MarkerData;
+import ee.juhan.meetingorganizer.models.server.LocationType;
+import ee.juhan.meetingorganizer.models.server.Meeting;
+import ee.juhan.meetingorganizer.services.MeetingUpdaterService;
+import ee.juhan.meetingorganizer.util.GsonUtil;
 
 public class ShowLocationActivity extends AppCompatActivity {
 
-	public static final String MARKER_LATITUDE = "marker-latitude";
-	public static final String MARKER_LONGITUDE = "marker-longitude";
-	private CustomMapFragment customMapFragment = new CustomMapFragment();
-	private LatLng markerLocation;
+	public static String CHOOSE_LOCATION_ARG = "choose-location";
+	private CustomMapFragment customMapFragment;
+	private Meeting currentMeeting;
+	private boolean chooseLocation;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +33,12 @@ public class ShowLocationActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_show_location);
 		setUpActionBar();
 		setUpMapLayout();
+	}
+
+	@Override
+	public final void onResume() {
+		super.onResume();
+		MeetingUpdaterService.startMeetingUpdaterTask();
 	}
 
 	@Override
@@ -47,12 +52,9 @@ public class ShowLocationActivity extends AppCompatActivity {
 	}
 
 	private void getIntentExtras() {
-		double markerLatitude = getIntent().getDoubleExtra(MARKER_LATITUDE, 0);
-		double markerLongitude = getIntent().getDoubleExtra(MARKER_LONGITUDE, 0);
-		if (markerLatitude != 0 && markerLongitude != 0) {
-			markerLocation = new LatLng(markerLatitude, markerLongitude);
-		}
-
+		currentMeeting = GsonUtil.getJsonObjectFromIntentExtras(getIntent(), Meeting.class,
+				Meeting.class.getSimpleName());
+		chooseLocation = getIntent().getBooleanExtra(CHOOSE_LOCATION_ARG, false);
 	}
 
 	private void setUpActionBar() {
@@ -80,23 +82,17 @@ public class ShowLocationActivity extends AppCompatActivity {
 	private void setUpMapLayout() {
 		customMapFragment = CustomMapFragment.newInstance();
 		customMapFragment.setIsClickableMap(false);
-		addParticipantMarkers();
+		customMapFragment.addParticipantMarkers(currentMeeting.getParticipants());
 		getFragmentManager().beginTransaction().replace(R.id.location_frame, customMapFragment)
 				.commit();
 
-		if (markerLocation != null) {
-			customMapFragment.setMarkerLocations(Collections.singletonList(markerLocation));
+		if (currentMeeting.getLocationType() == LocationType.SPECIFIC_LOCATION &&
+				currentMeeting.getLocation() != null) {
+			customMapFragment.addMarker(new MarkerData(currentMeeting));
 		}
-	}
 
-	private void addParticipantMarkers() {
-		for (Participant participant : MeetingInfoFragment.getMeeting().getParticipants()) {
-			if (participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND ||
-					participant.getLocation() == null) {
-				continue;
-			}
-			customMapFragment.addParticipantMarkerOptions(participant.getId(),
-					participant.getMarkerOptions());
+		if (chooseLocation) {
+			// TODO
 		}
 	}
 

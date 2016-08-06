@@ -12,18 +12,23 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
-import com.rey.material.widget.ListView;
+import com.rey.material.widget.CheckBox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
+import ee.juhan.meetingorganizer.adapters.GroupedListAdapter;
 import ee.juhan.meetingorganizer.models.server.Contact;
 import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.network.RestClient;
@@ -97,8 +102,8 @@ public class InviteContactsActivity extends AppCompatActivity {
 
 	private void checkContactsFromServer() {
 		showProgress(true);
-		RestClient.get().checkContactsRequest(contactsList, getAccountId(),
-				new Callback<List<Contact>>() {
+		RestClient.get()
+				.checkContactsRequest(contactsList, getAccountId(), new Callback<List<Contact>>() {
 					@Override
 					public void success(final List<Contact> serverResponse, Response response) {
 						showProgress(false);
@@ -134,6 +139,9 @@ public class InviteContactsActivity extends AppCompatActivity {
 	}
 
 	private void addContactsAsParticipants() {
+		if (contactsAdapter == null) {
+			return;
+		}
 		NewMeetingActivity.getNewMeetingModel().getParticipants().clear();
 		participantsWithoutAccount = 0;
 		for (Contact checkedContact : contactsAdapter.getCheckedItems()) {
@@ -210,46 +218,95 @@ public class InviteContactsActivity extends AppCompatActivity {
 
 	private void refreshListView() {
 		ListView listview = (ListView) chooseContactsLayout.findViewById(R.id.contacts_list);
+		listview.setItemsCanFocus(true);
+		listview.setOnItemClickListener((parent, view, position, id) -> {
+			GroupedListAdapter.GroupedListItem item = contactsAdapter.getItem(position);
+			if (!item.isGroupItem()) {
+				CheckBox checkBox = (CheckBox) view.findViewById(R.id.chk_contact);
+				contactsAdapter.checkContact(checkBox, (Contact) item.getObject());
+			}
+		});
 		if (contactsAdapter == null) {
-			contactsAdapter = new ContactsAdapter(this, contactsList);
+			contactsAdapter = new ContactsAdapter(this, getGroupedListItems());
 		}
 		listview.setAdapter(contactsAdapter);
 	}
 
-	private class ContactsAdapter extends CheckBoxAdapter<Contact> {
-
-		public ContactsAdapter(Context context, List<Contact> objects) {
-			super(context, objects);
-		}
-
-		@Override
-		protected void setUpCheckBox() {
-			Contact contact = super.getCurrentItem();
-			if (super.getCheckedItems().contains(contact)) {
-				super.getCheckBox().setChecked(true);
-			}
-			super.setCheckBoxText(contact.getName() + "\n" + contact.getPhoneNumber());
-			if (contact.getAccountId() != 0) {
-				super.addIcon(R.drawable.ic_account_box_black_18dp, R.color.dark_gray);
-			}
-		}
-
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			String contactPhoneNumber = buttonView.getText().toString().split("\n")[1];
-			Contact chosenContact = new Contact();
-			for (Contact contact : super.getItems()) {
-				if (contact.getPhoneNumber().equals(contactPhoneNumber)) {
-					chosenContact = contact;
-					break;
-				}
-			}
-			if (isChecked) {
-				super.getCheckedItems().add(chosenContact);
+	private List<GroupedListAdapter.GroupedListItem> getGroupedListItems() {
+		List<GroupedListAdapter.GroupedListItem> contactsWithAccount = new ArrayList<>();
+		contactsWithAccount.add(new GroupedListAdapter.GroupedListItem("Contacts with account"));
+		List<GroupedListAdapter.GroupedListItem> contactsWithoutAccount = new ArrayList<>();
+		contactsWithoutAccount
+				.add(new GroupedListAdapter.GroupedListItem("Contacts without account"));
+		for (Contact contact : contactsList) {
+			if (contact.getAccountId() == 0) {
+				contactsWithoutAccount.add(new GroupedListAdapter.GroupedListItem<>(contact));
 			} else {
-				super.getCheckedItems().remove(chosenContact);
+				contactsWithAccount.add(new GroupedListAdapter.GroupedListItem<>(contact));
 			}
 		}
 
+		List<GroupedListAdapter.GroupedListItem> groupedListItems = new ArrayList<>();
+		if (contactsWithAccount.size() > 1) {
+			groupedListItems.addAll(contactsWithAccount);
+		}
+		if (contactsWithoutAccount.size() > 1) {
+			groupedListItems.addAll(contactsWithoutAccount);
+		}
+		return groupedListItems;
 	}
+
+	private class ContactsAdapter extends GroupedListAdapter implements View.OnTouchListener {
+
+		private Set<Contact> checkedItems = new HashSet<>();
+		private Map<CheckBox, Integer> checkBoxPositionMap = new HashMap<>();
+
+		public ContactsAdapter(Context context, List<GroupedListItem> listItems) {
+			super(context, R.layout.list_item_contact, listItems);
+		}
+
+		@Override
+		protected void populateLayout() {
+			Contact contact = (Contact) super.getCurrentItem().getObject();
+			CheckBox checkBox = (CheckBox) super.getLayout().findViewById(R.id.chk_contact);
+			checkBoxPositionMap.put(checkBox, getPosition(super.getCurrentItem()));
+			checkBox.setOnTouchListener(this);
+			if (checkedItems.contains(contact)) {
+				checkBox.setCheckedImmediately(true);
+			}
+			TextView nameTextView =
+					(TextView) super.getLayout().findViewById(R.id.txt_contact_name);
+			nameTextView.setText(contact.getName());
+			TextView phoneTextView =
+					(TextView) super.getLayout().findViewById(R.id.txt_contact_phone);
+			phoneTextView.setText(contact.getPhoneNumber());
+		}
+
+		@Override
+		public boolean onTouch(View view, MotionEvent motionEvent) {
+			if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+				CheckBox checkBox = (CheckBox) view;
+				int position = checkBoxPositionMap.get(checkBox);
+				Contact contact = (Contact) contactsAdapter.getItem(position).getObject();
+				checkContact(checkBox, contact);
+				return true;
+			}
+			return false;
+		}
+
+		public Set<Contact> getCheckedItems() {
+			return checkedItems;
+		}
+
+		public void checkContact(CheckBox checkBox, Contact contact) {
+			if (checkBox.isChecked()) {
+				checkBox.setChecked(false);
+				checkedItems.remove(contact);
+			} else {
+				checkBox.setChecked(true);
+				checkedItems.add(contact);
+			}
+		}
+	}
+
 }

@@ -87,9 +87,12 @@ public class MeetingsListFragment extends Fragment {
 	}
 
 	private void getMeetingsRequest() {
+		if (MainActivity.getAccountId() == 0) {
+			return;
+		}
 		final Fragment fragment = this;
 		activity.showProgress(true);
-		RestClient.get().getMeetingsRequest(meetingsType, activity.getAccountId(),
+		RestClient.get().getMeetingsRequest(meetingsType, MainActivity.getAccountId(),
 				new Callback<List<Meeting>>() {
 					@Override
 					public void success(final List<Meeting> meetingList, Response response) {
@@ -145,7 +148,7 @@ public class MeetingsListFragment extends Fragment {
 	private class MeetingsAdapter extends GroupedListAdapter {
 
 		public MeetingsAdapter(Context context, List<GroupedListItem> listItems) {
-			super(context, R.layout.list_item_meetings, listItems);
+			super(context, R.layout.list_item_meeting, listItems);
 		}
 
 		@Override

@@ -14,7 +14,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.rey.material.app.DatePickerDialog;
 import com.rey.material.app.Dialog;
 import com.rey.material.app.DialogFragment;
@@ -22,8 +21,10 @@ import com.rey.material.app.TimePickerDialog;
 import com.rey.material.widget.CheckBox;
 import com.rey.material.widget.Spinner;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.models.server.LocationType;
@@ -31,9 +32,10 @@ import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
 import ee.juhan.meetingorganizer.models.server.SendGpsLocationAnswer;
-import ee.juhan.meetingorganizer.network.LocationService;
 import ee.juhan.meetingorganizer.network.RestClient;
+import ee.juhan.meetingorganizer.services.LocationService;
 import ee.juhan.meetingorganizer.util.DateUtil;
+import ee.juhan.meetingorganizer.util.GsonUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -41,6 +43,7 @@ import retrofit.client.Response;
 
 public class NewMeetingActivity extends AppCompatActivity {
 
+	private static final int QUICK_MEETING_DURATION_HOURS = 2;
 	private static Meeting newMeetingModel = new Meeting();
 	private ViewGroup newMeetingLayout;
 	private View progressView;
@@ -57,6 +60,10 @@ public class NewMeetingActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (savedInstanceState != null) {
+			newMeetingModel = GsonUtil.getJsonObjectFromBundle(savedInstanceState, Meeting.class,
+					Meeting.class.getSimpleName());
+		}
 		setContentView(R.layout.activity_new_meeting);
 		setTitle(getString(R.string.title_new_meeting));
 		ActionBar actionBar = getSupportActionBar();
@@ -66,6 +73,14 @@ public class NewMeetingActivity extends AppCompatActivity {
 		newMeetingLayout = (ViewGroup) findViewById(R.id.layout_content);
 		progressView = findViewById(R.id.progress_bar);
 		setButtonListeners();
+		addLeaderParticipant();
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		savedInstanceState = GsonUtil.addJsonObjectToBundle(savedInstanceState, newMeetingModel,
+				newMeetingModel.getClass().getSimpleName());
+		super.onSaveInstanceState(savedInstanceState);
 	}
 
 	@Override
@@ -131,12 +146,13 @@ public class NewMeetingActivity extends AppCompatActivity {
 
 		createButton.setOnClickListener(view -> {
 			if (isValidData()) {
+				saveData();
 				if (newMeetingModel.isQuickMeeting()) {
 					Date currentDateTime = new Date();
 					newMeetingModel.setStartDateTime(currentDateTime);
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(currentDateTime);
-					cal.add(Calendar.HOUR_OF_DAY, 1);
+					cal.add(Calendar.HOUR_OF_DAY, QUICK_MEETING_DURATION_HOURS);
 					newMeetingModel.setEndDateTime(cal.getTime());
 				}
 				sendNewMeetingRequest();
@@ -144,8 +160,6 @@ public class NewMeetingActivity extends AppCompatActivity {
 		});
 
 		quickMeetingCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-			newMeetingModel.setLocation(null);
-			newMeetingModel.setLocationType(LocationType.SPECIFIC_LOCATION);
 			if (isChecked) {
 				newMeetingModel.setQuickMeeting(true);
 				descriptionEditText.setVisibility(View.GONE);
@@ -158,6 +172,12 @@ public class NewMeetingActivity extends AppCompatActivity {
 				dateButton.setVisibility(View.VISIBLE);
 				startTimeButton.setVisibility(View.VISIBLE);
 				endTimeButton.setVisibility(View.VISIBLE);
+
+				if (newMeetingModel.getLocationType() != LocationType.NOT_SET &&
+						newMeetingModel.getLocationType() != LocationType.SPECIFIC_LOCATION) {
+					newMeetingModel.setLocationType(LocationType.NOT_SET);
+					newMeetingModel.getUserPreferredLocations().clear();
+				}
 			}
 		});
 		quickMeetingCheckBox.setCheckedImmediately(newMeetingModel.isQuickMeeting());
@@ -180,16 +200,29 @@ public class NewMeetingActivity extends AppCompatActivity {
 			setViewText(R.id.spn_new_end_time,
 					DateUtil.formatTime(newMeetingModel.getEndDateTime()));
 		}
-		if (newMeetingModel.getLocationType() == LocationType.NOT_SET) {
-			setViewText(R.id.spn_new_location, getString(R.string.new_meeting_touch_to_set));
-		} else {
-			setViewText(R.id.spn_new_location, getString(R.string.new_meeting_touch_to_view));
+
+		List<String> locationOptions =
+				Arrays.asList(getResources().getStringArray(R.array.location_options_array));
+		switch (newMeetingModel.getLocationType()) {
+			case NOT_SET:
+				setViewText(R.id.spn_new_location, getString(R.string.new_meeting_touch_to_set));
+				break;
+			case SPECIFIC_LOCATION:
+				setViewText(R.id.spn_new_location, locationOptions.get(0));
+				break;
+			case GENERATED_FROM_PREFERRED_LOCATIONS:
+				setViewText(R.id.spn_new_location, locationOptions.get(1));
+				break;
+			case GENERATED_FROM_PARAMETERS:
+				setViewText(R.id.spn_new_location, locationOptions.get(2));
+				break;
 		}
-		if (newMeetingModel.getParticipants().isEmpty()) {
+
+		if (newMeetingModel.getParticipants().size() <= 1) {
 			setViewText(R.id.spn_new_participants, getString(R.string.new_meeting_touch_to_set));
 		} else {
 			setViewText(R.id.spn_new_participants,
-					newMeetingModel.getParticipants().size() + " contacts invited. " +
+					newMeetingModel.getParticipants().size() - 1 + " contacts invited. " +
 							getString(R.string.new_meeting_touch_to_view));
 		}
 
@@ -260,12 +293,18 @@ public class NewMeetingActivity extends AppCompatActivity {
 				getViewText(R.id.spn_new_date) + " " + getViewText(R.id.spn_new_end_time)));
 	}
 
-	private void addLeaderInfo() {
-		NewMeetingActivity.getNewMeetingModel().setLeaderId(getAccountId());
-		Participant participant =
-				new Participant(NewMeetingActivity.getNewMeetingModel().getLeaderId(),
-						ParticipationAnswer.PARTICIPATING, SendGpsLocationAnswer.NO_ANSWER,
-						LocationService.getGpsLocation(), new Date());
+	private void addLeaderParticipant() {
+		int accountId = getAccountId();
+		// Check if leader's participant object already exists in participants list.
+		for (Participant participant : NewMeetingActivity.getNewMeetingModel().getParticipants()) {
+			if (participant.getAccountId() == accountId) {
+				return;
+			}
+		}
+
+		NewMeetingActivity.getNewMeetingModel().setLeaderId(accountId);
+		Participant participant = new Participant(accountId, ParticipationAnswer.PARTICIPATING,
+				SendGpsLocationAnswer.NO_ANSWER, LocationService.getGpsLocation(), new Date());
 		NewMeetingActivity.getNewMeetingModel().addParticipant(participant);
 	}
 
@@ -326,7 +365,6 @@ public class NewMeetingActivity extends AppCompatActivity {
 	//	}
 
 	private void sendNewMeetingRequest() {
-		addLeaderInfo();
 		showProgress(true);
 		RestClient.get().newMeetingRequest(NewMeetingActivity.getNewMeetingModel(),
 				new Callback<Meeting>() {
@@ -348,10 +386,11 @@ public class NewMeetingActivity extends AppCompatActivity {
 	}
 
 	private void finishWithResult(Meeting meeting) {
-		Bundle conData = new Bundle();
-		conData.putString("meeting", (new Gson()).toJson(meeting));
+		Bundle bundle = new Bundle();
+		bundle =
+				GsonUtil.addJsonObjectToBundle(bundle, meeting, meeting.getClass().getSimpleName());
 		Intent intent = new Intent();
-		intent.putExtras(conData);
+		intent.putExtras(bundle);
 		setResult(RESULT_OK, intent);
 		finish();
 	}

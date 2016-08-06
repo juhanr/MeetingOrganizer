@@ -7,9 +7,10 @@ public class MapCoordinate {
 	private Double latitude;
 	private Double longitude;
 
-	public MapCoordinate() {
+	// App-specific values, not used in server
+	private Double distanceFromRecommendedLocation;
 
-	}
+	public MapCoordinate() {}
 
 	public MapCoordinate(Double latitude, Double longitude) {
 		this.latitude = latitude;
@@ -54,5 +55,13 @@ public class MapCoordinate {
 
 	public final LatLng toLatLng() {
 		return new LatLng(this.latitude, this.longitude);
+	}
+
+	public Double getDistanceFromRecommendedLocation() {
+		return distanceFromRecommendedLocation;
+	}
+
+	public void setDistanceFromRecommendedLocation(Double distanceFromRecommendedLocation) {
+		this.distanceFromRecommendedLocation = distanceFromRecommendedLocation;
 	}
 }

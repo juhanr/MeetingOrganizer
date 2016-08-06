@@ -1,8 +1,10 @@
 package ee.juhan.meetingorganizer.fragments;
 
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
@@ -25,14 +27,19 @@ import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.activities.MainActivity;
 import ee.juhan.meetingorganizer.activities.ShowLocationActivity;
 import ee.juhan.meetingorganizer.adapters.GroupedListAdapter;
+import ee.juhan.meetingorganizer.models.server.LocationType;
+import ee.juhan.meetingorganizer.models.server.MapCoordinate;
 import ee.juhan.meetingorganizer.models.server.Meeting;
+import ee.juhan.meetingorganizer.models.server.MeetingStatus;
 import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
 import ee.juhan.meetingorganizer.models.server.SendGpsLocationAnswer;
-import ee.juhan.meetingorganizer.network.LocationService;
-import ee.juhan.meetingorganizer.network.MeetingUpdaterService;
 import ee.juhan.meetingorganizer.network.RestClient;
+import ee.juhan.meetingorganizer.services.LocationService;
+import ee.juhan.meetingorganizer.services.MeetingUpdaterService;
 import ee.juhan.meetingorganizer.util.DateUtil;
+import ee.juhan.meetingorganizer.util.GsonUtil;
+import ee.juhan.meetingorganizer.util.LocationRecommenderUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -40,26 +47,22 @@ import retrofit.client.Response;
 
 public class MeetingInfoFragment extends Fragment {
 
+	public static final String UPDATE_MEETING_ACTION = "update-meeting";
 	private static MeetingInfoFragment meetingInfoFragment;
-	private static Meeting meeting;
+	private Meeting meeting;
 	private String title;
 	private MainActivity activity;
 	private ViewGroup meetingInfoLayout;
 	private List<Participant> participantsList;
 	private ParticipantsAdapter participantsAdapter;
+	private MeetingInfoReceiver meetingInfoReceiver;
 
 	public static MeetingInfoFragment newInstance(Meeting meeting) {
 		MeetingInfoFragment fragment = new MeetingInfoFragment();
-		MeetingInfoFragment.setMeeting(meeting);
+		Bundle args = new Bundle();
+		GsonUtil.addJsonObjectToBundle(args, meeting, meeting.getClass().getSimpleName());
+		fragment.setArguments(args);
 		return fragment;
-	}
-
-	public static Meeting getMeeting() {
-		return MeetingInfoFragment.meeting;
-	}
-
-	public static void setMeeting(Meeting meeting) {
-		MeetingInfoFragment.meeting = meeting;
 	}
 
 	public static MeetingInfoFragment getFragment() {
@@ -69,6 +72,15 @@ public class MeetingInfoFragment extends Fragment {
 	@Override
 	public final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (savedInstanceState != null) {
+			setMeeting(GsonUtil.getJsonObjectFromBundle(savedInstanceState, Meeting.class,
+					Meeting.class.getSimpleName()));
+		}
+		Bundle args = getArguments();
+		if (args != null) {
+			setMeeting(GsonUtil.getJsonObjectFromBundle(args, Meeting.class,
+					Meeting.class.getSimpleName()));
+		}
 		activity = (MainActivity) getActivity();
 		title = getString(R.string.title_meeting_info);
 		participantsList = meeting.getParticipants();
@@ -78,37 +90,48 @@ public class MeetingInfoFragment extends Fragment {
 	public final View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		activity.setTitle(title);
-		meetingInfoFragment = this;
-		if (meeting == null) {
-			meetingInfoLayout =
-					(ViewGroup) inflater.inflate(R.layout.fragment_no_data, container, false);
-			TextView infoText = (TextView) meetingInfoLayout.findViewById(R.id.info_text);
-			infoText.setText(getString(R.string.meeting_no_info));
-		} else {
-			meetingInfoLayout =
-					(ViewGroup) inflater.inflate(R.layout.fragment_meeting_info, container, false);
-			populateLayout();
-			setButtonListeners();
-			refreshParticipantsListView();
-			if (meeting.isOngoing()) {
-				MeetingUpdaterService.startMeetingUpdaterTask();
-			}
-		}
+		meetingInfoLayout =
+				(ViewGroup) inflater.inflate(R.layout.fragment_meeting_info, container, false);
+		populateLayout();
+		setButtonListeners();
+		refreshParticipantsListView();
 		return meetingInfoLayout;
 	}
 
 	@Override
-	public void onDestroyView() {
-		activity.showLocationFab(false);
-		meetingInfoFragment = null;
-		super.onDestroyView();
+	public final void onResume() {
+		super.onResume();
+		meetingInfoFragment = this;
+		if (meeting.isOngoing()) {
+			MeetingUpdaterService.startMeetingUpdaterTask();
+		}
+		meetingInfoReceiver = new MeetingInfoReceiver();
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(MeetingInfoFragment.UPDATE_MEETING_ACTION);
+		getActivity().registerReceiver(meetingInfoReceiver, intentFilter);
 	}
 
-	public void refreshLayoutIfVisible() {
-		if (this.isVisible()) {
-			populateLayout();
-			refreshParticipantsListView();
-		}
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		savedInstanceState = GsonUtil.addJsonObjectToBundle(savedInstanceState, meeting,
+				meeting.getClass().getSimpleName());
+		super.onSaveInstanceState(savedInstanceState);
+	}
+
+	@Override
+	public final void onPause() {
+		getActivity().unregisterReceiver(meetingInfoReceiver);
+		meetingInfoFragment = null;
+		super.onPause();
+	}
+
+	public Meeting getMeeting() {
+		return this.meeting;
+	}
+
+	public void setMeeting(Meeting meeting) {
+		this.meeting = meeting;
+		MeetingUpdaterService.setUpdatedMeeting(meeting);
 	}
 
 	private void populateLayout() {
@@ -147,6 +170,12 @@ public class MeetingInfoFragment extends Fragment {
 
 		setAnswerButtons();
 		setUpOngoingMeetingViews();
+
+		if (meeting.getLocation() != null) {
+			activity.showLocationFab(true);
+		} else {
+			activity.showLocationFab(false);
+		}
 	}
 
 	private void setUpOngoingMeetingViews() {
@@ -175,22 +204,34 @@ public class MeetingInfoFragment extends Fragment {
 				getParticipantObject().getSendGpsLocationAnswer() == SendGpsLocationAnswer.SEND) {
 			chkSendGpsLocation.setCheckedImmediately(true);
 		}
+
+		if (meeting.getLeaderId() == MainActivity.getAccountId() &&
+				meeting.getStatus() == MeetingStatus.WAITING_LOCATION_CHOICE) {
+			Button chooseLocationButton =
+					(Button) meetingInfoLayout.findViewById(R.id.btn_choose_location);
+			chooseLocationButton.setVisibility(View.VISIBLE);
+			chooseLocationButton.setOnClickListener(view -> {
+				showChooseLocationDialog();
+			});
+		}
 	}
 
 	private void setButtonListeners() {
 		if (meeting.getLocation() != null) {
-			activity.showLocationFab(true);
 			FloatingActionButton showLocation =
 					(FloatingActionButton) activity.findViewById(R.id.fab_location);
-			showLocation.setOnClickListener(view -> {
-				Intent intent = new Intent(activity, ShowLocationActivity.class);
-				intent.putExtra(ShowLocationActivity.MARKER_LATITUDE,
-						meeting.getLocation().getLatitude());
-				intent.putExtra(ShowLocationActivity.MARKER_LONGITUDE,
-						meeting.getLocation().getLongitude());
-				startActivity(intent);
-			});
+			showLocation.setOnClickListener(view -> startShowLocationActivity(null));
 		}
+	}
+
+	private void startShowLocationActivity(Bundle args) {
+		if (args == null) {
+			args = new Bundle();
+		}
+		Intent intent = new Intent(activity, ShowLocationActivity.class);
+		args = GsonUtil.addJsonObjectToBundle(args, meeting, meeting.getClass().getSimpleName());
+		intent.putExtras(args);
+		startActivity(intent);
 	}
 
 	private void setAnswerButtons() {
@@ -202,6 +243,8 @@ public class MeetingInfoFragment extends Fragment {
 		if (participant != null &&
 				participant.getParticipationAnswer() == ParticipationAnswer.NO_ANSWER &&
 				meeting.getEndDateTime().after(new Date())) {
+			acceptInvitationButton.setVisibility(View.VISIBLE);
+			denyInvitationButton.setVisibility(View.VISIBLE);
 			acceptInvitationButton.setOnClickListener(view -> {
 				participant.setParticipationAnswer(ParticipationAnswer.PARTICIPATING);
 				showSendGpsLocationDialog(participant);
@@ -209,9 +252,6 @@ public class MeetingInfoFragment extends Fragment {
 			denyInvitationButton.setOnClickListener(view -> {
 				showConfirmationDialog(participant);
 			});
-		} else {
-			acceptInvitationButton.setVisibility(View.GONE);
-			denyInvitationButton.setVisibility(View.GONE);
 		}
 	}
 
@@ -256,6 +296,50 @@ public class MeetingInfoFragment extends Fragment {
 				.title("Discard invitation?").positiveAction("OK").negativeAction("CANCEL");
 		DialogFragment fragment = DialogFragment.newInstance(builder);
 		fragment.show(activity.getSupportFragmentManager(), null);
+	}
+
+	private void showChooseLocationDialog() {
+		SimpleDialog.Builder builder = new SimpleDialog.Builder(R.style.DialogTheme) {
+			@Override
+			public void onPositiveActionClicked(DialogFragment fragment) {
+				showRecommendedLocation();
+				super.onPositiveActionClicked(fragment);
+			}
+
+			@Override
+			public void onNegativeActionClicked(DialogFragment fragment) {
+				super.onNegativeActionClicked(fragment);
+			}
+		};
+
+		int participantsWhoAnswered = 0;
+		for (Participant participant : meeting.getParticipants()) {
+			if (participant.getSendGpsLocationAnswer() == SendGpsLocationAnswer.SEND) {
+				participantsWhoAnswered++;
+			}
+		}
+
+		builder.message("The recommended locations depend on the locations of all participants. " +
+				"Currently " + participantsWhoAnswered + " participants out of " +
+				meeting.getParticipants().size() +
+				" have sent their GPS location. Continue anyway?").title("Choose meeting location?")
+				.positiveAction("OK").negativeAction("Cancel");
+		DialogFragment fragment = DialogFragment.newInstance(builder);
+		fragment.show(activity.getSupportFragmentManager(), null);
+	}
+
+	private void showRecommendedLocation() {
+		activity.showProgress(true);
+		MapCoordinate recommendedLocation = LocationRecommenderUtil.getCenterCoordinate(meeting);
+		if (meeting.getLocationType() == LocationType.GENERATED_FROM_PREFERRED_LOCATIONS) {
+			List<MapCoordinate> preferredLocationsSorted = LocationRecommenderUtil
+					.getUserPreferredSortedByRecommendation(meeting, recommendedLocation);
+			meeting.setUserPreferredLocations(preferredLocationsSorted);
+			Bundle args = new Bundle();
+			args.putBoolean(ShowLocationActivity.CHOOSE_LOCATION_ARG, true);
+			startShowLocationActivity(args);
+		}
+		activity.showProgress(false);
 	}
 
 	private void sendUpdateParticipationAnswerRequest(Participant participant) {
@@ -354,7 +438,7 @@ public class MeetingInfoFragment extends Fragment {
 	private class ParticipantsAdapter extends GroupedListAdapter {
 
 		public ParticipantsAdapter(Context context, List<GroupedListItem> listItems) {
-			super(context, R.layout.list_item_participants, listItems);
+			super(context, R.layout.list_item_participant, listItems);
 		}
 
 		@Override
@@ -371,8 +455,7 @@ public class MeetingInfoFragment extends Fragment {
 				super.addIcon(R.drawable.ic_account_box_black_18dp, R.color.dark_gray);
 			}
 			if (meeting.isOngoing()) {
-				if (participant.getLocation() == null ||
-						participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND) {
+				if (participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND) {
 					super.addIcon(R.drawable.ic_remove_marker_black_18dp, R.color.dark_red);
 				} else {
 					super.addIcon(R.drawable.ic_marker_black_18dp, R.color.green);
@@ -380,6 +463,20 @@ public class MeetingInfoFragment extends Fragment {
 			}
 		}
 
+	}
+
+	private class MeetingInfoReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Meeting newMeetingInfo = GsonUtil.getJsonObjectFromIntentExtras(intent, Meeting.class,
+					Meeting.class.getSimpleName());
+			if (getMeeting().getId() == newMeetingInfo.getId()) {
+				setMeeting(newMeetingInfo);
+				populateLayout();
+				refreshParticipantsListView();
+			}
+		}
 	}
 
 }

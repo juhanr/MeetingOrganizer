@@ -7,6 +7,12 @@
 	android:layout_height="match_parent"
 	android:layout_width="match_parent">
 
+	<ListView
+		android:id="@+id/list_view_location_parameters"
+		android:layout_height="match_parent"
+		android:layout_marginTop="?android:attr/actionBarSize"
+		android:layout_width="match_parent"/>
+
 	<FrameLayout
 		android:focusable="true"
 		android:focusableInTouchMode="true"

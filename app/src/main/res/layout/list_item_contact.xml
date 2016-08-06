@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:gravity="center_vertical"
+	android:layout_height="72dp"
+	android:layout_width="match_parent"
+	android:paddingLeft="16dp"
+	android:paddingRight="16dp">
+
+	<com.rey.material.widget.CheckBox
+		android:id="@+id/chk_contact"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:paddingRight="16dp"/>
+
+	<TextView
+		style="@style/TextPrimary"
+		android:id="@+id/txt_contact_name"
+		android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/chk_contact"
+		android:layout_width="wrap_content"/>
+
+	<TextView
+		style="@style/TextSecondary"
+		android:id="@+id/txt_contact_phone"
+		android:layout_below="@id/txt_contact_name"
+		android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/chk_contact"
+		android:layout_width="wrap_content"/>
+
+</RelativeLayout>

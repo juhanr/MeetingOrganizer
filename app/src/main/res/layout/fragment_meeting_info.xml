@@ -88,14 +88,23 @@
 
 			<com.rey.material.widget.Button
 				style="@style/RaisedButtonColored"
+				android:id="@+id/btn_choose_location"
+				android:layout_below="@id/chk_send_gps_location"
+				android:text="Choose location"
+				android:visibility="gone"/>
+
+			<com.rey.material.widget.Button
+				style="@style/RaisedButtonColored"
 				android:id="@+id/btn_accept_invitation"
-				android:text="@string/action_accept"/>
+				android:text="@string/action_accept"
+				android:visibility="gone"/>
 
 			<com.rey.material.widget.Button
 				style="@style/RaisedButtonColored"
 				android:id="@+id/btn_deny_invitation"
 				android:layout_toRightOf="@id/btn_accept_invitation"
-				android:text="@string/action_deny"/>
+				android:text="@string/action_deny"
+				android:visibility="gone"/>
 		</RelativeLayout>
 
 		<TextView

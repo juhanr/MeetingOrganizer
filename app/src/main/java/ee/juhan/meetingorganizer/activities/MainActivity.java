@@ -21,8 +21,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.fragments.HistoryFragment;
 import ee.juhan.meetingorganizer.fragments.InvitationsFragment;
@@ -34,8 +32,10 @@ import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
 import ee.juhan.meetingorganizer.models.server.Account;
 import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.models.server.Participant;
-import ee.juhan.meetingorganizer.network.LocationService;
 import ee.juhan.meetingorganizer.network.RestClient;
+import ee.juhan.meetingorganizer.services.LocationService;
+import ee.juhan.meetingorganizer.services.MeetingUpdaterService;
+import ee.juhan.meetingorganizer.util.GsonUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
 
 public class MainActivity extends AppCompatActivity
@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity
 		showSmsFab(false);
 		showCallFab(false);
 		new LocationService(this, false);
+		MeetingUpdaterService.setContext(this);
 	}
 
 	@Override
@@ -92,9 +93,9 @@ public class MainActivity extends AppCompatActivity
 			case 1:
 				if (resultCode == RESULT_OK) {
 					NewMeetingActivity.setNewMeetingModel(new Meeting());
-					Bundle res = data.getExtras();
-					Meeting meeting =
-							(new Gson()).fromJson(res.getString("meeting"), Meeting.class);
+					Bundle bundle = data.getExtras();
+					Meeting meeting = GsonUtil.getJsonObjectFromBundle(bundle, Meeting.class,
+							Meeting.class.getSimpleName());
 					changeFragmentToMeetingInfoImmediately(meeting);
 				}
 				break;
@@ -151,6 +152,7 @@ public class MainActivity extends AppCompatActivity
 		fragmentManager.addOnBackStackChangedListener(() -> {
 			Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
 			if (fragment != null) {
+				hideLocationFabIfNotMeetingFragment(fragment);
 				currentFragmentClass = fragment.getClass();
 			}
 		});
@@ -266,9 +268,13 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	private void changeFragment(Fragment fragment, boolean showAnimation) {
-		if (fragment.getClass().equals(currentFragmentClass)) {
+		// Only MeetingInfoFragment is allowed to be replaced with itself.
+		if (fragment.getClass().equals(currentFragmentClass) &&
+				currentFragmentClass != MeetingInfoFragment.class) {
 			return;
 		}
+
+		hideLocationFabIfNotMeetingFragment(fragment);
 		currentFragmentClass = fragment.getClass();
 		FragmentTransaction ft = getFragmentManager().beginTransaction();
 		if (showAnimation) {
@@ -363,6 +369,13 @@ public class MainActivity extends AppCompatActivity
 
 	public void showCallFab(boolean show) {
 		showFab(R.id.fab_call, show);
+	}
+
+	private void hideLocationFabIfNotMeetingFragment(Fragment fragment) {
+		if (!fragment.getClass().equals(currentFragmentClass) &&
+				currentFragmentClass == MeetingInfoFragment.class) {
+			showLocationFab(false);
+		}
 	}
 
 }
