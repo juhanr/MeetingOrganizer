@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -29,6 +30,7 @@ import ee.juhan.meetingorganizer.fragments.MeetingInfoFragment;
 import ee.juhan.meetingorganizer.fragments.MeetingsListFragment;
 import ee.juhan.meetingorganizer.fragments.ParticipantInfoFragment;
 import ee.juhan.meetingorganizer.fragments.RegistrationFragment;
+import ee.juhan.meetingorganizer.interfaces.SnackbarActivity;
 import ee.juhan.meetingorganizer.models.server.Account;
 import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.models.server.Participant;
@@ -39,7 +41,7 @@ import ee.juhan.meetingorganizer.util.GsonUtil;
 import ee.juhan.meetingorganizer.util.UIUtil;
 
 public class MainActivity extends AppCompatActivity
-		implements NavigationView.OnNavigationItemSelectedListener {
+		implements SnackbarActivity, NavigationView.OnNavigationItemSelectedListener {
 
 	private static SharedPreferences sharedPref;
 	private static int accountId = 0;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity
 	private NavigationView navigationView;
 	private View progressView;
 	private View fragmentContainer;
+	private CoordinatorLayout coordinatorLayout;
 
 	public static int getAccountId() {
 		return accountId;
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity
 		progressView = findViewById(R.id.progress_bar);
 		fragmentContainer = findViewById(R.id.fragment_container);
 		accountId = getAccountIdFromPrefs();
+		coordinatorLayout = (CoordinatorLayout) findViewById(R.id.layout_main);
 		setupListeners();
 		checkIfLoggedIn();
 		showLocationFab(false);
@@ -123,8 +127,7 @@ public class MainActivity extends AppCompatActivity
 			changeFragmentToInvitations();
 		} else if (id == R.id.nav_history) {
 			changeFragmentToHistory();
-		} else if (id == R.id.nav_settings) {
-
+			//		} else if (id == R.id.nav_settings) {
 		} else if (id == R.id.nav_log_out) {
 			logOut();
 		} else if (id == R.id.nav_log_in) {
@@ -134,6 +137,11 @@ public class MainActivity extends AppCompatActivity
 		}
 		drawer.closeDrawer(GravityCompat.START);
 		return true;
+	}
+
+	@Override
+	public void showSnackbar(String message) {
+		UIUtil.showSnackBar(coordinatorLayout, message);
 	}
 
 	private void setupListeners() {
@@ -184,7 +192,6 @@ public class MainActivity extends AppCompatActivity
 		return sharedPref.getString("phone", null);
 	}
 
-
 	public final void logIn(String sid, Account account) {
 		sharedPref.edit().putString("email", account.getEmail()).putString("sid", sid)
 				.putInt("accountId", account.getAccountId()).putString("name", account.getName())
@@ -206,6 +213,7 @@ public class MainActivity extends AppCompatActivity
 		accountId = getAccountIdFromPrefs();
 		RestClient.setSid(null);
 		setEmail(getString(R.string.drawer_not_logged_in));
+		setName("");
 		isLoggedIn = false;
 		setUpDrawer();
 		resetBackStack();
@@ -377,5 +385,4 @@ public class MainActivity extends AppCompatActivity
 			showLocationFab(false);
 		}
 	}
-
 }

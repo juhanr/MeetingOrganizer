@@ -22,7 +22,6 @@ import ee.juhan.meetingorganizer.adapters.GroupedListAdapter.GroupedListItem;
 import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.network.RestClient;
 import ee.juhan.meetingorganizer.util.DateUtil;
-import ee.juhan.meetingorganizer.util.UIUtil;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -104,7 +103,7 @@ public class MeetingsListFragment extends Fragment {
 					@Override
 					public void failure(RetrofitError error) {
 						activity.showProgress(false);
-						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
+						activity.showSnackbar(getString(R.string.error_server_fail));
 					}
 				});
 	}

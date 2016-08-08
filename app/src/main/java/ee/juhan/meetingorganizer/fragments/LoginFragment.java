@@ -67,9 +67,9 @@ public class LoginFragment extends Fragment {
 
 	private boolean isValidData() {
 		if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.edt_login_email))) {
-			UIUtil.showToastMessage(activity, getString(R.string.login_invalid_email));
+			activity.showSnackbar(getString(R.string.login_invalid_email));
 		} else if (getViewText(R.id.edt_login_password).length() < PASSWORD_MIN_LENGTH) {
-			UIUtil.showToastMessage(activity, getString(R.string.login_short_password1) +
+			activity.showSnackbar(getString(R.string.login_short_password1) +
 					PASSWORD_MIN_LENGTH + getString(R.string.login_short_password2));
 		} else {
 			return true;
@@ -91,37 +91,32 @@ public class LoginFragment extends Fragment {
 	private void sendLoginRequest(final String email, String password) {
 		activity.showProgress(true);
 		RestClient.get().loginRequest(new Account(email, password), new Callback<ServerResponse>() {
-					@Override
-					public void success(final ServerResponse serverResponse, Response response) {
-						activity.showProgress(false);
-						switch (serverResponse.getResult()) {
-							case SUCCESS:
-								UIUtil.showToastMessage(activity,
-										(getString(R.string.login_successful)));
-								activity.logIn(serverResponse.getSid(),
-										serverResponse.getAccount());
-								break;
-							case WRONG_PASSWORD:
-								UIUtil.showToastMessage(activity,
-										getString(R.string.login_wrong_password));
-								break;
-							case NO_ACCOUNT_FOUND:
-								UIUtil.showToastMessage(activity,
-										getString(R.string.login_no_account));
-								break;
-							case FAIL:
-								UIUtil.showToastMessage(activity,
-										getString(R.string.error_server_fail));
-								break;
-						}
-					}
+			@Override
+			public void success(final ServerResponse serverResponse, Response response) {
+				activity.showProgress(false);
+				switch (serverResponse.getResult()) {
+					case SUCCESS:
+						activity.showSnackbar((getString(R.string.login_successful)));
+						activity.logIn(serverResponse.getSid(), serverResponse.getAccount());
+						break;
+					case WRONG_PASSWORD:
+						activity.showSnackbar(getString(R.string.login_wrong_password));
+						break;
+					case NO_ACCOUNT_FOUND:
+						activity.showSnackbar(getString(R.string.login_no_account));
+						break;
+					case FAIL:
+						activity.showSnackbar(getString(R.string.error_server_fail));
+						break;
+				}
+			}
 
-					@Override
-					public void failure(RetrofitError error) {
-						activity.showProgress(false);
-						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
-					}
-				});
+			@Override
+			public void failure(RetrofitError error) {
+				activity.showProgress(false);
+				activity.showSnackbar(getString(R.string.error_server_fail));
+			}
+		});
 	}
 
 }

@@ -114,7 +114,8 @@ public class InviteContactsActivity extends AppCompatActivity {
 					@Override
 					public void failure(RetrofitError error) {
 						showProgress(false);
-						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
+						UIUtil.showSnackBar(chooseContactsLayout,
+								getString(R.string.error_server_fail));
 					}
 				});
 	}

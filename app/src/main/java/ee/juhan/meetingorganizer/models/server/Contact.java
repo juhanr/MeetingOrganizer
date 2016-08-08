@@ -1,5 +1,7 @@
 package ee.juhan.meetingorganizer.models.server;
 
+import ee.juhan.meetingorganizer.util.StringUtil;
+
 public class Contact {
 
 	private int accountId;
@@ -51,7 +53,7 @@ public class Contact {
 	}
 
 	public final String getPhoneNumber() {
-		return phoneNumber;
+		return StringUtil.formatPhoneNumber(phoneNumber);
 	}
 
 	public final void setPhoneNumber(String phoneNumber) {

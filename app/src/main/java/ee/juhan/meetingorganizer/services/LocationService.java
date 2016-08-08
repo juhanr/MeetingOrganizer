@@ -25,7 +25,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import java.util.Date;
 
 import ee.juhan.meetingorganizer.activities.MainActivity;
-import ee.juhan.meetingorganizer.models.server.MapCoordinate;
+import ee.juhan.meetingorganizer.models.server.MapLocation;
 import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.network.RestClient;
 import retrofit.Callback;
@@ -41,7 +41,7 @@ public class LocationService
 	private static final long GPS_INTERVAL = 10000;
 	private static final long GPS_FASTEST_INTERVAL = 5000;
 
-	private static MapCoordinate gpsLocation;
+	private static MapLocation gpsLocation;
 	private static Date gpsLocationTimestamp;
 	private static boolean isRunning;
 	private static GoogleApiClient googleApiClient;
@@ -61,7 +61,7 @@ public class LocationService
 		locationRequest.setFastestInterval(GPS_FASTEST_INTERVAL);
 	}
 
-	public static MapCoordinate getGpsLocation() {
+	public static MapLocation getGpsLocation() {
 		return LocationService.gpsLocation;
 	}
 
@@ -85,7 +85,7 @@ public class LocationService
 
 	@Override
 	public final void onLocationChanged(Location loc) {
-		LocationService.gpsLocation = new MapCoordinate(loc.getLatitude(), loc.getLongitude());
+		LocationService.gpsLocation = new MapLocation(loc.getLatitude(), loc.getLongitude());
 		LocationService.gpsLocationTimestamp = new Date();
 		Log.d(TAG, loc.getLatitude() + ", " + loc.getLongitude());
 		sendLocationRequest();
@@ -111,7 +111,7 @@ public class LocationService
 					.requestLocationUpdates(googleApiClient, locationRequest, this);
 		} else {
 			LocationService.gpsLocation =
-					new MapCoordinate(lastLocation.getLatitude(), lastLocation.getLongitude());
+					new MapLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
 			LocationService.gpsLocationTimestamp = new Date();
 			Log.d(TAG, lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
 		}

@@ -3,7 +3,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:fitsSystemWindows="true"
-	android:id="@+id/activity_location"
+	android:id="@+id/layout_choose_location"
 	android:layout_height="match_parent"
 	android:layout_width="match_parent">
 
@@ -39,7 +39,7 @@
 				android:layout_marginLeft="@dimen/view_margin_large"
 				android:layout_marginRight="@dimen/view_margin_large"
 				android:layout_marginTop="@dimen/view_margin_large"
-				app:spn_label="Location type"/>
+				app:spn_label="Location choice"/>
 
 			<TextView
 				style="@style/TextHint"
@@ -60,6 +60,15 @@
 				android:layout_width="match_parent"
 				android:text="@string/location_slide_up_info"
 				android:textColor="@color/accent"/>
+
+			<TextView
+				style="@style/TextHint"
+				android:id="@+id/extra_info"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="@dimen/view_margin_large"
+				android:layout_marginRight="@dimen/view_margin_large"
+				android:layout_width="match_parent"
+				android:text="No additional information currently available."/>
 		</LinearLayout>
 
 	</android.support.v4.widget.NestedScrollView>

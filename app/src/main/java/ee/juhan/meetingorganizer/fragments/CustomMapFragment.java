@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
@@ -14,16 +16,23 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -36,12 +45,13 @@ import java.util.Map;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.activities.ChooseLocationActivity;
 import ee.juhan.meetingorganizer.activities.ShowLocationActivity;
+import ee.juhan.meetingorganizer.interfaces.SnackbarActivity;
 import ee.juhan.meetingorganizer.models.MarkerData;
 import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.models.server.SendGpsLocationAnswer;
 import ee.juhan.meetingorganizer.util.GsonUtil;
-import ee.juhan.meetingorganizer.util.UIUtil;
+import ee.juhan.meetingorganizer.util.LocationUtil;
 
 public class CustomMapFragment extends MapFragment
 		implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMapClickListener,
@@ -49,7 +59,7 @@ public class CustomMapFragment extends MapFragment
 
 	public static final String UPDATE_PARTICIPANT_MARKERS_ACTION = "update-participant-markers";
 	private static final String TAG = CustomMapFragment.class.getSimpleName();
-	private static final LatLng DEFAULT_CAMERA_LOCATION = new LatLng(59.437046, 24.753742);
+	private static final LatLng DEFAULT_CAMERA_POSITION = new LatLng(59.437046, 24.753742);
 	private static final float DEFAULT_CAMERA_ZOOM = 10;
 	private static int mapVisibility = View.VISIBLE;
 	private static CustomMapFragment customMapFragment;
@@ -62,6 +72,8 @@ public class CustomMapFragment extends MapFragment
 	private boolean isClickableMap;
 	private ViewGroup mapLayout;
 	private ParticipantMarkerUpdateReceiver participantMarkerUpdateReceiver;
+	private LatLng newCameraPosition;
+	private BitmapDescriptor temporaryMarkerIcon;
 
 	private List<MarkerData> markersToAdd = new ArrayList<>();
 	private Map<Marker, MarkerData> addedMarkers = new HashMap<>();
@@ -80,20 +92,6 @@ public class CustomMapFragment extends MapFragment
 
 	public static boolean canShowParticipantMarkers() {
 		return activity instanceof ShowLocationActivity;
-	}
-
-	public static String getAddressFromLatLng(LatLng latLng) {
-		try {
-			Geocoder geocoder = new Geocoder(activity);
-			List<Address> addresses =
-					geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-			if (addresses.size() > 0) {
-				return addresses.get(0).getAddressLine(0);
-			}
-		} catch (IOException e) {
-			Log.e(TAG, "Could not get address string from location.");
-		}
-		return "Unknown address";
 	}
 
 	@Override
@@ -139,16 +137,18 @@ public class CustomMapFragment extends MapFragment
 		LocationManager locationManager =
 				(LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
 		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			UIUtil.showToastMessage(activity, "GPS is disabled!");
+			((SnackbarActivity) activity).showSnackbar("GPS is disabled!");
 		}
 		return false;
 	}
 
 	@Override
 	public final void onMapClick(LatLng latLng) {
-		if (temporaryMarker != null) {
-			temporaryMarker.remove();
+		if (!isClickableMap) {
+			setFocus(null, false);
+			return;
 		}
+
 		setTemporaryMarker(latLng);
 	}
 
@@ -170,38 +170,82 @@ public class CustomMapFragment extends MapFragment
 	}
 
 	private void initializeMap() {
-		if (map == null) {
-			return;
-		}
-		if (ActivityCompat
+		if (map == null || ActivityCompat
 				.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) !=
 				PackageManager.PERMISSION_GRANTED && ActivityCompat
 				.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) !=
 				PackageManager.PERMISSION_GRANTED) {
 			return;
 		}
+		isMapInitialized = true;
 		map.setMyLocationEnabled(true);
 		map.setOnMyLocationButtonClickListener(this);
-		if (isClickableMap) {
-			map.setOnMapClickListener(this);
-		}
+		map.setOnMapClickListener(this);
 
 		addMarkersToMap();
-
-		if (temporaryMarker == null) {
-			map.moveCamera(CameraUpdateFactory
-					.newLatLngZoom(DEFAULT_CAMERA_LOCATION, DEFAULT_CAMERA_ZOOM));
-		} else {
+		if (newCameraPosition != null) {
+			map.moveCamera(
+					CameraUpdateFactory.newLatLngZoom(newCameraPosition, DEFAULT_CAMERA_ZOOM));
+		} else if (temporaryMarker != null) {
 			map.moveCamera(CameraUpdateFactory
 					.newLatLngZoom(temporaryMarker.getPosition(), DEFAULT_CAMERA_ZOOM));
+		} else {
+			map.moveCamera(CameraUpdateFactory
+					.newLatLngZoom(DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_ZOOM));
 		}
+		centerCameraToMarkers();
 
 		map.setOnMarkerClickListener(marker -> {
 			setFocus(marker, true);
 			return false;
 		});
 		map.setPadding(0, 200, 0, 0);
-		isMapInitialized = true;
+		map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+			@Override
+			public View getInfoWindow(Marker arg0) {
+				return null;
+			}
+
+			@Override
+			public View getInfoContents(Marker marker) {
+
+				LinearLayout info = new LinearLayout(activity);
+				info.setOrientation(LinearLayout.VERTICAL);
+
+				TextView title = new TextView(activity);
+				title.setTextColor(Color.BLACK);
+				title.setGravity(Gravity.CENTER);
+				title.setTypeface(null, Typeface.BOLD);
+				title.setText(marker.getTitle());
+
+				TextView snippet = new TextView(activity);
+				snippet.setTextColor(Color.GRAY);
+				snippet.setText(marker.getSnippet());
+
+				if (marker.getTitle() != null && !marker.getTitle().equals("")) {
+					info.addView(title);
+				}
+				if (marker.getSnippet() != null && !marker.getSnippet().equals("")) {
+					info.addView(snippet);
+				}
+
+				return info;
+			}
+		});
+
+		if (temporaryMarkerIcon == null) {
+			temporaryMarkerIcon =
+					BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+		}
+	}
+
+	public void setCameraPosition(LatLng latLng) {
+		newCameraPosition = latLng;
+		if (isMapInitialized()) {
+			map.moveCamera(
+					CameraUpdateFactory.newLatLngZoom(newCameraPosition, DEFAULT_CAMERA_ZOOM));
+		}
 	}
 
 	private void addMarkersToMap() {
@@ -210,7 +254,7 @@ public class CustomMapFragment extends MapFragment
 			addedMarkers.put(marker, markerData);
 		}
 		if (activity instanceof ChooseLocationActivity) {
-			((ChooseLocationActivity) activity).refreshConfirmMarkerFABState();
+			((ChooseLocationActivity) activity).refreshConfirmMarkerFabState();
 		}
 		markersToAdd.clear();
 
@@ -219,12 +263,27 @@ public class CustomMapFragment extends MapFragment
 	private void setFocus(Marker marker, boolean focused) {
 		if (focused) {
 			focusedMarker = marker;
-			if (activity instanceof ChooseLocationActivity) {
-				((ChooseLocationActivity) activity).showDeleteMarkerFAB(true);
+			if (activity instanceof ChooseLocationActivity &&
+					addedMarkers.get(focusedMarker) != null &&
+					addedMarkers.get(focusedMarker).getType() != MarkerData.Type.TEMPORARY_MARKER) {
+				((ChooseLocationActivity) activity).showDeleteMarkerFab(true);
+			} else if (addedMarkers.get(focusedMarker).getType() ==
+					MarkerData.Type.TEMPORARY_MARKER) {
+				((ChooseLocationActivity) activity).showDeleteMarkerFab(false);
+			} else if (activity instanceof ShowLocationActivity) {
+				MarkerData.Type focusedMarkerTpe = addedMarkers.get(focusedMarker).getType();
+				if (focusedMarkerTpe == MarkerData.Type.PREFERRED_LOCATION_MARKER ||
+						focusedMarkerTpe == MarkerData.Type.RECOMMENDED_PLACE_MARKER) {
+					((ShowLocationActivity) activity).showConfirmFab(true);
+				} else {
+					((ShowLocationActivity) activity).showConfirmFab(false);
+				}
 			}
 		} else {
 			if (activity instanceof ChooseLocationActivity) {
-				((ChooseLocationActivity) activity).showDeleteMarkerFAB(false);
+				((ChooseLocationActivity) activity).showDeleteMarkerFab(false);
+			} else if (activity instanceof ShowLocationActivity) {
+				((ShowLocationActivity) activity).showConfirmFab(false);
 			}
 		}
 	}
@@ -243,21 +302,8 @@ public class CustomMapFragment extends MapFragment
 		addedMarkers.remove(marker);
 	}
 
-	private void setTemporaryMarker(LatLng latLng, String address) {
-		setFocus(null, false);
-		if (temporaryMarker == null) {
-			MarkerData markerData = new MarkerData(
-					new MarkerOptions().draggable(false).alpha(0.5f).position(latLng),
-					MarkerData.Type.TEMPORARY_MARKER);
-			temporaryMarker = map.addMarker(markerData.getMarkerOptions());
-			addedMarkers.put(temporaryMarker, markerData);
-		}
-		temporaryMarker.setPosition(latLng);
-		temporaryMarker.setTitle(address);
-		temporaryMarker.showInfoWindow();
-		if (activity instanceof ChooseLocationActivity) {
-			((ChooseLocationActivity) activity).refreshConfirmMarkerFABState();
-		}
+	public MarkerData getMarkerData(Marker marker) {
+		return addedMarkers.get(marker);
 	}
 
 	public Marker confirmTemporaryMarker() {
@@ -294,7 +340,28 @@ public class CustomMapFragment extends MapFragment
 	}
 
 	private void setTemporaryMarker(LatLng latLng) {
-		setTemporaryMarker(latLng, getAddressFromLatLng(latLng));
+		MarkerData markerData;
+		if (temporaryMarker == null) {
+			markerData = new MarkerData(
+					new MarkerOptions().draggable(false).alpha(0.5f).position(latLng)
+							.icon(temporaryMarkerIcon), MarkerData.Type.TEMPORARY_MARKER, activity);
+			temporaryMarker = map.addMarker(markerData.getMarkerOptions());
+			addedMarkers.put(temporaryMarker, markerData);
+		} else {
+			markerData = addedMarkers.get(temporaryMarker);
+			markerData.getMapLocation().setLatLng(latLng);
+			markerData.getMapLocation()
+					.setAddress(LocationUtil.getAddressFromLatLng(latLng, activity));
+		}
+		temporaryMarker.setPosition(latLng);
+		temporaryMarker.setTitle(markerData.getMapLocation().getPlaceName());
+		temporaryMarker.setSnippet(markerData.getMapLocation().getAddressFormatted());
+		temporaryMarker.showInfoWindow();
+		temporaryMarker.setIcon(temporaryMarkerIcon);
+		setFocus(temporaryMarker, true);
+		if (activity instanceof ChooseLocationActivity) {
+			((ChooseLocationActivity) activity).refreshConfirmMarkerFabState();
+		}
 	}
 
 	public final void setIsClickableMap(boolean isClickableMap) {
@@ -324,31 +391,32 @@ public class CustomMapFragment extends MapFragment
 				LatLng latLng =
 						new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
 				map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_CAMERA_ZOOM));
-				setTemporaryMarker(latLng, addresses.get(0).getAddressLine(0));
+				setTemporaryMarker(latLng);
 			} else {
-				UIUtil.showToastMessage(activity, getString(R.string.location_not_found));
+				((SnackbarActivity) activity).showSnackbar(getString(R.string.location_not_found));
 			}
 		} catch (IOException e) {
 			Log.e(TAG, "Could not get location from address string.");
-			UIUtil.showToastMessage(activity, getString(R.string.location_geocoder_service_error));
+			((SnackbarActivity) activity)
+					.showSnackbar(getString(R.string.location_geocoder_service_error));
 		}
 	}
 
-	public void addParticipantMarkers(List<Participant> participants) {
+	public void addParticipantMarkers(List<Participant> participants, Context context) {
 		for (Participant participant : participants) {
 			if (participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND ||
-					participant.getLocation() == null) {
+					participant.getMapLocation() == null) {
 				continue;
 			}
 			markersToAdd.add(new MarkerData(participant.getMarkerOptions(),
-					MarkerData.Type.PARTICIPANT_MARKER, participant.getId()));
+					MarkerData.Type.PARTICIPANT_MARKER, participant.getId(), context));
 		}
 	}
 
 	public void updateParticipantMarker(Participant participant) {
 		if (customMapFragment == null || !customMapFragment.isVisible() || !isMapInitialized ||
 				participant.getSendGpsLocationAnswer() != SendGpsLocationAnswer.SEND ||
-				participant.getLocation() == null || !canShowParticipantMarkers()) {
+				participant.getMapLocation() == null || !canShowParticipantMarkers()) {
 			return;
 		}
 		Marker marker = null;
@@ -360,7 +428,7 @@ public class CustomMapFragment extends MapFragment
 			}
 		}
 		if (marker != null) {
-			marker.setPosition(participant.getLocation().toLatLng());
+			marker.setPosition(participant.getMapLocation().getLatLng());
 			marker.setSnippet("Last updated: " + participant.getLocationTimestampFormatted());
 
 			// Refresh info window if it's open.
@@ -370,7 +438,27 @@ public class CustomMapFragment extends MapFragment
 		} else {
 			marker = map.addMarker(participant.getMarkerOptions());
 			addedMarkers.put(marker, new MarkerData(participant.getMarkerOptions(),
-					MarkerData.Type.PARTICIPANT_MARKER, participant.getId()));
+					MarkerData.Type.PARTICIPANT_MARKER, participant.getId(), activity));
+		}
+	}
+
+	public void setTemporaryMarkerIcon(BitmapDescriptor temporaryMarkerIcon) {
+		this.temporaryMarkerIcon = temporaryMarkerIcon;
+	}
+
+	public void centerCameraToMarkers() {
+		if (!addedMarkers.isEmpty() && isMapInitialized()) {
+			LatLngBounds.Builder builder = new LatLngBounds.Builder();
+			for (Marker marker : addedMarkers.keySet()) {
+				builder.include(marker.getPosition());
+			}
+			LatLngBounds bounds = builder.build();
+			int width = getResources().getDisplayMetrics().widthPixels;
+			int height = getResources().getDisplayMetrics().heightPixels;
+			int padding = (int) (width * 0.30);
+			CameraUpdate cameraUpdate =
+					CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+			map.moveCamera(cameraUpdate);
 		}
 	}
 

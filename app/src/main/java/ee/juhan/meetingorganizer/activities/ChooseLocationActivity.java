@@ -19,6 +19,8 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 import com.rey.material.widget.Spinner;
 
@@ -28,17 +30,19 @@ import java.util.List;
 import ee.juhan.meetingorganizer.R;
 import ee.juhan.meetingorganizer.adapters.CheckBoxAdapter;
 import ee.juhan.meetingorganizer.fragments.CustomMapFragment;
+import ee.juhan.meetingorganizer.interfaces.SnackbarActivity;
 import ee.juhan.meetingorganizer.models.MarkerData;
-import ee.juhan.meetingorganizer.models.server.LocationType;
-import ee.juhan.meetingorganizer.models.server.MapCoordinate;
+import ee.juhan.meetingorganizer.models.server.LocationChoice;
+import ee.juhan.meetingorganizer.models.server.MapLocation;
 import ee.juhan.meetingorganizer.models.server.Meeting;
+import ee.juhan.meetingorganizer.util.UIUtil;
 
-import static ee.juhan.meetingorganizer.models.server.LocationType.GENERATED_FROM_PARAMETERS;
-import static ee.juhan.meetingorganizer.models.server.LocationType.GENERATED_FROM_PREFERRED_LOCATIONS;
-import static ee.juhan.meetingorganizer.models.server.LocationType.NOT_SET;
-import static ee.juhan.meetingorganizer.models.server.LocationType.SPECIFIC_LOCATION;
+import static ee.juhan.meetingorganizer.models.server.LocationChoice.NOT_SET;
+import static ee.juhan.meetingorganizer.models.server.LocationChoice.RECOMMENDED_BY_PLACE_TYPE;
+import static ee.juhan.meetingorganizer.models.server.LocationChoice.RECOMMENDED_FROM_PREFERRED_LOCATIONS;
+import static ee.juhan.meetingorganizer.models.server.LocationChoice.SPECIFIC_LOCATION;
 
-public class ChooseLocationActivity extends AppCompatActivity {
+public class ChooseLocationActivity extends AppCompatActivity implements SnackbarActivity {
 
 	private ViewGroup chooseLocationLayout;
 	private List<String> filtersList;
@@ -53,8 +57,9 @@ public class ChooseLocationActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_location);
-		chooseLocationLayout = (ViewGroup) findViewById(R.id.activity_location);
+		MapsInitializer.initialize(getApplicationContext());
+		setContentView(R.layout.activity_choose_location);
+		chooseLocationLayout = (ViewGroup) findViewById(R.id.layout_choose_location);
 		locationTypeInfo = (TextView) findViewById(R.id.location_type_info);
 		confirmFab = (FloatingActionButton) findViewById(R.id.fab_confirm);
 		confirmMarkerFab = (FloatingActionButton) findViewById(R.id.fab_confirm_marker);
@@ -62,8 +67,9 @@ public class ChooseLocationActivity extends AppCompatActivity {
 		bottomSheet = findViewById(R.id.bottom_sheet);
 		filtersList =
 				Arrays.asList(getResources().getStringArray(R.array.location_parameters_array));
-		if (NewMeetingActivity.getNewMeetingModel().getLocationType() == NOT_SET) {
-			NewMeetingActivity.getNewMeetingModel().setLocationType(LocationType.SPECIFIC_LOCATION);
+		if (NewMeetingActivity.getNewMeetingModel().getLocationChoice() == NOT_SET) {
+			NewMeetingActivity.getNewMeetingModel()
+					.setLocationChoice(LocationChoice.SPECIFIC_LOCATION);
 		}
 		setUpActionBar();
 		setUpMapLayout();
@@ -75,11 +81,11 @@ public class ChooseLocationActivity extends AppCompatActivity {
 	protected void onPause() {
 		// Check if we should change the meeting type to NOT_SET.
 		Meeting newMeetingModel = NewMeetingActivity.getNewMeetingModel();
-		if (newMeetingModel.getLocationType() == LocationType.SPECIFIC_LOCATION &&
-				newMeetingModel.getLocation() == null || newMeetingModel.getLocationType() ==
-				LocationType.GENERATED_FROM_PREFERRED_LOCATIONS &&
+		if (newMeetingModel.getLocationChoice() == LocationChoice.SPECIFIC_LOCATION &&
+				newMeetingModel.getMapLocation() == null || newMeetingModel.getLocationChoice() ==
+				LocationChoice.RECOMMENDED_FROM_PREFERRED_LOCATIONS &&
 				newMeetingModel.getUserPreferredLocations().isEmpty()) {
-			NewMeetingActivity.getNewMeetingModel().setLocationType(LocationType.NOT_SET);
+			NewMeetingActivity.getNewMeetingModel().setLocationChoice(LocationChoice.NOT_SET);
 		}
 		super.onPause();
 	}
@@ -92,6 +98,11 @@ public class ChooseLocationActivity extends AppCompatActivity {
 				break;
 		}
 		return false;
+	}
+
+	@Override
+	public void showSnackbar(String message) {
+		UIUtil.showSnackBar(chooseLocationLayout, message);
 	}
 
 	private void setUpActionBar() {
@@ -130,20 +141,20 @@ public class ChooseLocationActivity extends AppCompatActivity {
 				FrameLayout.LayoutParams.MATCH_PARENT));
 
 		// Set the spinner selection.
-		switch (NewMeetingActivity.getNewMeetingModel().getLocationType()) {
+		switch (NewMeetingActivity.getNewMeetingModel().getLocationChoice()) {
 			case SPECIFIC_LOCATION:
 				spinner.setSelection(0);
 				break;
-			case GENERATED_FROM_PREFERRED_LOCATIONS:
+			case RECOMMENDED_FROM_PREFERRED_LOCATIONS:
 				spinner.setSelection(1);
 				break;
-			case GENERATED_FROM_PARAMETERS:
+			case RECOMMENDED_BY_PLACE_TYPE:
 				spinner.setSelection(2);
 				break;
 			default:
 				spinner.setSelection(0);
 		}
-		refreshConfirmMarkerFABState();
+		refreshConfirmMarkerFabState();
 	}
 
 	private void setButtonListeners() {
@@ -154,18 +165,18 @@ public class ChooseLocationActivity extends AppCompatActivity {
 		if (confirmMarkerFab != null) {
 			confirmMarkerFab.setOnClickListener(view -> {
 				Marker locationMarker = customMapFragment.confirmTemporaryMarker();
-				refreshConfirmMarkerFABState();
+				MarkerData locationMarkerData = customMapFragment.getMarkerData(locationMarker);
+				refreshConfirmMarkerFabState();
 
-				if (NewMeetingActivity.getNewMeetingModel().getLocationType() ==
-						LocationType.SPECIFIC_LOCATION) {
-					NewMeetingActivity.getNewMeetingModel().setLocation(
-							new MapCoordinate(locationMarker.getPosition().latitude,
-									locationMarker.getPosition().longitude));
-				} else if (NewMeetingActivity.getNewMeetingModel().getLocationType() ==
-						LocationType.GENERATED_FROM_PREFERRED_LOCATIONS) {
+				if (NewMeetingActivity.getNewMeetingModel().getLocationChoice() ==
+						LocationChoice.SPECIFIC_LOCATION) {
+					MapLocation mapLocation = locationMarkerData.getMapLocation();
+					mapLocation.setPlaceName("Meeting location");
+					NewMeetingActivity.getNewMeetingModel().setMapLocation(mapLocation);
+				} else if (NewMeetingActivity.getNewMeetingModel().getLocationChoice() ==
+						LocationChoice.RECOMMENDED_FROM_PREFERRED_LOCATIONS) {
 					NewMeetingActivity.getNewMeetingModel().addUserPreferredLocation(
-							new MapCoordinate(locationMarker.getPosition().latitude,
-									locationMarker.getPosition().longitude));
+							locationMarkerData.getMapLocation());
 				}
 			});
 		}
@@ -175,23 +186,23 @@ public class ChooseLocationActivity extends AppCompatActivity {
 				Marker focusedMarker = customMapFragment.getFocusedMarker();
 				if (focusedMarker != null) {
 					customMapFragment.removeMarker(focusedMarker);
-					MapCoordinate newMeetingLocation =
-							NewMeetingActivity.getNewMeetingModel().getLocation();
-					List<MapCoordinate> newMeetingPredefinedLocations =
+					MapLocation newMeetingLocation =
+							NewMeetingActivity.getNewMeetingModel().getMapLocation();
+					List<MapLocation> newMeetingPredefinedLocations =
 							NewMeetingActivity.getNewMeetingModel().getUserPreferredLocations();
-					MapCoordinate focusedMarkerMapCoordinate =
-							new MapCoordinate(focusedMarker.getPosition());
+					MapLocation focusedMarkerMapLocation =
+							new MapLocation(focusedMarker.getPosition());
 					if (newMeetingLocation != null && newMeetingLocation
-							.equals(new MapCoordinate(focusedMarker.getPosition()))) {
-						NewMeetingActivity.getNewMeetingModel().setLocation(null);
-					} else if (newMeetingPredefinedLocations.contains(focusedMarkerMapCoordinate)) {
-						newMeetingPredefinedLocations.remove(focusedMarkerMapCoordinate);
+							.equals(new MapLocation(focusedMarker.getPosition()))) {
+						NewMeetingActivity.getNewMeetingModel().setMapLocation(null);
+					} else if (newMeetingPredefinedLocations.contains(focusedMarkerMapLocation)) {
+						newMeetingPredefinedLocations.remove(focusedMarkerMapLocation);
 					}
 				}
-				showDeleteMarkerFAB(false);
+				showDeleteMarkerFab(false);
 			});
 		}
-		showDeleteMarkerFAB(false);
+		showDeleteMarkerFab(false);
 
 		final BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 		bottomSheetBehavior.setPeekHeight(450);
@@ -208,12 +219,16 @@ public class ChooseLocationActivity extends AppCompatActivity {
 				if (slideUpInfo != null) {
 					slideUpInfo.setAlpha(1 - slideOffset);
 				}
+				TextView extraInfo = (TextView) findViewById(R.id.extra_info);
+				if (extraInfo != null) {
+					extraInfo.setAlpha(0 + slideOffset);
+				}
 
 			}
 		});
 	}
 
-	public void showDeleteMarkerFAB(boolean show) {
+	public void showDeleteMarkerFab(boolean show) {
 		if (show) {
 			confirmMarkerFab.hide();
 			deleteMarkerFab.show();
@@ -222,7 +237,7 @@ public class ChooseLocationActivity extends AppCompatActivity {
 		}
 	}
 
-	public void refreshConfirmMarkerFABState() {
+	public void refreshConfirmMarkerFabState() {
 		if (canConfirmMarker()) {
 			deleteMarkerFab.hide();
 			confirmMarkerFab.show();
@@ -235,8 +250,8 @@ public class ChooseLocationActivity extends AppCompatActivity {
 		return CustomMapFragment.isMapInitialized() &&
 				customMapFragment.getTemporaryMarker() != null &&
 				customMapFragment.isLocationMarkerAvailable() &&
-				NewMeetingActivity.getNewMeetingModel().getLocationType() !=
-						LocationType.GENERATED_FROM_PARAMETERS;
+				NewMeetingActivity.getNewMeetingModel().getLocationChoice() !=
+						LocationChoice.RECOMMENDED_BY_PLACE_TYPE;
 	}
 
 	private void setUpMapLayout() {
@@ -249,13 +264,16 @@ public class ChooseLocationActivity extends AppCompatActivity {
 		isMapFragmentShown = true;
 
 		Meeting newMeeting = NewMeetingActivity.getNewMeetingModel();
-		List<MapCoordinate> userPreferredLocations = newMeeting.getUserPreferredLocations();
-		if (newMeeting.getLocationType() == SPECIFIC_LOCATION && newMeeting.getLocation() != null) {
-			customMapFragment.addMarker(new MarkerData(newMeeting));
-		} else if (newMeeting.getLocationType() == GENERATED_FROM_PREFERRED_LOCATIONS &&
+		List<MapLocation> userPreferredLocations = newMeeting.getUserPreferredLocations();
+		if (newMeeting.getLocationChoice() == SPECIFIC_LOCATION &&
+				newMeeting.getMapLocation() != null) {
+			customMapFragment.addMarker(new MarkerData(MarkerData.Type.CONFIRMED_LOCATION_MARKER,
+					newMeeting.getMapLocation(), this));
+		} else if (newMeeting.getLocationChoice() == RECOMMENDED_FROM_PREFERRED_LOCATIONS &&
 				userPreferredLocations.size() > 0) {
-			for (MapCoordinate location : userPreferredLocations) {
-				customMapFragment.addMarker(new MarkerData(newMeeting, location));
+			for (MapLocation location : userPreferredLocations) {
+				customMapFragment.addMarker(
+						new MarkerData(MarkerData.Type.PREFERRED_LOCATION_MARKER, location, this));
 			}
 		}
 	}
@@ -301,10 +319,12 @@ public class ChooseLocationActivity extends AppCompatActivity {
 
 		@Override
 		public void onItemSelected(Spinner parent, View view, int pos, long id) {
+			customMapFragment.setTemporaryMarkerIcon(
+					BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 			switch (pos) {
 				case 0:
 					showListView(false);
-					NewMeetingActivity.getNewMeetingModel().setLocationType(SPECIFIC_LOCATION);
+					NewMeetingActivity.getNewMeetingModel().setLocationChoice(SPECIFIC_LOCATION);
 					NewMeetingActivity.getNewMeetingModel().getUserPreferredLocations().clear();
 					locationTypeInfo.setText(
 							getResources().getString(R.string.location_specific_location_info));
@@ -316,13 +336,15 @@ public class ChooseLocationActivity extends AppCompatActivity {
 					if (NewMeetingActivity.getNewMeetingModel().isQuickMeeting()) {
 						showListView(false);
 						NewMeetingActivity.getNewMeetingModel()
-								.setLocationType(GENERATED_FROM_PREFERRED_LOCATIONS);
-						NewMeetingActivity.getNewMeetingModel().setLocation(null);
+								.setLocationChoice(RECOMMENDED_FROM_PREFERRED_LOCATIONS);
+						NewMeetingActivity.getNewMeetingModel().setMapLocation(null);
 						locationTypeInfo.setText(getResources()
-								.getString(R.string.location_generated_from_locations_info));
+								.getString(R.string.location_recommended_from_locations_info));
 						locationTypeInfo.setTextColor(getResources().getColor(R.color.text_hint));
 						setUpMapLayout();
 						customMapFragment.setMaxLocationMarkers(5);
+						customMapFragment.setTemporaryMarkerIcon(BitmapDescriptorFactory
+								.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
 					} else {
 						locationTypeInfo
 								.setText("This option is available only with a Quick Meeting.");
@@ -331,12 +353,12 @@ public class ChooseLocationActivity extends AppCompatActivity {
 					break;
 				case 2:
 					if (NewMeetingActivity.getNewMeetingModel().isQuickMeeting()) {
-						showListView(true);
+						showListView(false);
 						NewMeetingActivity.getNewMeetingModel()
-								.setLocationType(GENERATED_FROM_PARAMETERS);
-						NewMeetingActivity.getNewMeetingModel().setLocation(null);
+								.setLocationChoice(RECOMMENDED_BY_PLACE_TYPE);
+						NewMeetingActivity.getNewMeetingModel().setMapLocation(null);
 						locationTypeInfo.setText(getResources()
-								.getString(R.string.location_generated_from_parameters_info));
+								.getString(R.string.location_recommended_by_place_type_info));
 						locationTypeInfo.setTextColor(getResources().getColor(R.color.text_hint));
 					} else {
 						locationTypeInfo
@@ -347,7 +369,7 @@ public class ChooseLocationActivity extends AppCompatActivity {
 				default:
 					break;
 			}
-			refreshConfirmMarkerFABState();
+			refreshConfirmMarkerFabState();
 		}
 
 	}

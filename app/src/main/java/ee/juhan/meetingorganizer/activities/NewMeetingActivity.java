@@ -27,7 +27,8 @@ import java.util.Date;
 import java.util.List;
 
 import ee.juhan.meetingorganizer.R;
-import ee.juhan.meetingorganizer.models.server.LocationType;
+import ee.juhan.meetingorganizer.interfaces.SnackbarActivity;
+import ee.juhan.meetingorganizer.models.server.LocationChoice;
 import ee.juhan.meetingorganizer.models.server.Meeting;
 import ee.juhan.meetingorganizer.models.server.Participant;
 import ee.juhan.meetingorganizer.models.server.ParticipationAnswer;
@@ -41,7 +42,7 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class NewMeetingActivity extends AppCompatActivity {
+public class NewMeetingActivity extends AppCompatActivity implements SnackbarActivity {
 
 	private static final int QUICK_MEETING_DURATION_HOURS = 2;
 	private static Meeting newMeetingModel = new Meeting();
@@ -73,7 +74,6 @@ public class NewMeetingActivity extends AppCompatActivity {
 		newMeetingLayout = (ViewGroup) findViewById(R.id.layout_content);
 		progressView = findViewById(R.id.progress_bar);
 		setButtonListeners();
-		addLeaderParticipant();
 	}
 
 	@Override
@@ -92,6 +92,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		addLeaderParticipant();
 		setSavedDataViews();
 	}
 
@@ -103,6 +104,11 @@ public class NewMeetingActivity extends AppCompatActivity {
 				break;
 		}
 		return false;
+	}
+
+	@Override
+	public void showSnackbar(String message) {
+		UIUtil.showSnackBar(newMeetingLayout, message);
 	}
 
 	private void setButtonListeners() {
@@ -173,9 +179,9 @@ public class NewMeetingActivity extends AppCompatActivity {
 				startTimeButton.setVisibility(View.VISIBLE);
 				endTimeButton.setVisibility(View.VISIBLE);
 
-				if (newMeetingModel.getLocationType() != LocationType.NOT_SET &&
-						newMeetingModel.getLocationType() != LocationType.SPECIFIC_LOCATION) {
-					newMeetingModel.setLocationType(LocationType.NOT_SET);
+				if (newMeetingModel.getLocationChoice() != LocationChoice.NOT_SET &&
+						newMeetingModel.getLocationChoice() != LocationChoice.SPECIFIC_LOCATION) {
+					newMeetingModel.setLocationChoice(LocationChoice.NOT_SET);
 					newMeetingModel.getUserPreferredLocations().clear();
 				}
 			}
@@ -203,17 +209,17 @@ public class NewMeetingActivity extends AppCompatActivity {
 
 		List<String> locationOptions =
 				Arrays.asList(getResources().getStringArray(R.array.location_options_array));
-		switch (newMeetingModel.getLocationType()) {
+		switch (newMeetingModel.getLocationChoice()) {
 			case NOT_SET:
 				setViewText(R.id.spn_new_location, getString(R.string.new_meeting_touch_to_set));
 				break;
 			case SPECIFIC_LOCATION:
 				setViewText(R.id.spn_new_location, locationOptions.get(0));
 				break;
-			case GENERATED_FROM_PREFERRED_LOCATIONS:
+			case RECOMMENDED_FROM_PREFERRED_LOCATIONS:
 				setViewText(R.id.spn_new_location, locationOptions.get(1));
 				break;
-			case GENERATED_FROM_PARAMETERS:
+			case RECOMMENDED_BY_PLACE_TYPE:
 				setViewText(R.id.spn_new_location, locationOptions.get(2));
 				break;
 		}
@@ -230,20 +236,20 @@ public class NewMeetingActivity extends AppCompatActivity {
 
 	private boolean isValidData() {
 		if (getViewText(R.id.edt_new_title).length() == 0) {
-			UIUtil.showToastMessage(this, getString(R.string.new_meeting_enter_title));
+			showSnackbar(getString(R.string.new_meeting_enter_title));
 			return false;
 		}
 		if (newMeetingModel.isQuickMeeting()) {
 			return true;
 		}
 		if (getViewText(R.id.spn_new_date).equals(getString(R.string.new_meeting_touch_to_set))) {
-			UIUtil.showToastMessage(this, getString(R.string.new_meeting_set_date));
+			showSnackbar(getString(R.string.new_meeting_set_date));
 		} else if (newMeetingModel.getStartDateTime() == null) {
-			UIUtil.showToastMessage(this, getString(R.string.new_meeting_set_start_time));
+			showSnackbar(getString(R.string.new_meeting_set_start_time));
 		} else if (newMeetingModel.getEndDateTime() == null) {
-			UIUtil.showToastMessage(this, getString(R.string.new_meeting_set_end_time));
+			showSnackbar(getString(R.string.new_meeting_set_end_time));
 		} else if (newMeetingModel.getStartDateTime().after(newMeetingModel.getEndDateTime())) {
-			UIUtil.showToastMessage(this, getString(R.string.new_meeting_end_time_after_start));
+			showSnackbar(getString(R.string.new_meeting_end_time_after_start));
 		} else {
 			return true;
 		}
@@ -312,10 +318,6 @@ public class NewMeetingActivity extends AppCompatActivity {
 		return PreferenceManager.getDefaultSharedPreferences(this).getInt("accountId", 0);
 	}
 
-	public void showProgress(final boolean show) {
-		UIUtil.showProgress(this, progressView, newMeetingLayout, show);
-	}
-
 
 /*	private void checkParticipantsWithoutAccount() {
 		if (participantsWithoutAccount > 0) {
@@ -364,6 +366,10 @@ public class NewMeetingActivity extends AppCompatActivity {
 	//		}
 	//	}
 
+	public void showProgress(final boolean show) {
+		UIUtil.showProgress(this, progressView, newMeetingLayout, show);
+	}
+
 	private void sendNewMeetingRequest() {
 		showProgress(true);
 		RestClient.get().newMeetingRequest(NewMeetingActivity.getNewMeetingModel(),
@@ -371,8 +377,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 					@Override
 					public void success(Meeting meeting, Response response) {
 						showProgress(false);
-						UIUtil.showToastMessage(activity,
-								getString(R.string.contacts_meeting_created));
+						showSnackbar(getString(R.string.contacts_meeting_created));
 						//						activity.changeFragmentToMeetingInfo(meeting);
 						finishWithResult(meeting);
 					}
@@ -380,7 +385,7 @@ public class NewMeetingActivity extends AppCompatActivity {
 					@Override
 					public void failure(RetrofitError error) {
 						showProgress(false);
-						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
+						showSnackbar(getString(R.string.error_server_fail));
 					}
 				});
 	}

@@ -41,7 +41,7 @@
 				android:id="@+id/chk_quick_meeting"
 				android:layout_height="wrap_content"
 				android:layout_width="wrap_content"
-				android:text="Quick meeting"/>
+				android:text="Quick Meeting (instant 2-hour meeting)"/>
 
 			<com.rey.material.widget.EditText
 				style="@style/LightEditText"

@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.Date;
 
 import ee.juhan.meetingorganizer.util.DateUtil;
+import ee.juhan.meetingorganizer.util.StringUtil;
 
 public class Participant {
 
@@ -16,7 +17,7 @@ public class Participant {
 	private String phoneNumber;
 	private ParticipationAnswer participationAnswer = ParticipationAnswer.NO_ANSWER;
 	private SendGpsLocationAnswer sendGpsLocationAnswer = SendGpsLocationAnswer.NO_ANSWER;
-	private MapCoordinate location;
+	private MapLocation mapLocation;
 	private Date locationTimestamp;
 
 	// App-specific values, not used in server
@@ -25,12 +26,12 @@ public class Participant {
 	public Participant() {}
 
 	public Participant(int accountId, ParticipationAnswer participationAnswer,
-			SendGpsLocationAnswer sendGpsLocationAnswer, MapCoordinate location,
+			SendGpsLocationAnswer sendGpsLocationAnswer, MapLocation mapLocation,
 			Date locationTimestamp) {
 		this.accountId = accountId;
 		this.participationAnswer = participationAnswer;
 		this.sendGpsLocationAnswer = sendGpsLocationAnswer;
-		this.location = location;
+		this.mapLocation = mapLocation;
 		this.setLocationTimestamp(locationTimestamp);
 	}
 
@@ -41,9 +42,9 @@ public class Participant {
 		this.phoneNumber = phoneNumber;
 	}
 
-	public Participant(int accountId, MapCoordinate location, Date locationTimestamp) {
+	public Participant(int accountId, MapLocation mapLocation, Date locationTimestamp) {
 		this.accountId = accountId;
-		this.location = location;
+		this.mapLocation = mapLocation;
 		this.setLocationTimestamp(locationTimestamp);
 	}
 
@@ -57,7 +58,7 @@ public class Participant {
 				", phoneNumber='" + phoneNumber + '\'' +
 				", participationAnswer=" + participationAnswer +
 				", sendGpsLocationAnswer=" + sendGpsLocationAnswer +
-				", location=" + location +
+				", mapLocation=" + mapLocation +
 				", locationTimestamp=" + locationTimestamp +
 				", isUTCTimeZone=" + isUTCTimeZone +
 				'}';
@@ -96,7 +97,7 @@ public class Participant {
 	}
 
 	public final String getPhoneNumber() {
-		return phoneNumber;
+		return StringUtil.formatPhoneNumber(phoneNumber);
 	}
 
 	public final void setPhoneNumber(String phoneNumber) {
@@ -119,12 +120,12 @@ public class Participant {
 		this.sendGpsLocationAnswer = sendGpsLocationAnswer;
 	}
 
-	public final MapCoordinate getLocation() {
-		return location;
+	public final MapLocation getMapLocation() {
+		return mapLocation;
 	}
 
-	public final void setLocation(MapCoordinate location) {
-		this.location = location;
+	public final void setMapLocation(MapLocation mapLocation) {
+		this.mapLocation = mapLocation;
 	}
 
 	public Date getLocationTimestamp() {
@@ -143,7 +144,7 @@ public class Participant {
 	}
 
 	public MarkerOptions getMarkerOptions() {
-		return new MarkerOptions().position(location.toLatLng()).title(name)
+		return new MarkerOptions().position(mapLocation.getLatLng()).title(name)
 				.snippet("Last updated: " + getLocationTimestampFormatted()).draggable(false)
 				.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 	}

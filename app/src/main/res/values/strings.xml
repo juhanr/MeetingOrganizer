@@ -111,20 +111,22 @@
 	<string name="location_get_your_location">Please get your location!</string>
 	<string name="location_search_location">Search for a location</string>
 	<string name="location_specific_location_info">Choose a location on the map or search from the search bar.</string>
-	<string name="location_generated_from_locations_info">
-		Choose several locations on the map and the final location will be chosen based on the positions of the participants.</string>
-	<string name="location_generated_from_parameters_info">
-		Choose location parameters and the final location will be chosen based on the chosen filters and the positions of the participants.</string>
+	<string name="location_recommended_from_locations_info">
+		Choose several locations on the map and you\'ll later get a recommended location based on the positions of the participants.</string>
+	<string name="location_recommended_by_place_type_info">
+		Choose a suitable place type after creating the meeting and you\'ll get recommended places based on the positions of the participants.</string>
 	<string name="location_slide_up_info">Slide up for more info.</string>
 	<string-array name="location_options_array">
 		<item>Specific location</item>
-		<item>Generated from locations</item>
-		<item>Generated from parameters</item>
+		<item>Choose later from preferred locations</item>
+		<item>Choose later from recommended places</item>
 	</string-array>
 	<string-array name="location_parameters_array">
+		<item>Bar</item>
 		<item>Cafe</item>
 		<item>Restaurant</item>
 		<item>Park</item>
+		<item>Movie theater</item>
 		<item>Night club</item>
 	</string-array>
 

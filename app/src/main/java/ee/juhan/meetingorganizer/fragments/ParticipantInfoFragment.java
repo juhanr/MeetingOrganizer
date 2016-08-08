@@ -68,10 +68,18 @@ public class ParticipantInfoFragment extends Fragment {
 			activity.showEmailFab(false);
 		} else {
 			email.setText(participant.getEmail());
-			activity.showEmailFab(true);
+			if (participant.getAccountId() != MainActivity.getAccountId()) {
+				activity.showEmailFab(true);
+			}
 		}
-		activity.showSmsFab(true);
-		activity.showCallFab(true);
+		if (participant.getAccountId() == MainActivity.getAccountId()) {
+			activity.showEmailFab(false);
+			activity.showSmsFab(false);
+			activity.showCallFab(false);
+		} else {
+			activity.showSmsFab(true);
+			activity.showCallFab(true);
+		}
 	}
 
 	private void setupFABListeners() {

@@ -71,9 +71,28 @@
 			android:layout_toRightOf="@id/img_time"
 			android:layout_width="wrap_content"/>
 
+		<ImageView
+			android:contentDescription="@string/msg_time"
+			android:id="@+id/img_location"
+			android:layout_below="@id/img_time"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:paddingBottom="5dp"
+			android:paddingRight="5dp"
+			android:src="@drawable/ic_marker_black_18dp"
+			android:tint="@color/dark_gray"/>
+
+		<TextView
+			style="@style/TextSecondary"
+			android:id="@+id/txt_location_name"
+			android:layout_below="@id/img_time"
+			android:layout_height="wrap_content"
+			android:layout_toRightOf="@id/img_location"
+			android:layout_width="wrap_content"/>
+
 		<RelativeLayout
 			android:id="@+id/layout_temporary"
-			android:layout_below="@id/img_time"
+			android:layout_below="@id/img_location"
 			android:layout_height="wrap_content"
 			android:layout_width="match_parent"
 			android:orientation="horizontal">

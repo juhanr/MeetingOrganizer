@@ -16,9 +16,9 @@
 			android:title="History"/>
 		<item android:title="Settings">
 			<menu>
-				<item
-					android:id="@+id/nav_settings"
-					android:title="Profile"/>
+				<!--<item-->
+				<!--android:id="@+id/nav_settings"-->
+				<!--android:title="Profile"/>-->
 				<item
 					android:id="@+id/nav_log_out"
 					android:title="Log out"/>

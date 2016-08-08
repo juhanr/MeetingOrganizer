@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public final class PatternMatcherUtil {
 
-	private static final Pattern NAME_REGEX = Pattern.compile("^\\S+\\s+\\S+.*$");
+	private static final Pattern NAME_REGEX = Pattern.compile("^\\S+$");
 	private static final Pattern PHONE_NUMBER_REGEX = Pattern.compile("^(?:[0-9] ?){6,14}[0-9]$");
 	private static final Pattern AREA_NUMBER_REGEX = Pattern.compile("^[0-9]{3}$");
 

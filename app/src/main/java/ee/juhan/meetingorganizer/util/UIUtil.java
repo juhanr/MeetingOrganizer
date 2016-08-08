@@ -4,24 +4,29 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.os.Build;
+import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import ee.juhan.meetingorganizer.fragments.listeners.EditTextFocusListener;
 
 public class UIUtil {
 
-	/**
-	 * Displays a toast message with the given message.
-	 *
-	 * @param message
-	 * 		message string
-	 */
-	public static void showToastMessage(final Activity activity, final String message) {
-		Toast toast = Toast.makeText(activity, message, Toast.LENGTH_LONG);
-		toast.show();
+	//	/**
+	//	 * Displays a toast message with the given message.
+	//	 *
+	//	 * @param message
+	//	 * 		message string
+	//	 */
+	//	public static void showToastMessage(final Activity activity, final String message) {
+	//		Toast toast = Toast.makeText(activity, message, Toast.LENGTH_LONG);
+	//		toast.show();
+	//	}
+
+	public static void showSnackBar(final ViewGroup viewGroup, final String message) {
+		Snackbar snackbar = Snackbar.make(viewGroup, message, Snackbar.LENGTH_LONG);
+		snackbar.show();
 	}
 
 	public static void setupEditTextFocusListeners(Activity activity, View view) {

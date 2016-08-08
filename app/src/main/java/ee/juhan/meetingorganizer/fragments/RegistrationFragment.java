@@ -64,22 +64,22 @@ public class RegistrationFragment extends Fragment {
 
 	private boolean isValidData() {
 		if (!PatternMatcherUtil.isValidEmail(getViewText(R.id.edt_register_email))) {
-			UIUtil.showToastMessage(activity, getString(R.string.login_invalid_email));
+			activity.showSnackbar(getString(R.string.login_invalid_email));
 		} else if (getViewText(R.id.edt_register_password).length() < PASSWORD_MIN_LENGTH) {
-			UIUtil.showToastMessage(activity, getString(R.string.login_short_password1) +
+			activity.showSnackbar(getString(R.string.login_short_password1) +
 					PASSWORD_MIN_LENGTH + getString(R.string.login_short_password2));
 		} else if (!getViewText(R.id.edt_register_password)
 				.equals(getViewText(R.id.edt_register_password_confirm))) {
-			UIUtil.showToastMessage(activity,
+			activity.showSnackbar(
 					getString(R.string.registration_passwords_dont_match));
 		} else if (!PatternMatcherUtil.isValidName(getViewText(R.id.edt_register_name))) {
-			UIUtil.showToastMessage(activity, getString(R.string.registration_enter_full_name));
+			activity.showSnackbar(getString(R.string.registration_enter_full_name));
 		} else if (!PatternMatcherUtil
 				.isValidAreaNumber(getViewText(R.id.edt_register_country_code))) {
-			UIUtil.showToastMessage(activity, getString(R.string.registration_invalid_area_code));
+			activity.showSnackbar(getString(R.string.registration_invalid_area_code));
 		} else if (!PatternMatcherUtil
 				.isValidPhoneNumber(getViewText(R.id.edt_register_phone_nr))) {
-			UIUtil.showToastMessage(activity,
+			activity.showSnackbar(
 					getString(R.string.registration_invalid_phone_number));
 		} else {
 			return true;
@@ -108,21 +108,21 @@ public class RegistrationFragment extends Fragment {
 						activity.showProgress(false);
 						switch (serverResponse.getResult()) {
 							case SUCCESS:
-								UIUtil.showToastMessage(activity,
+								activity.showSnackbar(
 										getString(R.string.registration_successful));
 								activity.logIn(serverResponse.getSid(),
 										serverResponse.getAccount());
 								break;
 							case EMAIL_IN_USE:
-								UIUtil.showToastMessage(activity,
+								activity.showSnackbar(
 										getString(R.string.registration_email_in_use));
 								break;
 							case PHONE_NUMBER_IN_USE:
-								UIUtil.showToastMessage(activity,
+								activity.showSnackbar(
 										getString(R.string.registration_phone_number_in_use));
 								break;
 							case FAIL:
-								UIUtil.showToastMessage(activity,
+								activity.showSnackbar(
 										getString(R.string.error_server_fail));
 								break;
 						}
@@ -131,7 +131,7 @@ public class RegistrationFragment extends Fragment {
 					@Override
 					public void failure(RetrofitError error) {
 						activity.showProgress(false);
-						UIUtil.showToastMessage(activity, getString(R.string.error_server_fail));
+						activity.showSnackbar(getString(R.string.error_server_fail));
 					}
 				});
 	}
