@@ -44,6 +44,9 @@ public class RegistrationFragment extends Fragment {
 		registrationLayout =
 				(ViewGroup) inflater.inflate(R.layout.fragment_registration, container, false);
 		setButtonListeners();
+		EditText editText =
+				(EditText) registrationLayout.findViewById(R.id.edt_register_country_code);
+		editText.setText("372");
 		return registrationLayout;
 	}
 

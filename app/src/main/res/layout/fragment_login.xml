@@ -9,14 +9,14 @@
 	android:layout_height="match_parent"
 	android:layout_weight="1"
 	android:layout_width="match_parent"
-	android:orientation="vertical">
+	android:orientation="vertical"
+	android:padding="@dimen/view_padding_large">
 
 	<com.rey.material.widget.EditText
 		style="@style/LightEditText"
 		android:hint="@string/msg_email"
 		android:inputType="textEmailAddress"
 		android:layout_marginBottom="@dimen/view_margin_medium"
-		android:layout_width="@dimen/textbox_width_normal"
 		android:maxLength="40"
 		app:et_inputId="@+id/edt_login_email"/>
 
@@ -25,7 +25,6 @@
 		android:hint="@string/login_password"
 		android:inputType="textPassword"
 		android:layout_marginBottom="@dimen/view_margin_medium"
-		android:layout_width="@dimen/textbox_width_normal"
 		app:et_inputId="@+id/edt_login_password"/>
 
 	<com.rey.material.widget.Button
