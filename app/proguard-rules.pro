@@ -22,7 +22,7 @@
 -dontwarn okio.**
 -dontwarn java.lang.invoke.*
 
--keep class ee.juhan.meetingorganizer.models.server.** { *; }
+-keep class ee.juhan.meetingorganizer.models.** { *; }
 -keep class retrofit.** { *; }
 
 -keepattributes Signature

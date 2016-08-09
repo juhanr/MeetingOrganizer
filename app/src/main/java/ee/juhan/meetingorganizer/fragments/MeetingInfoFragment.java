@@ -467,7 +467,9 @@ public class MeetingInfoFragment extends Fragment {
 									RestClient.getGooglePlacesService()
 											.getNearbyPlaces(recommendedLocation.latitude + "," +
 													recommendedLocation.longitude, 5000, placeType);
-							nearbyPlacesSet.addAll(placeSearchResult.getResults());
+							if (placeSearchResult.getResults() != null) {
+								nearbyPlacesSet.addAll(placeSearchResult.getResults());
+							}
 						}
 						if (nearbyPlacesSet.isEmpty()) {
 							return false;

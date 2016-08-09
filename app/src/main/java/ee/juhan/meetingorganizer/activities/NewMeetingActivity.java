@@ -152,7 +152,6 @@ public class NewMeetingActivity extends AppCompatActivity implements SnackbarAct
 
 		createButton.setOnClickListener(view -> {
 			if (isValidData()) {
-				saveData();
 				if (newMeetingModel.isQuickMeeting()) {
 					Date currentDateTime = new Date();
 					newMeetingModel.setStartDateTime(currentDateTime);
@@ -235,6 +234,7 @@ public class NewMeetingActivity extends AppCompatActivity implements SnackbarAct
 	}
 
 	private boolean isValidData() {
+		saveData();
 		if (getViewText(R.id.edt_new_title).length() == 0) {
 			showSnackbar(getString(R.string.new_meeting_enter_title));
 			return false;

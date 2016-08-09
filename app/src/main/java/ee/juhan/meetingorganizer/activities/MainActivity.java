@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity
 	protected final void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		Log.d("MeetingOrganiser", "PID: " + android.os.Process.myPid());
 		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		progressView = findViewById(R.id.progress_bar);
 		fragmentContainer = findViewById(R.id.fragment_container);
